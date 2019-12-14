@@ -15,6 +15,13 @@ ofxWindowApp::~ofxWindowApp()
 }
 
 //--------------------------------------------------------------
+void ofxWindowApp::setup()
+{
+    if (autoSaveLoad)
+        loadWindow();
+}
+
+//--------------------------------------------------------------
 void ofxWindowApp::saveWindow()
 {
     //save window settings

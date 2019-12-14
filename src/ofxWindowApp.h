@@ -14,6 +14,8 @@ public:
     string path_folder = "ofxWindowApp/";//this is to folder all files to avoid mixing with other addons data
     string path_filename = "AppWindow.json";
 
+    void setup();
+
     void saveWindow();
     void loadWindow();
 
