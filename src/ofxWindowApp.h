@@ -29,7 +29,7 @@ public:
         path_filename = s;
     }
 
-    bool autoSaveLoad = false;
+    bool autoSaveLoad = true;
     void setAutoSaveLoad(bool b)
     {
         autoSaveLoad = b;
