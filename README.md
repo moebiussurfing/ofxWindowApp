@@ -4,7 +4,7 @@
 
 The addon stores and recall the basic app window states:
 
-window position (x, y) , window size (w, h) and window mode (window/full screen).
+Window position (x, y), window size (w, h) and window mode (window/full screen).
 
 The addon auto loads when app starts and stores on app exit. Nothing more it's required.
 
