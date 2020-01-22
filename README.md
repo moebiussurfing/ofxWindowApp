@@ -26,7 +26,7 @@ AppWindow.json
 ```
 
 
-## Requirements
+## Dependencies
 
 ofxSerialize from @bakercp 
 https://github.com/bakercp/ofxSerializer
@@ -45,23 +45,23 @@ https://github.com/bakercp/ofxSerializer
 ```cpp 
 
 setup()
-        //all this is optional
+    //all is optional:
         
-        //default floder is "ofxWindowApp/". (Check to create the folder if required)
-        WindowApp.setPathFolder("settings/");
-        WindowApp.setPathFilename("AppWindow.json");
+    //default floder is "ofxWindowApp/". (Check to create the folder if required)
+    WindowApp.setPathFolder("settings/");
+    WindowApp.setPathFilename("AppWindow.json");
 
-        WindowApp.setAutoSaveLoad(false);//to disable auto
-        WindowApp.saveWindow();//save manually
-        WindowApp.loadWindow();//load manually
+    WindowApp.setAutoSaveLoad(false);//to disable auto
+    WindowApp.saveWindow();//save manually
+    WindowApp.loadWindow();//load manually
         
-        //WindowApp.setup();
+    //WindowApp.setup();
 
 update()
-//nothing more to do.
+    //nothing more to do.
 
 exit()
-//nothing more to do.
+    //nothing more to do.
 ```
 
 
