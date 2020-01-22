@@ -42,14 +42,15 @@ https://github.com/bakercp/ofxSerializer
 ```
 
 ### ofApp.cpp
-Nothing more required
+Nothing more is required.
 
 ```cpp 
 
 setup()
     //all is optional:
         
-    //default floder is "ofxWindowApp/". (Check to create the folder if required)
+    //default folder is "ofxWindowApp/". 
+    //(Check to create the folder if it's not created or required)
     WindowApp.setPathFolder("settings/");
     WindowApp.setPathFilename("AppWindow.json");
     WindowApp.setAutoSaveLoad(false);//to disable auto
@@ -61,7 +62,7 @@ update()
 exit()
     //nothing to do.
        
-       
+everywhere()       
     WindowApp.saveWindow();//save manually
     WindowApp.loadWindow();//load manually
 ```
