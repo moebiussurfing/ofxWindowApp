@@ -8,7 +8,7 @@ window position (x, y) , window size (w, h) and window mode (window/full screen)
 
 The addon auto loads when app starts and stores on app exit. Nothing more it's required.
 
-The json file will looks like this:
+The json file will looks like:
 ```
 AppWindow.json
 
@@ -42,6 +42,8 @@ https://github.com/bakercp/ofxSerializer
 ```
 
 ### ofApp.cpp
+Nothing more required
+
 ```cpp 
 
 setup()
