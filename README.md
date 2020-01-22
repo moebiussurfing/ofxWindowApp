@@ -73,7 +73,7 @@ everywhere()
 - Windows 10 + VS2017 + of0.10.1.
 - macOS + HighSierra + of0.10.1.
 
-## TODO
+### TODO
 
 + mix with another addon to handle borderless, put in-front, half screen... etc
 
