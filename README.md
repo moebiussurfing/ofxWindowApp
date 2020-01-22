@@ -9,9 +9,8 @@ window position (x, y) , window size (w, h) and window mode (window/full screen)
 The addon auto loads when app starts and stores on app exit. Nothing more it's required.
 
 The json file will looks like:
-```
 AppWindow.json
-
+```
 {
     "position": {
         "x": -1920.0,
