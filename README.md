@@ -52,18 +52,18 @@ setup()
     //default floder is "ofxWindowApp/". (Check to create the folder if required)
     WindowApp.setPathFolder("settings/");
     WindowApp.setPathFilename("AppWindow.json");
-
     WindowApp.setAutoSaveLoad(false);//to disable auto
-    WindowApp.saveWindow();//save manually
-    WindowApp.loadWindow();//load manually
-        
     //WindowApp.setup();
 
 update()
-    //nothing more to do.
+    //nothing to do.
 
 exit()
-    //nothing more to do.
+    //nothing to do.
+       
+       
+    WindowApp.saveWindow();//save manually
+    WindowApp.loadWindow();//load manually
 ```
 
 
