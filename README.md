@@ -2,7 +2,8 @@
 
 ## Overview
 
-The addon stores and recall the basic app window states: window position, window size and window mode.
+The addon stores and recall the basic app window states: 
+window position, window size and window mode.
 The addon auto loads when app starts and stores on app exit. Nothing more it's required.
 
 json file looks like this:
