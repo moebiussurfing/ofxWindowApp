@@ -70,8 +70,8 @@ everywhere()
 
 ## Tested system
 
-- Windows 10 + VS2017 + OF 0.11.0
-- macOS HighSierra + OF 0.11.0
+- Windows 10 / VS2017 / OF 0.11.0
+- macOS / High Sierra / Xcode / OF 0.11.0
 
 ### TODO
 
