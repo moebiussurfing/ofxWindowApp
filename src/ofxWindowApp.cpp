@@ -4,6 +4,7 @@
 ofxWindowApp::ofxWindowApp()
 {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
+	//ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
 
 	if (autoSaveLoad)
 		loadWindow();
@@ -37,10 +38,11 @@ void ofxWindowApp::draw(ofEventArgs & args)
 //--------------------------------------------------------------
 void ofxWindowApp::setup()
 {
+	ofLogVerbose("ofxWindowApp") << "called setup";
+	
 	//ofAddListener(ofEvent<whateverType>,//This is the event you are going to listen to. When a new event is notified it must pass a reference to an object of type whateverType, which can also be void. This object can be understood as a message to whomever is listening.
 	//	pointerToSomeClassInstance,// this is a pointer to the object that will receive the event message. If you place this function inside the class that will be listening you would use "this" as argument
 	//	pointerToSomeClassMethod);//This method must be part of the class that passed in the previous argument. It's argument must be a reference of class whateverType.
-	ofLogVerbose("ofxWindowApp") << "called setup";
 
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
@@ -48,11 +50,15 @@ void ofxWindowApp::setup()
 	if (autoSaveLoad)
 		loadWindow();
 
+	//extra settings
+	params_Settings.add(vSync);
+	params_Settings.add(fps);
+
 	//more window settings
-	Settings.fps = 60;
-	Settings.bVSync = true;
+	fps = 60;
+	vSync = true;
 	//ofSetFrameRate(fps);
-	//ofSetVerticalSync(bVSync);
+	//ofSetVerticalSync(vSync);
 
 	//TODO:
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
@@ -62,6 +68,8 @@ void ofxWindowApp::setup()
 //--------------------------------------------------------------
 void ofxWindowApp::saveWindow()
 {
+	ofLogNotice("ofxWindowApp") << "saveWindow: " << path_folder + path_filename;
+
 	//save window settings
 	ofWindowSettings AppWindow;
 	AppWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
@@ -72,14 +80,15 @@ void ofxWindowApp::saveWindow()
 	to_json(j, AppWindow);
 	ofSavePrettyJson(path_folder + path_filename, j);
 
-	////TODO:
-	//Settings.fps = ofGetFrameRate();
-	//Settings.bVSync = true;
-	//ofJson j2;
+	//TODO:
+	//extra setting could be mixed in one json only for both
+	//TEST:
+	ofJson j2;
+	fps = ofGetFrameRate();
+	vSync = true;
 	//to_json(j2, Settings);
-	//j2.serialize(Settings)
-
-	ofLogNotice("ofxWindowApp") << "saveWindow: " << path_folder + path_filename;
+	ofSerialize(j2, params_Settings);
+	ofSavePrettyJson(path_folder + path_filename2, j2);
 }
 
 //--------------------------------------------------------------
@@ -96,7 +105,8 @@ void ofxWindowApp::loadWindow()
 void ofxWindowApp::drawDEBUG()
 {
 	string vSyncStr;
-	string fpsStr;
+	string fpsRealStr;
+	string fpsTargetStr;
 
 	//----
 
@@ -108,8 +118,9 @@ void ofxWindowApp::drawDEBUG()
 	string strPad = "    ";
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
-	vSyncStr = ofToString((Settings.bVSync ? "ON" : "OFF"));
-	fpsStr = ofToString(ofGetFrameRate(), 1);
+	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
+	fpsRealStr = ofToString(ofGetFrameRate(), 1);
+	fpsTargetStr = ofToString(fps);
 	screenPosStr = "(" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + ")";
 
 	bool bMode;
@@ -123,15 +134,14 @@ void ofxWindowApp::drawDEBUG()
 	}
 	screenMode += bMode ? "FULL SCREEN MODE" : "WINDOW MODE";
 
-	str += "FPS " + fpsStr;
-	str += strPad + "VSYNC " + vSyncStr;
-	str += strPad + "SIZE " + screenStr;
-	str += strPad + "POSITION " + screenPosStr;
+	str += "FPS " + fpsRealStr;
+	str += " [" + fpsTargetStr +"]";
+	str += strPad + "VSYNC-" + vSyncStr;
+	str += strPad + "SIZE:" + screenStr;
+	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
-	{
-		ofDrawBitmapStringHighlight(str, 0, window_H - 5);
-	}
+	ofDrawBitmapStringHighlight(str, 0, window_H - 5);
 }
 
 

@@ -4,8 +4,8 @@
 #include "ofxSerializer.h"
 
 //TODO:
-//add more control
-
+//+ mix both json in one file settings
+//+ add windowResize subscribed listener to auto refresh
 
 class ofxWindowApp : public ofBaseApp
 {
@@ -15,8 +15,14 @@ public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
-	string path_folder = "ofxWindowApp/";//this is to folder all files to avoid mixing with other addons data
+	//this is to folder all files to avoid mixing with other addons data
+	string path_folder = "ofxWindowApp/";
 	string path_filename = "AppWindow.json";
+	string path_filename2 = "AppWindow_Extra.json";
+
+	//-
+
+	//API
 
 	void setup();
 	void update(ofEventArgs & args);
@@ -38,7 +44,6 @@ public:
 		path_filename = s;
 	}
 
-	bool autoSaveLoad = true;
 	void setAutoSaveLoad(bool b)
 	{
 		autoSaveLoad = b;
@@ -47,7 +52,6 @@ public:
 	//TODO:
 	//WORKAROUND bad window positioning..
 	//callback
-	bool bChanged = false;
 	bool isChanged()
 	{
 		if (bChanged)
@@ -60,23 +64,26 @@ public:
 			return false;
 	}
 
-	//-
-
-	ofParameter<int> window_W, window_H, window_X, window_Y;
-
-	bool ENABLE_Debug = true;
-	void drawDEBUG();
 	void setShowDebug(bool b = true)
 	{
 		ENABLE_Debug = b;
 	}
 
-	//TODO:
-	struct windowExtraSettings {
-		bool bVSync;
-		int fps;
-	}Settings;
+	//-
 
+private:
+
+	void drawDEBUG();
+
+	ofParameter<int> window_W, window_H, window_X, window_Y;
+
+	bool autoSaveLoad = true;
+	bool bChanged = false;
+	bool ENABLE_Debug = true;
+
+	ofParameterGroup params_Settings{ "EXTRA SETTINGS" };
+	ofParameter<bool> vSync{ "V-SYNC", false };
+	ofParameter<float> fps{ "FPS", 60.5, 1, 120 };
 };
 
 
