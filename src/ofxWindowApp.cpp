@@ -29,6 +29,9 @@ void ofxWindowApp::update(ofEventArgs & args)
 void ofxWindowApp::draw(ofEventArgs & args)
 {
 	ofLogVerbose("ofxWindowApp") << "called draw";
+
+	if (ENABLE_Debug)
+		drawDEBUG();
 }
 
 //--------------------------------------------------------------
@@ -46,10 +49,14 @@ void ofxWindowApp::setup()
 		loadWindow();
 
 	//more window settings
-	fps = 60;
-	bVSync = true;
+	Settings.fps = 60;
+	Settings.bVSync = true;
 	//ofSetFrameRate(fps);
 	//ofSetVerticalSync(bVSync);
+
+	//TODO:
+	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
+
 }
 
 //--------------------------------------------------------------
@@ -64,6 +71,13 @@ void ofxWindowApp::saveWindow()
 	ofJson j;
 	to_json(j, AppWindow);
 	ofSavePrettyJson(path_folder + path_filename, j);
+
+	////TODO:
+	//Settings.fps = ofGetFrameRate();
+	//Settings.bVSync = true;
+	//ofJson j2;
+	//to_json(j2, Settings);
+	//j2.serialize(Settings)
 
 	ofLogNotice("ofxWindowApp") << "saveWindow: " << path_folder + path_filename;
 }
@@ -81,6 +95,9 @@ void ofxWindowApp::loadWindow()
 //--------------------------------------------------------------
 void ofxWindowApp::drawDEBUG()
 {
+	string vSyncStr;
+	string fpsStr;
+
 	//----
 
 	//debug overlay screen modes
@@ -91,7 +108,7 @@ void ofxWindowApp::drawDEBUG()
 	string strPad = "    ";
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
-	vSyncStr = ofToString((bVSync ? "ON" : "OFF"));
+	vSyncStr = ofToString((Settings.bVSync ? "ON" : "OFF"));
 	fpsStr = ofToString(ofGetFrameRate(), 1);
 	screenPosStr = "(" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + ")";
 
@@ -115,4 +132,18 @@ void ofxWindowApp::drawDEBUG()
 	{
 		ofDrawBitmapStringHighlight(str, 0, window_H - 5);
 	}
+}
+
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowResized(int w, int h)
+{
+	window_X = ofGetWindowPositionX();
+	window_Y = ofGetWindowPositionY();
+
+	//window_W = ofGetWindowSize().x;
+	//window_H= ofGetWindowSize().y;
+
+	window_W = w;
+	window_H = h;
 }

@@ -21,6 +21,9 @@ public:
 	void setup();
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
+	void windowResized(int w, int h);
+
+	//-
 
 	void saveWindow();
 	void loadWindow();
@@ -59,15 +62,20 @@ public:
 
 	//-
 
+	ofParameter<int> window_W, window_H, window_X, window_Y;
+
 	bool ENABLE_Debug = true;
 	void drawDEBUG();
-	
-	bool bVSync;
-	string vSyncStr;
-	int fps;
-	string fpsStr;
+	void setShowDebug(bool b = true)
+	{
+		ENABLE_Debug = b;
+	}
 
-	ofParameter<int> window_W, window_H, window_X, window_Y;
+	//TODO:
+	struct windowExtraSettings {
+		bool bVSync;
+		int fps;
+	}Settings;
 
 };
 
