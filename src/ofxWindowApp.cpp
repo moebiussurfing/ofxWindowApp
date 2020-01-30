@@ -141,7 +141,13 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
-	ofDrawBitmapStringHighlight(str, 0, window_H - 5);
+	//WORKAROUND until windowResize implemented
+	window_X = ofGetWindowPositionX();
+	window_Y = ofGetWindowPositionY();
+	window_W = ofGetWindowSize().x;
+	window_H = ofGetWindowSize().y;
+
+	ofDrawBitmapStringHighlight(str, 0, window_H - 2);
 }
 
 
