@@ -68,6 +68,37 @@ public:
 	{
 		ENABLE_Debug = b;
 	}
+	
+	//-
+
+	//extra settings
+	void setSettingsFps(float f)
+	{
+		fps = f;
+		ofSetFrameRate(fps);
+	}
+	void setSettingsVsync(bool b)
+	{
+		vSync = b;
+		ofSetVerticalSync(vSync);
+	}
+	float getSettingsFps()
+	{
+		return fps.get();
+	}
+	bool getSettingsVsync()
+	{
+		return vSync.get();
+	}
+	void applySettings()
+	{
+		ofLogNotice("ofxWindowApp") << "applySettings()";
+		ofLogNotice("ofxWindowApp") << "fps: " << fps;
+		ofLogNotice("ofxWindowApp") << "vSync: " << vSync;
+
+		ofSetFrameRate(fps);
+		ofSetVerticalSync(vSync);
+	}
 
 	//-
 

@@ -81,12 +81,9 @@ void ofxWindowApp::saveWindow()
 	ofSavePrettyJson(path_folder + path_filename, j);
 
 	//TODO:
-	//extra setting could be mixed in one json only for both
+	//extra settings could be mixed in one json only for both
 	//TEST:
 	ofJson j2;
-	fps = ofGetFrameRate();
-	vSync = true;
-	//to_json(j2, Settings);
 	ofSerialize(j2, params_Settings);
 	ofSavePrettyJson(path_folder + path_filename2, j2);
 }
@@ -97,6 +94,14 @@ void ofxWindowApp::loadWindow()
 	//load window settings
 	ofJson j = ofLoadJson(path_folder + path_filename);
 	ofx::Serializer::ApplyWindowSettings(j);
+	
+	//extra settings could be mixed in one json only for both
+	//TEST:
+	ofJson j2;
+	j2 = ofLoadJson(path_folder + path_filename2);
+	ofDeserialize(j2, params_Settings);
+
+	applySettings();
 
 	ofLogNotice("ofxWindowApp") << "loadWindow: " << path_folder + path_filename;
 }
