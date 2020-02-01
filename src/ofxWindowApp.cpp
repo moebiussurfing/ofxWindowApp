@@ -6,8 +6,8 @@ ofxWindowApp::ofxWindowApp()
     ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
     //ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
 
-    if (autoSaveLoad)
-        loadWindow();
+//    if (autoSaveLoad)
+//        loadWindow();
 
     //auto call setup
     setup();
@@ -48,6 +48,7 @@ void ofxWindowApp::setup()
     //extra settings
     params_Settings.add(vSync);
     params_Settings.add(fps);
+    params_Settings.add(ENABLE_Debug);
 
     //load
     if (autoSaveLoad)
@@ -189,7 +190,6 @@ void ofxWindowApp::windowResized(int w, int h)
 void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 {
     const int &key = eventArgs.key;
-    ofLogNotice("ofxWindowApp") << "keyPressed: " << (char)key << " [" << key << "]";
 
     //modifier
     bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);
@@ -197,6 +197,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
     //disable draw debug
     if (mod_COMMAND && key == 'w')
     {
+        ofLogNotice("ofxWindowApp") << "keyPressed: " << (char)key << " [" << key << "]";
+
         ENABLE_Debug = !ENABLE_Debug;
     }
 
