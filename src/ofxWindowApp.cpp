@@ -47,18 +47,21 @@ void ofxWindowApp::setup()
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 
-	if (autoSaveLoad)
-		loadWindow();
 
 	//extra settings
 	params_Settings.add(vSync);
 	params_Settings.add(fps);
 
 	//more window settings
-	fps = 60;
-	vSync = true;
+    //default
+//    fps = 60;
+//    vSync = true;
 	//ofSetFrameRate(fps);
 	//ofSetVerticalSync(vSync);
+
+//load
+    if (autoSaveLoad)
+        loadWindow();
 
 	//TODO:
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
@@ -76,30 +79,57 @@ void ofxWindowApp::saveWindow()
 	AppWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 	AppWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 
+    //A. using 2 files
 	ofJson j;
 	to_json(j, AppWindow);
-	ofSavePrettyJson(path_folder + path_filename, j);
+//    ofSavePrettyJson(path_folder + path_filename, j);
 
 	//TODO:
+    //we cant get framerate and vsync mode from window app.
+    //should be setted by hand
 	//extra settings could be mixed in one json only for both
 	//TEST:
 	ofJson j2;
 	ofSerialize(j2, params_Settings);
-	ofSavePrettyJson(path_folder + path_filename2, j2);
+//    ofSavePrettyJson(path_folder + path_filename2, j2);
+
+
+    //B. settings in one file
+    ofJson data;
+    data.push_back(j);
+    data.push_back(j2);
+
+    std::cout << data.dump(4) << std::endl;
+    ofSavePrettyJson(path_folder + path_filename, data);
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::loadWindow()
 {
-	//load window settings
-	ofJson j = ofLoadJson(path_folder + path_filename);
-	ofx::Serializer::ApplyWindowSettings(j);
-	
-	//extra settings could be mixed in one json only for both
-	//TEST:
-	ofJson j2;
-	j2 = ofLoadJson(path_folder + path_filename2);
-	ofDeserialize(j2, params_Settings);
+    //load window settings
+
+    //A. using 2 files
+//    ofJson j = ofLoadJson(path_folder + path_filename);
+//    ofx::Serializer::ApplyWindowSettings(j);
+//
+//    //extra settings could be mixed in one json only for both
+//    //TEST:
+//    ofJson j2;
+//    j2 = ofLoadJson(path_folder + path_filename2);
+//    ofLogNotice("ofxWindowApp") << "json: " << j2;
+//    ofDeserialize(j2, params_Settings);
+
+    //B. settings in one file
+    ofJson data;
+    data = ofLoadJson(path_folder + path_filename);
+    ofLogNotice("ofxWindowApp") << "all json: " << data;
+    ofJson j = data[0];
+    ofJson j2 = data[1];
+
+    ofDeserialize(j2, params_Settings);
+    ofx::Serializer::ApplyWindowSettings(j);
+
+    //-
 
 	applySettings();
 
@@ -120,7 +150,7 @@ void ofxWindowApp::drawDEBUG()
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
-	string strPad = "    ";
+	string strPad = "    ";//add spaces
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
