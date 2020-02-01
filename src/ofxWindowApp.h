@@ -104,17 +104,20 @@ public:
 
 private:
 
+    bool ENABLE_Debug = true;
 	void drawDEBUG();
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
 	bool autoSaveLoad = true;
 	bool bChanged = false;
-	bool ENABLE_Debug = true;
 
 	ofParameterGroup params_Settings{ "EXTRA SETTINGS" };
 	ofParameter<bool> vSync{ "V-SYNC", false };
 	ofParameter<float> fps{ "FPS", 60.5, 1, 120 };
+
+    void keyPressed(ofKeyEventArgs &eventArgs);
+
 };
 
 
