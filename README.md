@@ -4,7 +4,17 @@
 
 The addon stores and recall the basic app window states:
 
-Window position (x, y), window size (w, h) and window mode (window/full screen).
+-Window position (x, y), window size (w, h) and window mode (window/full screen).
+-the app fps and vsync state.
+
+When you starts for first time and no json file present, you need to set the extra settings:
+
+windowApp.setSettingsFps(25);
+windowApp.setSettingsVsync(false);
+
+To show printed the window info you must call:
+windowApp.setShowDebug(true);
+Also shortcut CMD+w toggles the show debug info.
 
 The addon auto loads when app starts and stores on app exit. Nothing more it's required.
 
@@ -12,17 +22,26 @@ The json file will looks like:
 
 AppWindow.json
 ```
-{
-    "position": {
-        "x": -1920.0,
-        "y": 23.0
+[
+    {
+        "position": {
+            "x": 0.0,
+            "y": 22.0
+        },
+        "size": {
+            "height": 878,
+            "width": 1436
+        },
+        "window_mode": "OF_WINDOW"
     },
-    "size": {
-        "height": 1057,
-        "width": 1920
-    },
-    "window_mode": "OF_WINDOW"
-}
+    {
+        "extra_settings": {
+            "debug": "0",
+            "fps": "60",
+            "vsync": "0"
+        }
+    }
+]
 ```
 
 
@@ -47,8 +66,14 @@ Nothing more is required.
 ```cpp 
 
 setup()
-    //all is optional:
-        
+//must be defined to allow that the addon handles this right. 
+//    windowApp.setSettingsFps(25);
+//    windowApp.setSettingsVsync(false);
+
+//    windowApp.setShowDebug(true);
+
+    //all is optional: 
+
     //default folder is "ofxWindowApp/". 
     //(Check to create the folder if it's not created or required)
     WindowApp.setPathFolder("settings/");

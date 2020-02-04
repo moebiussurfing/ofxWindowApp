@@ -6,8 +6,8 @@ ofxWindowApp::ofxWindowApp()
     ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
     //ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
 
-    if (autoSaveLoad)
-        loadWindow();
+//    if (autoSaveLoad)
+//        loadWindow();
 
     //auto call setup
     setup();
@@ -48,6 +48,7 @@ void ofxWindowApp::setup()
     //extra settings
     params_Settings.add(vSync);
     params_Settings.add(fps);
+    params_Settings.add(ENABLE_Debug);
 
     //load
     if (autoSaveLoad)

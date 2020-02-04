@@ -94,7 +94,8 @@ public:
 	{
 		ofLogNotice("ofxWindowApp") << "applySettings()";
 		ofLogNotice("ofxWindowApp") << "fps: " << fps;
-		ofLogNotice("ofxWindowApp") << "vSync: " << vSync;
+        ofLogNotice("ofxWindowApp") << "vSync: " << vSync;
+        ofLogNotice("ofxWindowApp") << "SHOW DEBUG: " <<ENABLE_Debug.get();
 
 		ofSetFrameRate(fps);
 		ofSetVerticalSync(vSync);
@@ -104,17 +105,17 @@ public:
 
 private:
 
-    bool ENABLE_Debug = true;
-	void drawDEBUG();
-
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
 	bool autoSaveLoad = true;
 	bool bChanged = false;
 
-	ofParameterGroup params_Settings{ "EXTRA SETTINGS" };
-	ofParameter<bool> vSync{ "V-SYNC", false };
-	ofParameter<float> fps{ "FPS", 60.5, 1, 120 };
+	ofParameterGroup params_Settings{ "extra settings" };
+	ofParameter<bool> vSync{ "vsync", false };
+	ofParameter<float> fps{ "fps", 60.5, 1, 120 };
+    ofParameter<bool> ENABLE_Debug{"debug", true};
+
+    void drawDEBUG();
 
     void keyPressed(ofKeyEventArgs &eventArgs);
 
