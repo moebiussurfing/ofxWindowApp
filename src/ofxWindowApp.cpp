@@ -189,14 +189,15 @@ void ofxWindowApp::windowResized(int w, int h)
 void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 {
     const int &key = eventArgs.key;
-    ofLogNotice("ofxWindowApp") << "keyPressed: " << (char)key << " [" << key << "]";
 
     //modifier
-    bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);
+	bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
+	bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
 
     //disable draw debug
-    if (mod_COMMAND && key == 'w')
+    if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' || key == 'W')
     {
+		ofLogNotice("ofxWindowApp") << "keyPressed: " << (char)key << " [" << key << "]";
         ENABLE_Debug = !ENABLE_Debug;
     }
 
