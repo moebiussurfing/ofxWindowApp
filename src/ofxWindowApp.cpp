@@ -195,7 +195,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 	bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
 	bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
 
-	ofLogNotice("ofxWindowApp") << "keyPressed: " << (char)key << " [" << key << "]";
+	if (false)
+		ofLogNotice("ofxWindowApp") << "keyPressed: '" << (char)key << "' [" << key << "]";
 
 	//disable draw debug
 	if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' ||
@@ -206,7 +207,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 	}
 
 	//disable draw debug
-	if (key == 'F')
+	else if (key == 'F')
 	{
 		ofLogVerbose("ofxWindowApp") << "changed window mode";
 
