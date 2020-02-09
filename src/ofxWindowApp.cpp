@@ -143,7 +143,8 @@ void ofxWindowApp::drawDEBUG()
 	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
 	fpsRealStr = ofToString(ofGetFrameRate(), 1);
 	fpsTargetStr = ofToString(fps);
-	screenPosStr = " [" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + "]";
+	//screenPosStr = " [" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + "]";
+	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
 
 	bool bMode;
 	if (ofGetWindowMode() == OF_WINDOW)//go full screen
@@ -159,7 +160,7 @@ void ofxWindowApp::drawDEBUG()
 	str += "FPS " + fpsRealStr;
 	str += " [" + fpsTargetStr + "]";
 	str += strPad + "VSYNC-" + vSyncStr;
-	str += strPad + "SIZE:" + screenStr;
+	str += strPad + "SIZE " + screenStr;
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
@@ -210,6 +211,16 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 	else if (key == 'F')
 	{
 		ofLogVerbose("ofxWindowApp") << "changed window mode";
+
+		//WORKAROUND to clamp window inside of the screen
+		float x = ofGetWindowPositionX();
+		float y = ofGetWindowPositionY();
+		float gap = 25;
+		if (y < gap)
+		{
+			y = gap;
+			ofSetWindowPosition(x, y);
+		}
 
 		//auto winMode = ofGetWindowMode();
 		//if (winMode == OF_WINDOW)
