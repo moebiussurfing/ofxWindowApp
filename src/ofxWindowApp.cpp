@@ -144,7 +144,7 @@ void ofxWindowApp::drawDEBUG()
 	fpsRealStr = ofToString(ofGetFrameRate(), 1);
 	fpsTargetStr = ofToString(fps);
 	//screenPosStr = " [" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + "]";
-	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
+	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 
 	bool bMode;
 	if (ofGetWindowMode() == OF_WINDOW)//go full screen
