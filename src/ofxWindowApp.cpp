@@ -188,29 +188,38 @@ void ofxWindowApp::drawDEBUG()
 	}
 	ofDrawBitmapStringHighlight(str, xx, yy);
 
+	//-
+
 	//monitor fps performance
-	float fpsThreshold = 0.95f;
-	float fx, fy, fw, fh, fwMax;
-	fwMax = 100;//max width
-	fh = 15;
-	fx = window_W - fwMax - 2;
-	fy = yy - fh;
-	fw = ofMap(ofGetFrameRate(), 0.5f*fps, fps, 0, fwMax);
-	int fa = 200;
+	float fpsThreshold = 0.9f;
+	
+	//bool bPre = (realFps < fps*0.999);//by ratio
+	bool bPre = (realFps < 59.0f);//absolute
 
-	ofPushStyle();
+	if (bPre)//to draw only under pre threshold
+	{
+		bool b = (realFps > fps*fpsThreshold);
+		float fx, fy, fw, fh, fwMax;
+		fwMax = 100;//max width
+		fh = 10;
+		fx = window_W - fwMax - 50;
+		fy = yy - fh;
+		fw = ofMap(ofGetFrameRate(), 0.5f*fps, fps, 0, fwMax);
+		int fa = 200;
 
-	ofFill();
-	bool b = (realFps > fps*fpsThreshold);
-	ofSetColor(b ? (ofColor(ofColor::black, fa)):(ofColor(ofColor::red, fa)));
+		ofPushStyle();
 
-	ofDrawRectangle( fx, fy, fw, fh );
-	ofNoFill();
-	ofSetLineWidth(1.0f);
-	ofSetColor(ofColor(ofColor::white, fa-100));
-	ofDrawRectangle( fx, fy, fwMax, fh );
+		ofFill();
+		ofSetColor(b ? (ofColor(ofColor::black, fa)) : (ofColor(ofColor::red, fa)));
 
-	ofPopStyle();
+		ofDrawRectangle(fx, fy, fw, fh);
+		ofNoFill();
+		ofSetLineWidth(1.0f);
+		ofSetColor(ofColor(ofColor::white, fa - 100));
+		ofDrawRectangle(fx, fy, fwMax, fh);
+
+		ofPopStyle();
+	}
 }
 
 
