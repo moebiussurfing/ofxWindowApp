@@ -101,6 +101,17 @@ public:
 		ofSetVerticalSync(vSync);
 	}
 
+	enum DEBUG_Position
+	{
+		DEBUG_TOP = 0,
+		DEBUG_BOTTOM
+	};
+	int layout_DEBUG_Position = DEBUG_BOTTOM;
+	void setDEBUG_Position(int POS)
+	{
+		layout_DEBUG_Position = POS;
+	}
+
 	//-
 
 private:

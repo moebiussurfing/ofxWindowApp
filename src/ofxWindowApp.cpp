@@ -133,11 +133,11 @@ void ofxWindowApp::drawDEBUG()
 	//----
 
 	//debug overlay screen modes
-	string str = "";
+	string strPad = "    ";//add spaces
+	string str = "ofxWindowApp" + strPad;
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
-	string strPad = "    ";//add spaces
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
@@ -170,7 +170,11 @@ void ofxWindowApp::drawDEBUG()
 	window_W = ofGetWindowSize().x;
 	window_H = ofGetWindowSize().y;
 
-	ofDrawBitmapStringHighlight(str, 0, window_H - 2);
+	if (layout_DEBUG_Position == DEBUG_BOTTOM)
+		ofDrawBitmapStringHighlight(str, 0, window_H - 2);
+	else if (layout_DEBUG_Position == DEBUG_TOP)
+		ofDrawBitmapStringHighlight(str, 0, 15);
+
 }
 
 
@@ -185,6 +189,8 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	window_W = w;
 	window_H = h;
+
+
 }
 
 //--------------------------------------------------------------
@@ -207,27 +213,51 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (ENABLE_Debug ? "ON" : "OFF");
 	}
 
-	//disable draw debug
-	else if (key == 'F')
+	////disable draw debug
+	//else if (key == 'F')
+	//{
+	//	ofLogVerbose("ofxWindowApp") << "changed window mode";
+
+	//	//WORKAROUND to clamp window inside of the screen
+	//	float x = ofGetWindowPositionX();
+	//	float y = ofGetWindowPositionY();
+	//	float gap = 25;
+	//	if (y < gap)
+	//	{
+	//		y = gap;
+	//		ofSetWindowPosition(x, y);
+	//	}
+
+	//	//auto winMode = ofGetWindowMode();
+	//	//if (winMode == OF_WINDOW)
+	//	//{
+	//	//	ofSetFullscreen();
+	//	//}
+
+	//	ofToggleFullscreen();
+	//}
+		
+	//WORKAROUND
+	if (key == 'F')//switch window mode
 	{
-		ofLogVerbose("ofxWindowApp") << "changed window mode";
-
-		//WORKAROUND to clamp window inside of the screen
-		float x = ofGetWindowPositionX();
-		float y = ofGetWindowPositionY();
-		float gap = 25;
-		if (y < gap)
+		if (ofGetWindowMode() == OF_WINDOW)//go full screen
 		{
-			y = gap;
-			ofSetWindowPosition(x, y);
+			ofSetFullscreen(true);
+			//WORKAROUND
+			window_X = ofGetWindowPositionX();
+			window_Y = 0;
+			ofSetWindowPosition(window_X, window_Y);
 		}
+		else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
+		{
+			ofSetFullscreen(false);
 
-		//auto winMode = ofGetWindowMode();
-		//if (winMode == OF_WINDOW)
-		//{
-		//	ofSetFullscreen();
-		//}
-
-		ofToggleFullscreen();
+			//WORKAROUND
+			//kick a little down to avoid hidden window title bar
+			window_X = ofGetWindowPositionX();
+			window_Y = max(ofGetWindowPositionY(), 25);//avoid negative out of screen. minimal h is 25
+			ofSetWindowPosition(window_X, window_Y);
+		}
+		windowResized(ofGetWindowWidth(), ofGetWindowHeight());
 	}
 }
