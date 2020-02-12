@@ -139,9 +139,11 @@ void ofxWindowApp::drawDEBUG()
 	string screenPosStr = "";
 	string screenMode = "";
 
+	float realFps = ofGetFrameRate();
+
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
-	fpsRealStr = ofToString(ofGetFrameRate(), 1);
+	fpsRealStr = ofToString(realFps, 1);
 	fpsTargetStr = ofToString(fps);
 	//screenPosStr = " [" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + "]";
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -170,11 +172,45 @@ void ofxWindowApp::drawDEBUG()
 	window_W = ofGetWindowSize().x;
 	window_H = ofGetWindowSize().y;
 
-	if (layout_DEBUG_Position == DEBUG_BOTTOM)
-		ofDrawBitmapStringHighlight(str, 0, window_H - 2);
-	else if (layout_DEBUG_Position == DEBUG_TOP)
-		ofDrawBitmapStringHighlight(str, 0, 15);
+	int xx, yy;
 
+	if (layout_DEBUG_Position == DEBUG_BOTTOM)
+	{
+		xx = 0;
+		yy = window_H - 2;
+		//ofDrawBitmapStringHighlight(str, 0, window_H - 2);
+	}
+	else if (layout_DEBUG_Position == DEBUG_TOP)
+	{
+		xx = 0;
+		yy = 15;
+		//ofDrawBitmapStringHighlight(str, 0, 15);
+	}
+	ofDrawBitmapStringHighlight(str, xx, yy);
+
+	//monitor fps performance
+	float fpsThreshold = 0.95f;
+	float fx, fy, fw, fh, fwMax;
+	fwMax = 100;//max width
+	fh = 15;
+	fx = window_W - fwMax - 2;
+	fy = yy - fh;
+	fw = ofMap(ofGetFrameRate(), 0.5f*fps, fps, 0, fwMax);
+	int fa = 200;
+
+	ofPushStyle();
+
+	ofFill();
+	bool b = (realFps > fps*fpsThreshold);
+	ofSetColor(b ? (ofColor(ofColor::black, fa)):(ofColor(ofColor::red, fa)));
+
+	ofDrawRectangle( fx, fy, fw, fh );
+	ofNoFill();
+	ofSetLineWidth(1.0f);
+	ofSetColor(ofColor(ofColor::white, fa-100));
+	ofDrawRectangle( fx, fy, fwMax, fh );
+
+	ofPopStyle();
 }
 
 
@@ -236,7 +272,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 
 	//	ofToggleFullscreen();
 	//}
-		
+
 	//WORKAROUND
 	if (key == 'F')//switch window mode
 	{
