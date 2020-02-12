@@ -194,17 +194,19 @@ void ofxWindowApp::drawDEBUG()
 	float fpsThreshold = 0.9f;
 	
 	//bool bPre = (realFps < fps*0.999);//by ratio
-	bool bPre = (realFps < 59.0f);//absolute
+	bool bPre = (realFps < fps - 1.0f);//absolute 1fps below
 
 	if (bPre)//to draw only under pre threshold
 	{
-		bool b = (realFps > fps*fpsThreshold);
+		//bool b = (realFps > fps*fpsThreshold);//by ratio
+		bool b = (realFps > fps - 4.0f);//absolute 4fps below
+		
 		float fx, fy, fw, fh, fwMax;
 		fwMax = 100;//max width
 		fh = 10;
 		fx = window_W - fwMax - 50;
 		fy = yy - fh;
-		fw = ofMap(ofGetFrameRate(), 0.5f*fps, fps, 0, fwMax);
+		fw = ofMap(ofGetFrameRate(), 0.75f*fps, fps, 0, fwMax);
 		int fa = 200;
 
 		ofPushStyle();
