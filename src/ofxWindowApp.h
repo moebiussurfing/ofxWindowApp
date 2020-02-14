@@ -4,7 +4,7 @@
 #include "ofxSerializer.h"
 
 //TODO:
-//+ mix both json in one file settings
+//+++ add screenSetup addon to bundle all features
 //+ add windowResize subscribed listener to auto refresh
 
 class ofxWindowApp : public ofBaseApp

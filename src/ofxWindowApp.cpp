@@ -192,7 +192,7 @@ void ofxWindowApp::drawDEBUG()
 
 	//monitor fps performance
 	float fpsThreshold = 0.9f;
-	
+
 	//bool bPre = (realFps < fps*0.999);//by ratio
 	bool bPre = (realFps < fps - 1.0f);//absolute 1fps below
 
@@ -200,7 +200,7 @@ void ofxWindowApp::drawDEBUG()
 	{
 		//bool b = (realFps > fps*fpsThreshold);//by ratio
 		bool b = (realFps > fps - 4.0f);//absolute 4fps below
-		
+
 		float fx, fy, fw, fh, fwMax;
 		fwMax = 100;//max width
 		fh = 10;
@@ -232,12 +232,10 @@ void ofxWindowApp::windowResized(int w, int h)
 	window_Y = ofGetWindowPositionY();
 
 	//window_W = ofGetWindowSize().x;
-	//window_H= ofGetWindowSize().y;
+	//window_H = ofGetWindowSize().y;
 
 	window_W = w;
 	window_H = h;
-
-
 }
 
 //--------------------------------------------------------------
@@ -287,24 +285,50 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 	//WORKAROUND
 	if (key == 'F')//switch window mode
 	{
+		float windowBar_h = 25;
+
 		if (ofGetWindowMode() == OF_WINDOW)//go full screen
 		{
 			ofSetFullscreen(true);
+
 			//WORKAROUND
 			window_X = ofGetWindowPositionX();
-			window_Y = 0;
+			window_Y = 0;//align to top border
 			ofSetWindowPosition(window_X, window_Y);
 		}
 		else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
 		{
 			ofSetFullscreen(false);
 
+			//TODO:
+			//rare behaviour with black screen..
+
 			//WORKAROUND
 			//kick a little down to avoid hidden window title bar
-			window_X = ofGetWindowPositionX();
-			window_Y = max(ofGetWindowPositionY(), 25);//avoid negative out of screen. minimal h is 25
+			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
+			//window_X = ofGetWindowPositionX();
 			ofSetWindowPosition(window_X, window_Y);
+			
+			//window_W = ofGetWindowWidth();
+			window_H = ofGetWindowHeight();
+
+			if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
+			{
+				//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
+				float hMax = 1080 - window_Y;// -windowBar_h;
+				
+				window_H = hMax;
+				//ofSetWindowPosition(window_X, window_Y);
+				ofSetWindowShape(window_W, window_H);
+			}
 		}
-		windowResized(ofGetWindowWidth(), ofGetWindowHeight());
+
+		//update
+		windowResized(ofGetWidth(), ofGetHeight());
+	}
+	else if (key == 'V')//switch Vsync mode
+	{
+		vSync = !vSync;
+		ofSetVerticalSync(vSync);
 	}
 }
