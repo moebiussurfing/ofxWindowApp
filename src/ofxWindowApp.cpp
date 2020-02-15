@@ -126,6 +126,8 @@ void ofxWindowApp::loadWindow()
 //--------------------------------------------------------------
 void ofxWindowApp::drawDEBUG()
 {
+	float realFps = ofGetFrameRate();
+
 	string vSyncStr;
 	string fpsRealStr;
 	string fpsTargetStr;
@@ -138,8 +140,6 @@ void ofxWindowApp::drawDEBUG()
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
-
-	float realFps = ofGetFrameRate();
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
@@ -166,10 +166,10 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
-	//WORKAROUND until windowResize implemented
-	window_X = ofGetWindowPositionX();
-	window_Y = ofGetWindowPositionY();
-	window_W = ofGetWindowSize().x;
+	////WORKAROUND until windowResize implemented
+	//window_X = ofGetWindowPositionX();
+	//window_Y = ofGetWindowPositionY();
+	//window_W = ofGetWindowSize().x;
 	window_H = ofGetWindowSize().y;
 
 	int xx, yy;
@@ -191,35 +191,39 @@ void ofxWindowApp::drawDEBUG()
 	//-
 
 	//monitor fps performance
-	float fpsThreshold = 0.9f;
 
-	//bool bPre = (realFps < fps*0.999);//by ratio
-	bool bPre = (realFps < fps - 1.0f);//absolute 1fps below
+	////thresholds by factor
+	//float fpsThreshold = 0.9f;//below this trigs alert red state
+	//bool bPreShow = (realFps < fps*0.999);//by ratio
 
-	if (bPre)//to draw only under pre threshold
+	//thresholds by factor
+	//monitor fps performance
+	float fpsThreshold = 10;//num frames below this trigs alert red state
+	bool bPreShow = (realFps < fps - 5); //below 5 fps starts showing bar
+
+	//bool bAlert = (realFps < fps*fpsThreshold);//by ratio
+	bool bAlert = (realFps < (fps - fpsThreshold));//by absolute fps
+
+	//-
+
+	if (bPreShow)//to draw only under pre threshold
 	{
-		//bool b = (realFps > fps*fpsThreshold);//by ratio
-		bool b = (realFps > fps - 4.0f);//absolute 4fps below
-
 		float fx, fy, fw, fh, fwMax;
 		fwMax = 100;//max width
 		fh = 10;
-		fx = window_W - fwMax - 50;
+		fx = window_W - fwMax - 25;//pad to border
 		fy = yy - fh;
-		fw = ofMap(ofGetFrameRate(), 0.75f*fps, fps, 0, fwMax);
+		fw = ofMap(realFps, 0.0f*fps, fps, 0, fwMax, true);
 		int fa = 200;
 
 		ofPushStyle();
-
 		ofFill();
-		ofSetColor(b ? (ofColor(ofColor::black, fa)) : (ofColor(ofColor::red, fa)));
-
+		ofSetColor(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
 		ofDrawRectangle(fx, fy, fw, fh);
 		ofNoFill();
 		ofSetLineWidth(1.0f);
 		ofSetColor(ofColor(ofColor::white, fa - 100));
 		ofDrawRectangle(fx, fy, fwMax, fh);
-
 		ofPopStyle();
 	}
 }
@@ -291,10 +295,10 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		{
 			ofSetFullscreen(true);
 
-			//WORKAROUND
-			window_X = ofGetWindowPositionX();
-			window_Y = 0;//align to top border
-			ofSetWindowPosition(window_X, window_Y);
+			////WORKAROUND
+			//window_X = ofGetWindowPositionX();
+			//window_Y = 0;//align to top border
+			//ofSetWindowPosition(window_X, window_Y);
 		}
 		else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
 		{
@@ -306,21 +310,21 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 			//WORKAROUND
 			//kick a little down to avoid hidden window title bar
 			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
-			//window_X = ofGetWindowPositionX();
+			window_X = ofGetWindowPositionX();
 			ofSetWindowPosition(window_X, window_Y);
 			
-			//window_W = ofGetWindowWidth();
-			window_H = ofGetWindowHeight();
+			////window_W = ofGetWindowWidth();
+			//window_H = ofGetWindowHeight();
 
-			if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
-			{
-				//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
-				float hMax = 1080 - window_Y;// -windowBar_h;
-				
-				window_H = hMax;
-				//ofSetWindowPosition(window_X, window_Y);
-				ofSetWindowShape(window_W, window_H);
-			}
+			//if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
+			//{
+			//	//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
+			//	float hMax = 1080 - window_Y;// -windowBar_h;
+			//	
+			//	window_H = hMax;
+			//	//ofSetWindowPosition(window_X, window_Y);
+			//	ofSetWindowShape(window_W, window_H);
+			//}
 		}
 
 		//update
