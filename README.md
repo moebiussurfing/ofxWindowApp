@@ -25,7 +25,7 @@ windowApp.setShowDebug(true);
 windowApp.setSettingsVsync(false);
 ```
 
-The addon auto loads when app starts and stores on app exit. Nothing more it's required.
+The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.
 
 The json file will looks like:
 
