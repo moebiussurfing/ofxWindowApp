@@ -11,6 +11,7 @@ This openFrameworks addon debugs, stores and recall the basic app window states:
 * window size (w, h) 
 * window mode (window/full screen)
 * app fps and vsync state
+* "trigs alert" and shows a performance bar when fps drops under the expected frame rate
 
 When you use the addon for first time into a project and no json file is present, you need to set the initial settings:
 
