@@ -12,8 +12,8 @@ This openFrameworks addon debugs, stores and recall the basic app window states:
 * window mode (window/full screen)
 * app fps and vsync state
 
-When you starts for first time and no json file present, you need to set the initial settings:
-ofApp.cpp
+When you use the addon for first time into a project and no json file is present, you need to set the initial settings:
+
 ```
 windowApp.setSettingsFps(25);
 windowApp.setSettingsVsync(false);
