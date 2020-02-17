@@ -6,9 +6,6 @@ ofxWindowApp::ofxWindowApp()
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 	//ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
 
-//    if (autoSaveLoad)
-//        loadWindow();
-
 	//auto call setup
 	setup();
 }
@@ -18,21 +15,6 @@ ofxWindowApp::~ofxWindowApp()
 {
 	if (autoSaveLoad)
 		saveWindow();
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::update(ofEventArgs & args)
-{
-	ofLogVerbose("ofxWindowApp") << "called update";
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::draw(ofEventArgs & args)
-{
-	ofLogVerbose("ofxWindowApp") << "called draw";
-
-	if (ENABLE_Debug)
-		drawDEBUG();
 }
 
 //--------------------------------------------------------------
@@ -55,6 +37,21 @@ void ofxWindowApp::setup()
 		loadWindow();
 
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::update(ofEventArgs & args)
+{
+	ofLogVerbose("ofxWindowApp") << "called update";
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::draw(ofEventArgs & args)
+{
+	ofLogVerbose("ofxWindowApp") << "called draw";
+
+	if (ENABLE_Debug)
+		drawDEBUG();
 }
 
 //--------------------------------------------------------------
@@ -240,6 +237,8 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	window_W = w;
 	window_H = h;
+
+	bChanged = true;
 }
 
 //--------------------------------------------------------------
@@ -262,33 +261,10 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (ENABLE_Debug ? "ON" : "OFF");
 	}
 
-	////disable draw debug
-	//else if (key == 'F')
-	//{
-	//	ofLogVerbose("ofxWindowApp") << "changed window mode";
-
-	//	//WORKAROUND to clamp window inside of the screen
-	//	float x = ofGetWindowPositionX();
-	//	float y = ofGetWindowPositionY();
-	//	float gap = 25;
-	//	if (y < gap)
-	//	{
-	//		y = gap;
-	//		ofSetWindowPosition(x, y);
-	//	}
-
-	//	//auto winMode = ofGetWindowMode();
-	//	//if (winMode == OF_WINDOW)
-	//	//{
-	//	//	ofSetFullscreen();
-	//	//}
-
-	//	ofToggleFullscreen();
-	//}
-
-	//WORKAROUND
-	if (key == 'F')//switch window mode
+	//switch window mode
+	if (key == 'F')
 	{
+		//WORKAROUND: to fit window and his bar visible into the screen
 		float windowBar_h = 25;
 
 		if (ofGetWindowMode() == OF_WINDOW)//go full screen
@@ -305,14 +281,14 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 			ofSetFullscreen(false);
 
 			//TODO:
-			//rare behaviour with black screen..
+			//rare behaviour with black screen in secondary monitors..
 
 			//WORKAROUND
 			//kick a little down to avoid hidden window title bar
 			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
 			window_X = ofGetWindowPositionX();
 			ofSetWindowPosition(window_X, window_Y);
-			
+
 			////window_W = ofGetWindowWidth();
 			//window_H = ofGetWindowHeight();
 

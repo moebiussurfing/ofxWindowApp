@@ -15,11 +15,6 @@ public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
-	//this is to folder all files to avoid mixing with other addons data
-	string path_folder = "ofxWindowApp/";
-	string path_filename = "AppWindow.json";
-	string path_filename2 = "AppWindow_Extra.json";
-
 	//-
 
 	//API
@@ -48,10 +43,15 @@ public:
 	{
 		autoSaveLoad = b;
 	}
+	
+	void setShowDebug(bool b = true)
+	{
+		ENABLE_Debug = b;
+	}
+	
+	//-
 
-	//TODO:
-	//WORKAROUND bad window positioning..
-	//callback
+	//callback to check if some settings have changed
 	bool isChanged()
 	{
 		if (bChanged)
@@ -64,14 +64,7 @@ public:
 			return false;
 	}
 
-	void setShowDebug(bool b = true)
-	{
-		ENABLE_Debug = b;
-	}
-	
-	//-
-
-	//extra settings
+	//setters. required when used for first time into your project
 	void setSettingsFps(float f)
 	{
 		fps = f;
@@ -82,14 +75,9 @@ public:
 		vSync = b;
 		ofSetVerticalSync(vSync);
 	}
-	float getSettingsFps()
-	{
-		return fps.get();
-	}
-	bool getSettingsVsync()
-	{
-		return vSync.get();
-	}
+	
+	//-
+
 	void applySettings()
 	{
 		ofLogNotice("ofxWindowApp") << "applySettings()";
@@ -101,12 +89,6 @@ public:
 		ofSetVerticalSync(vSync);
 	}
 
-	enum DEBUG_Position
-	{
-		DEBUG_TOP = 0,
-		DEBUG_BOTTOM
-	};
-	int layout_DEBUG_Position = DEBUG_BOTTOM;
 	void setDEBUG_Position(int POS)
 	{
 		layout_DEBUG_Position = POS;
@@ -114,7 +96,48 @@ public:
 
 	//-
 
+	//getters
+	float getSettingsFps()
+	{
+		return fps.get();
+	}
+	bool getSettingsVsync()
+	{
+		return vSync.get();
+	}
+	float getWindowWidth()
+	{
+		return window_W;
+	}
+	float getWindowHeight()
+	{
+		return window_H;
+	}
+	float getWindowPositionX()
+	{
+		return window_X;
+	}
+	float getWindowPositionY()
+	{
+		return window_Y;
+	}
+
+	//-
+
 private:
+
+	enum DEBUG_Position
+	{
+		DEBUG_TOP = 0,
+		DEBUG_BOTTOM
+	};
+	int layout_DEBUG_Position = DEBUG_BOTTOM;
+
+	//default folders
+	//this is to folder all files to avoid mixing with other addons data
+	string path_folder = "ofxWindowApp/";//maybe should create this folder manually into project /data
+	string path_filename = "AppWindow.json";
+	//string path_filename2 = "AppWindow_Extra.json";
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
