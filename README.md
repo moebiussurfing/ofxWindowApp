@@ -15,7 +15,7 @@ This openFrameworks addon debugs, stores and recall the basic app window states:
 When you use the addon for first time into a project and no json file is present, you need to set the initial settings:
 
 ```
-windowApp.setSettingsFps(25);
+windowApp.setSettingsFps(30);
 windowApp.setSettingsVsync(false);
 ```
 
