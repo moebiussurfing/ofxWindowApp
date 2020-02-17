@@ -5,7 +5,7 @@
 
 ## Overview
 
-This openFrameworks addon debugs, stores and recall the basic app window states:
+This openFrameworks addon debugs, stores and recall the basic app window state/settings:
 
 * window position (x, y) 
 * window size (w, h) 
