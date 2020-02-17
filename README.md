@@ -46,7 +46,7 @@ AppWindow.json
     {
         "extra_settings": {
             "debug": "1",
-            "fps": "25",
+            "fps": "30",
             "vsync": "0"
         }
     }
