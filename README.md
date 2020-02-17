@@ -86,7 +86,7 @@ Nothing more is required.
 ```cpp 
 
 setup()
-    //required if no previous xml file settings 
+    //required if no previous session json file settings 
     //windowApp.setSettingsFps(30);
     //windowApp.setSettingsVsync(false);
     //show or hide
