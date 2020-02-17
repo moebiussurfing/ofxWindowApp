@@ -23,7 +23,6 @@ windowApp.setSettingsVsync(false);
 To show or hide the window info you must call:
 ```
 windowApp.setShowDebug(true);
-windowApp.setSettingsVsync(false);
 ```
 
 The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.
