@@ -1,4 +1,4 @@
-# ofxWindowApp;
+# ofxWindowApp
 
 ## Screenshot
 ![Alt text](/screenshot.JPG?raw=true "MoebiusSurfing")
