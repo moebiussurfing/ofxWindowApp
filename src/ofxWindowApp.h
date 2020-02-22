@@ -94,6 +94,11 @@ public:
 		layout_DEBUG_Position = POS;
 	}
 
+	void setEnableKeys(bool b)
+	{
+		ENABLE_Keys = b;
+	}
+
 	//-
 
 	//getters
@@ -148,11 +153,12 @@ private:
 	ofParameter<bool> vSync{ "vsync", false };
 	ofParameter<float> fps{ "fps", 60.5, 1, 120 };
     ofParameter<bool> ENABLE_Debug{"debug", true};
+	//TODO: add full screen/window bool
 
     void drawDEBUG();
 
+	bool ENABLE_Keys = true;//keys enabled by default
     void keyPressed(ofKeyEventArgs &eventArgs);
-
 };
 
 

@@ -15,6 +15,10 @@ ofxWindowApp::~ofxWindowApp()
 {
 	if (autoSaveLoad)
 		saveWindow();
+
+	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
+	ofRemoveListener(ofEvents().draw, this, &ofxWindowApp::draw);
+	ofRemoveListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
 }
 
 //--------------------------------------------------------------
@@ -244,71 +248,74 @@ void ofxWindowApp::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 {
-	const int &key = eventArgs.key;
-
-	//modifier
-	bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
-	bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
-
-	if (false)
-		ofLogNotice("ofxWindowApp") << "keyPressed: '" << (char)key << "' [" << key << "]";
-
-	//disable draw debug
-	if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' ||
-		key == 'W')
+	if (ENABLE_Keys)
 	{
-		ENABLE_Debug = !ENABLE_Debug;
-		ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (ENABLE_Debug ? "ON" : "OFF");
-	}
+		const int &key = eventArgs.key;
 
-	//switch window mode
-	if (key == 'F')
-	{
-		//WORKAROUND: to fit window and his bar visible into the screen
-		float windowBar_h = 25;
+		//modifier
+		bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
+		bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
 
-		if (ofGetWindowMode() == OF_WINDOW)//go full screen
+		if (false)
+			ofLogNotice("ofxWindowApp") << "keyPressed: '" << (char)key << "' [" << key << "]";
+
+		//disable draw debug
+		if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' ||
+			key == 'W')
 		{
-			ofSetFullscreen(true);
-
-			////WORKAROUND
-			//window_X = ofGetWindowPositionX();
-			//window_Y = 0;//align to top border
-			//ofSetWindowPosition(window_X, window_Y);
-		}
-		else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
-		{
-			ofSetFullscreen(false);
-
-			//TODO:
-			//rare behaviour with black screen in secondary monitors..
-
-			//WORKAROUND
-			//kick a little down to avoid hidden window title bar
-			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
-			window_X = ofGetWindowPositionX();
-			ofSetWindowPosition(window_X, window_Y);
-
-			////window_W = ofGetWindowWidth();
-			//window_H = ofGetWindowHeight();
-
-			//if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
-			//{
-			//	//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
-			//	float hMax = 1080 - window_Y;// -windowBar_h;
-			//	
-			//	window_H = hMax;
-			//	//ofSetWindowPosition(window_X, window_Y);
-			//	ofSetWindowShape(window_W, window_H);
-			//}
+			ENABLE_Debug = !ENABLE_Debug;
+			ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (ENABLE_Debug ? "ON" : "OFF");
 		}
 
-		//update
-		windowResized(ofGetWidth(), ofGetHeight());
-	}
-	else if (key == 'V')//switch Vsync mode
-	{
-		vSync = !vSync;
-		ofSetVerticalSync(vSync);
+		//switch window mode
+		else if (key == 'F')
+		{
+			if (ofGetWindowMode() == OF_WINDOW)//go full screen
+			{
+				ofSetFullscreen(true);
+
+				////WORKAROUND
+				//window_X = ofGetWindowPositionX();
+				//window_Y = 0;//align to top border
+				//ofSetWindowPosition(window_X, window_Y);
+			}
+			else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
+			{
+				ofSetFullscreen(false);
+
+				//WORKAROUND: to fit window and his bar visible into the screen
+				float windowBar_h = 25;
+
+				//TODO:
+				//rare behaviour with black screen in secondary monitors..
+
+				//WORKAROUND
+				//kick a little down to avoid hidden window title bar
+				window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
+				window_X = ofGetWindowPositionX();
+				ofSetWindowPosition(window_X, window_Y);
+
+				////window_W = ofGetWindowWidth();
+				//window_H = ofGetWindowHeight();
+
+				//if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
+				//{
+				//	//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
+				//	float hMax = 1080 - window_Y;// -windowBar_h;
+				//	
+				//	window_H = hMax;
+				//	//ofSetWindowPosition(window_X, window_Y);
+				//	ofSetWindowShape(window_W, window_H);
+				//}
+			}
+
+			//update
+			windowResized(ofGetWidth(), ofGetHeight());
+		}
+		else if (key == 'V')//switch Vsync mode
+		{
+			vSync = !vSync;
+			ofSetVerticalSync(vSync);
+		}
 	}
 }
