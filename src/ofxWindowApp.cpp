@@ -177,7 +177,7 @@ void ofxWindowApp::drawDEBUG()
 	int yy = 0;
 	if (layout_DEBUG_Position == DEBUG_BOTTOM)
 	{
-		yy = window_H - 2;
+		yy = window_H - 6;
 	}
 	else if (layout_DEBUG_Position == DEBUG_TOP)
 	{
@@ -189,17 +189,19 @@ void ofxWindowApp::drawDEBUG()
 
 	//monitor fps performance alert
 
+	bool bPreShow;//starts draw black
+	bool bAlert;//draws red
+	float fpsThreshold;
+
 	////A. thresholds by factor fps between target and real fps
-	//float fpsThreshold = 0.9f;//below this trigs alert red state
-	//bool bPreShow = (realFps < targetFps*0.999);//by ratio
+	//fpsThreshold = 0.9f;//below this trigs alert red state
+	//bPreShow = (realFps < targetFps*0.999);//by ratio
+	//bAlert = (realFps < targetFps*fpsThreshold);//A. by ratio
 
 	//B. thresholds by absolute fps difference between desired target and real fps
 	//monitor fps performance
-	float fpsThreshold = 10;//num frames below this trigs alert red state
-	bool bPreShow = (realFps < targetFps - 5); //below 5 fps starts showing bar
-
-	bool bAlert;
-	//bAlert = (realFps < targetFps*fpsThreshold);//A. by ratio
+	fpsThreshold = 10.f;//num frames below this trigs alert red state
+	bPreShow = (realFps < targetFps - 5); //below 5 fps starts showing bar
 	bAlert = (realFps < (targetFps - fpsThreshold));//B. by absolute fps diff
 
 	//-
@@ -211,10 +213,13 @@ void ofxWindowApp::drawDEBUG()
 		fh = 10.f;
 		fPad = 5.f;//pad to border
 		fx = window_W - fwMax - fPad;
-		fy = yy - fh -1.f;
+		fy = yy - fh + 1.0f;
 		fw = ofMap(realFps, 0.0f*targetFps, targetFps, 0, fwMax, true);
-		int fa = 192;//alpha
-		string diff = ofToString(realFps - targetFps, 0) + " FPS";
+		int fa = 150;//alpha
+		int iDiff = (int)targetFps - realFps;
+		string diff = ofToString(iDiff, 0);
+		if (iDiff < 10) diff = " " + diff;
+		diff += " FPS";
 
 		ofPushStyle();
 
@@ -222,7 +227,7 @@ void ofxWindowApp::drawDEBUG()
 		ofColor cAlert(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
 		ofSetColor(cAlert);
 		ofDrawRectangle(fx, fy, fw, fh);//out-performance bar
-		ofDrawBitmapStringHighlight(diff, fx - 67.f, yy, cAlert, ofColor(255));//text fps diff
+		ofDrawBitmapStringHighlight(diff, fx - 62.f, yy, cAlert, ofColor(255));//text fps diff
 
 		ofNoFill();
 		ofSetLineWidth(2.0f);
