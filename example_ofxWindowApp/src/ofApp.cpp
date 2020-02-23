@@ -61,7 +61,7 @@ void ofApp::mouseExited(int x, int y) {
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h) {
 	//TODO:
-	//there's some rare behaviurs maybe when multiple monitors and switching to fullscreen/window modes... 
+	//there's some rare behaviors maybe when multiple monitors and switching to fullscreen/window modes... 
 }
 
 //--------------------------------------------------------------
