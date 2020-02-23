@@ -72,6 +72,8 @@ ipch/
 icon.rc
 *.vs/*
 .vs/example_ofxWindowApp/v15
+*/.vs/example_ofxWindowApp/v15
+*/*.vs/example_ofxWindowApp/v15
 
 # Eclipse
 .metadata
