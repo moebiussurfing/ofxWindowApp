@@ -64,6 +64,14 @@ xcuserdata
 *.aps
 ipch/
 
+#vs2017
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+icon.rc
+*.vs/*
+
 # Eclipse
 .metadata
 local.properties
