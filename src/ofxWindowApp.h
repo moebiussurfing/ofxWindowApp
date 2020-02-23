@@ -4,27 +4,46 @@
 #include "ofxSerializer.h"
 
 //TODO:
-//+++ add screenSetup addon to bundle all features
+//+++ add ofxScreenSetup addon to bundle all other features
 //+ add windowResize subscribed listener to auto refresh
 
 class ofxWindowApp : public ofBaseApp
 {
+	//TODO:
+	//I used public ofBaseApp to make auto update/draw without any call to them is required to made manually...
+	//but it exposes several not needed methods (?)
 
 public:
-
 	ofxWindowApp();
 	~ofxWindowApp();
 
 	//-
 
-	//API
-
+private:
 	void setup();
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
+    void keyPressed(ofKeyEventArgs &eventArgs);
 	void windowResized(int w, int h);
+    
+	void drawDEBUG();
 
-	//-
+	//--
+
+	//API
+public:
+
+	//setters. required when used for first time into your project
+	void setSettingsFps(float f)
+	{
+		targetFps = f;
+		ofSetFrameRate(targetFps);
+	}
+	void setSettingsVsync(bool b)
+	{
+		vSync = b;
+		ofSetVerticalSync(vSync);
+	}
 
 	void saveWindow();
 	void loadWindow();
@@ -46,12 +65,12 @@ public:
 	
 	void setShowDebug(bool b = true)
 	{
-		ENABLE_Debug = b;
+		SHOW_Debug = b;
 	}
 	
 	//-
 
-	//callback to check if some settings have changed
+	//easy callback to check from ofApp if some settings have changed
 	bool isChanged()
 	{
 		if (bChanged)
@@ -63,37 +82,43 @@ public:
 		else
 			return false;
 	}
-
-	//setters. required when used for first time into your project
-	void setSettingsFps(float f)
-	{
-		targetFps = f;
-		ofSetFrameRate(targetFps);
-	}
-	void setSettingsVsync(bool b)
-	{
-		vSync = b;
-		ofSetVerticalSync(vSync);
-	}
 	
 	//-
 
-	void applySettings()
+private:
+	void applySettings()//fps and vsync only
 	{
 		ofLogNotice("ofxWindowApp") << "applySettings()";
 		ofLogNotice("ofxWindowApp") << "targetFps: " << targetFps;
         ofLogNotice("ofxWindowApp") << "vSync: " << vSync;
-        ofLogNotice("ofxWindowApp") << "SHOW DEBUG: " <<ENABLE_Debug.get();
+        ofLogNotice("ofxWindowApp") << "SHOW DEBUG: " <<SHOW_Debug.get();
 
 		ofSetFrameRate(targetFps);
 		ofSetVerticalSync(vSync);
 	}
 
-	void setDEBUG_Position(int POS)
+private:
+	//layout modes
+	enum DEBUG_Position
 	{
-		layout_DEBUG_Position = POS;
-	}
+		DEBUG_POSITION_TOP = 0,
+		DEBUG_POSITION_BOTTOM
+	};
+	int positionLayout = DEBUG_POSITION_BOTTOM;
 
+public:
+	void setPosition(int POS)
+	{
+		positionLayout = POS;
+	}
+	int getDEBUG_Position()
+	{
+		return positionLayout;
+	}
+	void togglePosition()
+	{
+		setPosition((positionLayout == 1) ? 0 : 1);
+	}
 	void setEnableKeys(bool b)
 	{
 		ENABLE_Keys = b;
@@ -131,34 +156,23 @@ public:
 
 private:
 
-	enum DEBUG_Position
-	{
-		DEBUG_TOP = 0,
-		DEBUG_BOTTOM
-	};
-	int layout_DEBUG_Position = DEBUG_BOTTOM;
-
 	//default folders
 	//this is to folder all files to avoid mixing with other addons data
-	string path_folder = "ofxWindowApp/";//maybe should create this folder manually into project /data
+	string path_folder = "ofxWindowApp/";//NOTE: maybe you need to create this folder manually into project /data
 	string path_filename = "AppWindow.json";
-	//string path_filename2 = "AppWindow_Extra.json";
-
-	ofParameter<int> window_W, window_H, window_X, window_Y;
+	//string path_filename2 = "AppWindow_Extra.json";//to split settings in more than one files...
 
 	bool autoSaveLoad = true;
 	bool bChanged = false;
+	bool ENABLE_Keys = true;//keys enabled by default
 
+	ofParameter<int> window_W, window_H, window_X, window_Y;
 	ofParameterGroup params_Settings{ "extra settings" };
 	ofParameter<bool> vSync{ "vsync", false };
 	ofParameter<float> targetFps{ "targetFps", 60.5, 1, 120 };
-    ofParameter<bool> ENABLE_Debug{"debug", true};
-	//TODO: add full screen/window bool
+    ofParameter<bool> SHOW_Debug{"debug", true};
+	//TODO: add full screen/window bool param
 
-    void drawDEBUG();
-
-	bool ENABLE_Keys = true;//keys enabled by default
-    void keyPressed(ofKeyEventArgs &eventArgs);
 };
 
 

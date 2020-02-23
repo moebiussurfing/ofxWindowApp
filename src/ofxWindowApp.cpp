@@ -34,7 +34,7 @@ void ofxWindowApp::setup()
 	//extra settings
 	params_Settings.add(vSync);
 	params_Settings.add(targetFps);
-	params_Settings.add(ENABLE_Debug);
+	params_Settings.add(SHOW_Debug);
 
 	//load
 	if (autoSaveLoad)
@@ -54,7 +54,7 @@ void ofxWindowApp::draw(ofEventArgs & args)
 {
 	ofLogVerbose("ofxWindowApp") << "called draw";
 
-	if (ENABLE_Debug)
+	if (SHOW_Debug)
 		drawDEBUG();
 }
 
@@ -166,8 +166,8 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
-	////WORKAROUND: to move window to make upper bar visible
-	//until windowResize implemented
+	////WORKAROUND:
+	//until windowResize well implemented
 	//window_X = ofGetWindowPositionX();
 	//window_Y = ofGetWindowPositionY();
 	window_W = ofGetWindowSize().x;
@@ -175,11 +175,11 @@ void ofxWindowApp::drawDEBUG()
 
 	int xx = 0;
 	int yy = 0;
-	if (layout_DEBUG_Position == DEBUG_BOTTOM)
+	if (positionLayout == DEBUG_POSITION_BOTTOM)
 	{
 		yy = window_H - 6;
 	}
-	else if (layout_DEBUG_Position == DEBUG_TOP)
+	else if (positionLayout == DEBUG_POSITION_TOP)
 	{
 		yy = 15;
 	}
@@ -272,8 +272,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' ||
 			key == 'W')
 		{
-			ENABLE_Debug = !ENABLE_Debug;
-			ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (ENABLE_Debug ? "ON" : "OFF");
+			SHOW_Debug = !SHOW_Debug;
+			ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (SHOW_Debug ? "ON" : "OFF");
 		}
 
 		//switch window mode
@@ -305,7 +305,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 				ofSetWindowPosition(window_X, window_Y);
 
 				////window_W = ofGetWindowWidth();
-				//window_H = ofGetWindowHeight();
+				////window_H = ofGetWindowHeight();
 
 				//if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
 				//{
