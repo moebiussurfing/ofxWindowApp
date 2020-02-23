@@ -67,8 +67,8 @@ public:
 	//setters. required when used for first time into your project
 	void setSettingsFps(float f)
 	{
-		fps = f;
-		ofSetFrameRate(fps);
+		targetFps = f;
+		ofSetFrameRate(targetFps);
 	}
 	void setSettingsVsync(bool b)
 	{
@@ -81,11 +81,11 @@ public:
 	void applySettings()
 	{
 		ofLogNotice("ofxWindowApp") << "applySettings()";
-		ofLogNotice("ofxWindowApp") << "fps: " << fps;
+		ofLogNotice("ofxWindowApp") << "targetFps: " << targetFps;
         ofLogNotice("ofxWindowApp") << "vSync: " << vSync;
         ofLogNotice("ofxWindowApp") << "SHOW DEBUG: " <<ENABLE_Debug.get();
 
-		ofSetFrameRate(fps);
+		ofSetFrameRate(targetFps);
 		ofSetVerticalSync(vSync);
 	}
 
@@ -104,7 +104,7 @@ public:
 	//getters
 	float getSettingsFps()
 	{
-		return fps.get();
+		return targetFps.get();
 	}
 	bool getSettingsVsync()
 	{
@@ -151,7 +151,7 @@ private:
 
 	ofParameterGroup params_Settings{ "extra settings" };
 	ofParameter<bool> vSync{ "vsync", false };
-	ofParameter<float> fps{ "fps", 60.5, 1, 120 };
+	ofParameter<float> targetFps{ "targetFps", 60.5, 1, 120 };
     ofParameter<bool> ENABLE_Debug{"debug", true};
 	//TODO: add full screen/window bool
 

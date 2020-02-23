@@ -33,7 +33,7 @@ void ofxWindowApp::setup()
 
 	//extra settings
 	params_Settings.add(vSync);
-	params_Settings.add(fps);
+	params_Settings.add(targetFps);
 	params_Settings.add(ENABLE_Debug);
 
 	//load
@@ -129,13 +129,13 @@ void ofxWindowApp::drawDEBUG()
 {
 	float realFps = ofGetFrameRate();
 
-	string vSyncStr;
-	string fpsRealStr;
-	string fpsTargetStr;
-
 	//----
 
 	//debug overlay screen modes
+
+	string vSyncStr;
+	string fpsRealStr;
+	string fpsTargetStr;
 	string strPad = "    ";//add spaces
 	string str = "ofxWindowApp" + strPad;
 	string screenStr = "";
@@ -145,8 +145,7 @@ void ofxWindowApp::drawDEBUG()
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
 	fpsRealStr = ofToString(realFps, 1);
-	fpsTargetStr = ofToString(fps);
-	//screenPosStr = " [" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY()) + "]";
+	fpsTargetStr = ofToString(targetFps);
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 
 	bool bMode;
@@ -167,64 +166,69 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
-	////WORKAROUND until windowResize implemented
+	////WORKAROUND: to move window to make upper bar visible
+	//until windowResize implemented
 	//window_X = ofGetWindowPositionX();
 	//window_Y = ofGetWindowPositionY();
-	//window_W = ofGetWindowSize().x;
+	window_W = ofGetWindowSize().x;
 	window_H = ofGetWindowSize().y;
 
-	int xx, yy;
-
+	int xx = 0;
+	int yy = 0;
 	if (layout_DEBUG_Position == DEBUG_BOTTOM)
 	{
-		xx = 0;
 		yy = window_H - 2;
-		//ofDrawBitmapStringHighlight(str, 0, window_H - 2);
 	}
 	else if (layout_DEBUG_Position == DEBUG_TOP)
 	{
-		xx = 0;
 		yy = 15;
-		//ofDrawBitmapStringHighlight(str, 0, 15);
 	}
 	ofDrawBitmapStringHighlight(str, xx, yy);
 
 	//-
 
-	//monitor fps performance
+	//monitor fps performance alert
 
-	////thresholds by factor
+	////A. thresholds by factor fps between target and real fps
 	//float fpsThreshold = 0.9f;//below this trigs alert red state
-	//bool bPreShow = (realFps < fps*0.999);//by ratio
+	//bool bPreShow = (realFps < targetFps*0.999);//by ratio
 
-	//thresholds by factor
+	//B. thresholds by absolute fps difference between desired target and real fps
 	//monitor fps performance
 	float fpsThreshold = 10;//num frames below this trigs alert red state
-	bool bPreShow = (realFps < fps - 5); //below 5 fps starts showing bar
+	bool bPreShow = (realFps < targetFps - 5); //below 5 fps starts showing bar
 
-	//bool bAlert = (realFps < fps*fpsThreshold);//by ratio
-	bool bAlert = (realFps < (fps - fpsThreshold));//by absolute fps
+	bool bAlert;
+	//bAlert = (realFps < targetFps*fpsThreshold);//A. by ratio
+	bAlert = (realFps < (targetFps - fpsThreshold));//B. by absolute fps diff
 
 	//-
 
 	if (bPreShow)//to draw only under pre threshold
 	{
-		float fx, fy, fw, fh, fwMax;
-		fwMax = 100;//max width
-		fh = 10;
-		fx = window_W - fwMax - 25;//pad to border
-		fy = yy - fh;
-		fw = ofMap(realFps, 0.0f*fps, fps, 0, fwMax, true);
-		int fa = 200;
+		float fx, fy, fw, fh, fwMax, fPad;
+		fwMax = 100.f;//max width
+		fh = 10.f;
+		fPad = 5.f;//pad to border
+		fx = window_W - fwMax - fPad;
+		fy = yy - fh -1.f;
+		fw = ofMap(realFps, 0.0f*targetFps, targetFps, 0, fwMax, true);
+		int fa = 192;//alpha
+		string diff = ofToString(realFps - targetFps, 0) + " FPS";
 
 		ofPushStyle();
+
 		ofFill();
-		ofSetColor(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
-		ofDrawRectangle(fx, fy, fw, fh);
+		ofColor cAlert(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
+		ofSetColor(cAlert);
+		ofDrawRectangle(fx, fy, fw, fh);//out-performance bar
+		ofDrawBitmapStringHighlight(diff, fx - 67.f, yy, cAlert, ofColor(255));//text fps diff
+
 		ofNoFill();
-		ofSetLineWidth(1.0f);
-		ofSetColor(ofColor(ofColor::white, fa - 100));
-		ofDrawRectangle(fx, fy, fwMax, fh);
+		ofSetLineWidth(2.0f);
+		ofSetColor(cAlert);
+		ofDrawRectangle(fx, fy, fwMax, fh);//rect border
+
 		ofPopStyle();
 	}
 }
