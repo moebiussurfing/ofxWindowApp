@@ -14,8 +14,8 @@ docs/tagfile.xml
 
 *.XML
 *.xml
-*.JSON
-*.json
+#*.JSON
+#*.json
 
 [Bb]uild/
 [Oo]bj/
