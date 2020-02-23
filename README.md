@@ -11,10 +11,14 @@ This openFrameworks addon debugs, stores and recall the basic app window state/s
 * window position (x, y) 
 * window size (w, h) 
 * window mode (window/full screen)
-* app target fps settings, real current framerate and vsync state
+* app target fps settings, real current framerate, and vsync state
 * "trigs alert" and shows a performance bar when fps drops under the expected frame rate
 
-When you use the addon for first time into a project and no json file is present, you need to set the initial settings:
+
+This openFrameworks addon debugs, stores and recalls the basic app window state/settings.
+
+
+When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:
 
 ```
 windowApp.setSettingsFps(30);
@@ -28,7 +32,7 @@ windowApp.setShowDebug(true);
 
 The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.
 
-The json file will looks like:
+The JSON file will look like:
 
 AppWindow.json
 ```
@@ -60,10 +64,16 @@ AppWindow.json
 ```
 W: toggle show debug info.
 
-F: toggle full screen
+F: toggle fullscreen
 
-V: toggle v sync state
+V: toggle vsync state
 ```
+
+
+## Why?
+
+Usually when you start a clean OF project you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...
+Using this addon you can forget about this annoying behavior, as the app window will be open in the same place and with the same size and settings.  (Apart from this, it can be useful to maintain window settings between your app sessions.)
 
 
 ## Dependencies
@@ -127,6 +137,6 @@ everywhere()
 
 MoebiusSurfing
 
-github: https://github.com/moebiussurfing
+GitHub: https://github.com/moebiussurfing
 
 link: http://https://www.instagram.com/moebiussurfing/
