@@ -1,8 +1,10 @@
 # ofxWindowApp
 
-## Screenshot
+## Screenshots
 ![screenshot](/screenshot.JPG?raw=true "MoebiusSurfing")
 ![screenshot](/screenshot2.JPG?raw=true "MoebiusSurfing")
+
+
 
 ## Overview
 
@@ -59,6 +61,7 @@ AppWindow.json
 ```
 
 
+
 ## Shortcuts
 
 ```
@@ -70,16 +73,19 @@ V: toggle vsync state
 ```
 
 
+
 ## Why?
 
 Usually when you start a clean OF project you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...
 Using this addon you can forget about this annoying behavior, as the app window will be open in the same place and with the same size and settings.  (Apart from this, it can be useful to maintain window settings between your app sessions.)
 
 
+
 ## Dependencies
 
 ofxSerialize from @bakercp 
 https://github.com/bakercp/ofxSerializer
+
 
 
 ## Usage
@@ -122,15 +128,18 @@ everywhere()
 ```
 
 
-## Tested system
+
+## Tested on systems
 
 - Windows 10 / VS2017 / OF 0.11.0
 - macOS / High Sierra / Xcode / OF 0.11.0
 
 
+
 ### TODO
 
 + mix with another addon to handle borderless, put in-front, half screen... etc
+
 
 
 ## Author
