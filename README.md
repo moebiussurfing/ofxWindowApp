@@ -1,7 +1,8 @@
 # ofxWindowApp
 
 ## Screenshot
-![Alt text](/screenshot.JPG?raw=true "MoebiusSurfing")
+![screenshot](/screenshot.JPG?raw=true "MoebiusSurfing")
+![screenshot](/screenshot2.JPG?raw=true "MoebiusSurfing")
 
 ## Overview
 
