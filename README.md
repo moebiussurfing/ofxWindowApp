@@ -5,7 +5,7 @@
 ![screenshot](/ofxWindowApp.gif?raw=true "MoebiusSurfing")
 
 
-## Screenshots
+## Screenshot
 
 ![screenshot](/screenshot2.JPG?raw=true "MoebiusSurfing")
 
@@ -107,17 +107,17 @@ Nothing more is required.
 
 setup()
     //required if no previous session json file settings 
-    //windowApp.setSettingsFps(30);
-    //windowApp.setSettingsVsync(false);
+    windowApp.setSettingsFps(30);
+    windowApp.setSettingsVsync(false);
     //show or hide
     //windowApp.setShowDebug(true);
 
     //customize: 
     //default folder is "ofxWindowApp/". 
     //(Check to create the folder if it's not created or required)
-    WindowApp.setPathFolder("settings/");
-    WindowApp.setPathFilename("AppWindow.json");
-    WindowApp.setAutoSaveLoad(false);//to disable auto
+    //WindowApp.setPathFolder("settings/");
+    //WindowApp.setPathFilename("AppWindow.json");
+    //WindowApp.setAutoSaveLoad(false);//to disable auto
 
 update()
     //nothing to do.
@@ -141,7 +141,7 @@ everywhere()
 
 ### TODO
 
-+ mix with another addon to handle more window settings borderless, put in-front, half screen... etc
++ mix with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 
 
