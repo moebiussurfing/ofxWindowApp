@@ -15,29 +15,25 @@
 
 This openFrameworks addon debugs, auto stores and recalls the basic app window state/settings:
 
-* window position (x, y) 
-* window size (w, h) 
-* window mode (window/full screen)
-* app target fps settings, real current framerate, and vsync state
-* "trigs alert" and shows a performance bar when fps drops under the expected frame rate
+* Window position (x, y) 
+* Window size (w, h) 
+* Window mode (window/full screen)
+* App target fps settings, real current framerate, and vsync state
+* "Trigs Alert" and shows a performance bar when fps drops under the expected frame rate
 
-When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:
-
+When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:  
 ```
 windowApp.setSettingsFps(30);
 windowApp.setSettingsVsync(false);
 ```
 
-To show or hide the window info you must call:
+To show or hide the window info you must call:  
 ```
 windowApp.setShowDebug(true);
 ```
 
-The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.
-
-The JSON file will look like:
-
-AppWindow.json
+The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.  
+The JSON file (AppWindow.json) will look like:  
 ```
 [
     {
