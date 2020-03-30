@@ -75,10 +75,10 @@ V: toggle vsync state
 
 ## Why?
 
+It can be useful to auto-maintain window settings between your app sessions.  
+
 Usually when you start a clean OF project you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...
 Using this addon you can forget about this annoying behavior, as the app window will be open in the same place and with the same size and settings.  
-Apart from this, it can be useful to maintain window settings between your app sessions.
-
 
 
 ## Dependencies
@@ -86,45 +86,44 @@ Apart from this, it can be useful to maintain window settings between your app s
 ofxSerialize from @bakercp (Thanks!)  
 https://github.com/bakercp/ofxSerializer
 
+(Check and create the /data/ofxWindowApp folder if it's required to avoid startup crash!)
 
 
 ## Usage
 
-### ofApp.h
+## ofApp.h
 ```cpp
     #include "ofxWindowApp.h"
 
     ofxWindowApp WindowApp;
 ```
 
-### ofApp.cpp
+## ofApp.cpp
 Nothing more is required.
 
 ```cpp 
 
 setup()
+
     //required if no previous session json file settings 
-    windowApp.setSettingsFps(30);
-    windowApp.setSettingsVsync(false);
-    //show or hide
-    //windowApp.setShowDebug(true);
+    WindowApp.setSettingsFps(30);
+    WindowApp.setSettingsVsync(false);
 
     //customize: 
-    //default folder is "ofxWindowApp/". 
-    //(Check to create the folder if it's not created or required)
+    //default folder is "data/ofxWindowApp/". 
     //WindowApp.setPathFolder("settings/");
     //WindowApp.setPathFilename("AppWindow.json");
     //WindowApp.setAutoSaveLoad(false);//to disable auto
+	//WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
 
-update()
-    //nothing to do.
-
-exit()
-    //nothing to do.
+update()//nothing to do.
+draw()//nothing to do.
+exit()//nothing to do.
        
 everywhere()       
-    WindowApp.saveWindow();//save manually
-    WindowApp.loadWindow();//load manually
+    WindowApp.saveWindow();//manually save
+    WindowApp.loadWindow();//manually load
+    WindowApp.setShowDebug(true);//manually show/hide
 ```
 
 
@@ -138,12 +137,14 @@ everywhere()
 
 ### TODO
 
-+ mix with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
+* Mix with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 
 
 ## Author
 
-MoebiusSurfing  
-GitHub: https://github.com/moebiussurfing  
-link: http://https://www.instagram.com/moebiussurfing/
+MoebiusSurfing, 2020.  
+GitHub:  
+https://github.com/moebiussurfing  
+Link:  
+https://www.instagram.com/moebiussurfing/
