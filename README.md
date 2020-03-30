@@ -101,25 +101,27 @@ Nothing more is required.
 
 setup()
 
-    //required if no previous session json file settings 
-    WindowApp.setSettingsFps(30);
-    WindowApp.setSettingsVsync(false);
+//required if no previous session json file settings 
+WindowApp.setSettingsFps(30);
+WindowApp.setSettingsVsync(false);
 
-    //customize: 
-    //default folder is "data/ofxWindowApp/". 
-    //WindowApp.setPathFolder("settings/");
-    //WindowApp.setPathFilename("AppWindow.json");
-    //WindowApp.setAutoSaveLoad(false);//to disable auto
-	//WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
+//customize: 
+//default folder is "data/ofxWindowApp/". 
+//WindowApp.setPathFolder("settings/");
+//WindowApp.setPathFilename("AppWindow.json");
+//WindowApp.setAutoSaveLoad(false);//to disable auto
+//WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
 
 update()//nothing to do.
+
 draw()//nothing to do.
+
 exit()//nothing to do.
        
 everywhere()       
-    WindowApp.saveWindow();//manually save
-    WindowApp.loadWindow();//manually load
-    WindowApp.setShowDebug(true);//manually show/hide
+WindowApp.saveWindow();//manually save
+WindowApp.loadWindow();//manually load
+WindowApp.setShowDebug(true);//manually show/hide
 ```
 
 
