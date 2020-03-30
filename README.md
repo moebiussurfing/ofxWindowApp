@@ -102,13 +102,12 @@ Nothing more is required.
 
 setup()
 
-//required only if no previous session json file settings present
+//only required if no previous session json file settings present
 WindowApp.setSettingsFps(30);
 WindowApp.setSettingsVsync(false);
 
-//optional customize: 
-//default folder is "data/ofxWindowApp/". 
-//WindowApp.setPathFolder("settings/");
+//optional customization:  
+//WindowApp.setPathFolder("settings/");//default folder is "data/ofxWindowApp/"
 //WindowApp.setPathFilename("AppWindow.json");
 //WindowApp.setAutoSaveLoad(false);//to disable auto
 //WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
