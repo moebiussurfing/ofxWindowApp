@@ -20,6 +20,7 @@ This openFrameworks addon debugs, auto stores and recalls the basic app window s
 * Window mode (window/full screen)
 * App target fps settings, real current framerate, and vsync state
 * "Trigs Alert" and shows a performance bar when fps drops under the expected frame rate
+* Easy change the app settings just editing the JSON file.
 
 When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:  
 ```
@@ -101,11 +102,11 @@ Nothing more is required.
 
 setup()
 
-//required if no previous session json file settings 
+//required only if no previous session json file settings present
 WindowApp.setSettingsFps(30);
 WindowApp.setSettingsVsync(false);
 
-//customize: 
+//optional customize: 
 //default folder is "data/ofxWindowApp/". 
 //WindowApp.setPathFolder("settings/");
 //WindowApp.setPathFilename("AppWindow.json");
@@ -113,9 +114,7 @@ WindowApp.setSettingsVsync(false);
 //WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
 
 update()//nothing to do.
-
 draw()//nothing to do.
-
 exit()//nothing to do.
        
 everywhere()       
