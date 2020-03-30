@@ -35,10 +35,14 @@ void ofxWindowApp::setup()
 	params_Settings.add(vSync);
 	params_Settings.add(targetFps);
 	params_Settings.add(SHOW_Debug);
+	params_Settings.add(SHOW_PerformanceAllways);
 
 	//load
 	if (autoSaveLoad)
 		loadWindow();
+
+	//default
+	setShowPerformanceAllways(true);
 
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
 }
@@ -54,8 +58,38 @@ void ofxWindowApp::draw(ofEventArgs & args)
 {
 	ofLogVerbose("ofxWindowApp") << "called draw";
 
+	//--
+
+	realFps = ofGetFrameRate();
+
+	////WORKAROUND:
+	//until windowResize well implemented
+	//window_X = ofGetWindowPositionX();
+	//window_Y = ofGetWindowPositionY();
+	window_W = ofGetWindowSize().x;
+	window_H = ofGetWindowSize().y;
+
+	if (positionLayout == DEBUG_POSITION_BOTTOM)
+	{
+		yy = window_H - 6;
+	}
+	else if (positionLayout == DEBUG_POSITION_TOP)
+	{
+		yy = 15;
+	}
+
+	//--
+
 	if (SHOW_Debug)
+	{
 		drawDEBUG();
+		drawPerformance();
+	}
+	else
+	{
+		if (SHOW_PerformanceAllways)
+			drawPerformance();
+	}
 }
 
 //--------------------------------------------------------------
@@ -127,8 +161,6 @@ void ofxWindowApp::loadWindow()
 //--------------------------------------------------------------
 void ofxWindowApp::drawDEBUG()
 {
-	float realFps = ofGetFrameRate();
-
 	//----
 
 	//debug overlay screen modes
@@ -136,8 +168,9 @@ void ofxWindowApp::drawDEBUG()
 	string vSyncStr;
 	string fpsRealStr;
 	string fpsTargetStr;
-	string strPad = "    ";//add spaces
-	string str = "ofxWindowApp" + strPad;
+	string strPad = "  ";//add spaces
+	string str;
+	//str = "ofxWindowApp" + strPad;
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
@@ -157,7 +190,7 @@ void ofxWindowApp::drawDEBUG()
 	{
 		bMode = true;
 	}
-	screenMode += bMode ? "FULL SCREEN MODE" : "WINDOW MODE";
+	screenMode += bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE";
 
 	str += "FPS " + fpsRealStr;
 	str += " [" + fpsTargetStr + "]";
@@ -166,27 +199,14 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
 
-	////WORKAROUND:
-	//until windowResize well implemented
-	//window_X = ofGetWindowPositionX();
-	//window_Y = ofGetWindowPositionY();
-	window_W = ofGetWindowSize().x;
-	window_H = ofGetWindowSize().y;
 
-	int xx = 0;
-	int yy = 0;
-	if (positionLayout == DEBUG_POSITION_BOTTOM)
-	{
-		yy = window_H - 6;
-	}
-	else if (positionLayout == DEBUG_POSITION_TOP)
-	{
-		yy = 15;
-	}
+	
 	ofDrawBitmapStringHighlight(str, xx, yy);
+}
 
-	//-
-
+//--------------------------------------------------------------
+void ofxWindowApp::drawPerformance()
+{
 	//monitor fps performance alert
 
 	bool bPreShow;//starts draw black
@@ -217,7 +237,9 @@ void ofxWindowApp::drawDEBUG()
 		fw = ofMap(realFps, 0.0f*targetFps, targetFps, 0, fwMax, true);
 		int fa = 150;//alpha
 		int iDiff = (int)targetFps - realFps;
-		string diff = ofToString(iDiff, 0);
+		string diff;
+		diff += "-";
+		diff += ofToString(iDiff, 0);
 		if (iDiff < 10) diff = " " + diff;
 		diff += " FPS";
 
@@ -237,7 +259,6 @@ void ofxWindowApp::drawDEBUG()
 		ofPopStyle();
 	}
 }
-
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h)

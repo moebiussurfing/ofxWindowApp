@@ -27,14 +27,15 @@ private:
 	void windowResized(int w, int h);
     
 	void drawDEBUG();
+	void drawPerformance();
 
 	//--
 
 	//API
 public:
 
-	//setters. required when used for first time into your project
-	void setSettingsFps(float f)
+	///setters. 
+	void setSettingsFps(float f)///required when used for first time into your project and no JSON file settings created yet
 	{
 		targetFps = f;
 		ofSetFrameRate(targetFps);
@@ -67,7 +68,12 @@ public:
 	{
 		SHOW_Debug = b;
 	}
-	
+
+	void setShowPerformanceAllways(bool b = true)
+	{
+		SHOW_PerformanceAllways = b;
+	}
+
 	//-
 
 	//easy callback to check from ofApp if some settings have changed
@@ -173,6 +179,12 @@ private:
     ofParameter<bool> SHOW_Debug{"debug", true};
 	//TODO: add full screen/window bool param
 
+	ofParameter<bool> SHOW_PerformanceAllways{ "performance", true };
+
+	float realFps;
+
+	int xx = 0;
+	int yy = 0;
 };
 
 

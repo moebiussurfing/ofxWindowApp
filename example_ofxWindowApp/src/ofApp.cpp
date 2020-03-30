@@ -2,8 +2,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-	windowApp.setSettingsFps(30);
-	windowApp.setSettingsVsync(false);
+	windowApp.setSettingsFps(60);
+	windowApp.setSettingsVsync(true);
 	windowApp.setShowDebug(true);
 }
 

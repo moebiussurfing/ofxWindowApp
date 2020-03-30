@@ -1,6 +1,12 @@
 # ofxWindowApp
 
+## Screencast
+
+![screenshot](/ofxWindowApp.gif?raw=true "MoebiusSurfing")
+
+
 ## Screenshots
+
 ![screenshot](/screenshot.JPG?raw=true "MoebiusSurfing")
 ![screenshot](/screenshot2.JPG?raw=true "MoebiusSurfing")
 
@@ -8,7 +14,7 @@
 
 ## Overview
 
-This openFrameworks addon debugs, stores and recalls the basic app window state/settings:
+This openFrameworks addon debugs, auto stores and recalls the basic app window state/settings:
 
 * window position (x, y) 
 * window size (w, h) 
@@ -138,7 +144,7 @@ everywhere()
 
 ### TODO
 
-+ mix with another addon to handle borderless, put in-front, half screen... etc
++ mix with another addon to handle more window settings borderless, put in-front, half screen... etc
 
 
 
