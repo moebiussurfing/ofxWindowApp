@@ -7,7 +7,6 @@
 
 ## Screenshots
 
-![screenshot](/screenshot.JPG?raw=true "MoebiusSurfing")
 ![screenshot](/screenshot2.JPG?raw=true "MoebiusSurfing")
 
 
@@ -71,10 +70,8 @@ AppWindow.json
 ## Shortcuts
 
 ```
-W: toggle show debug info.
-
-F: toggle fullscreen
-
+W: toggle show debug info.  
+F: toggle fullscreen  
 V: toggle vsync state
 ```
 
@@ -89,7 +86,7 @@ Using this addon you can forget about this annoying behavior, as the app window 
 
 ## Dependencies
 
-ofxSerialize from @bakercp 
+ofxSerialize from @bakercp (Thanks!)  
 https://github.com/bakercp/ofxSerializer
 
 
@@ -150,8 +147,6 @@ everywhere()
 
 ## Author
 
-MoebiusSurfing
-
-GitHub: https://github.com/moebiussurfing
-
+MoebiusSurfing  
+GitHub: https://github.com/moebiussurfing  
 link: http://https://www.instagram.com/moebiussurfing/
