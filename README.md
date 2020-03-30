@@ -21,10 +21,6 @@ This openFrameworks addon debugs, auto stores and recalls the basic app window s
 * app target fps settings, real current framerate, and vsync state
 * "trigs alert" and shows a performance bar when fps drops under the expected frame rate
 
-
-This openFrameworks addon debugs, stores and recalls the basic app window state/settings.
-
-
 When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:
 
 ```
