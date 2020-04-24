@@ -176,7 +176,7 @@ void ofxWindowApp::drawDEBUG()
 	string screenMode = "";
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
-	vSyncStr = ofToString((vSync ? "ON" : "OFF"));
+	vSyncStr = ofToString((vSync ? "ON " : "OFF"));
 	fpsRealStr = ofToString(realFps, 1);
 	fpsTargetStr = ofToString(targetFps);
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -198,8 +198,6 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "SIZE " + screenStr;
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
-
-
 	
 	ofDrawBitmapStringHighlight(str, xx, yy);
 }
@@ -249,7 +247,7 @@ void ofxWindowApp::drawPerformance()
 		ofColor cAlert(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
 		ofSetColor(cAlert);
 		ofDrawRectangle(fx, fy, fw, fh);//out-performance bar
-		ofDrawBitmapStringHighlight(diff, fx - 62.f, yy, cAlert, ofColor(255));//text fps diff
+		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255));//text fps diff
 
 		ofNoFill();
 		ofSetLineWidth(2.0f);

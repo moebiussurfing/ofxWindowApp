@@ -68,6 +68,14 @@ public:
 	{
 		SHOW_Debug = b;
 	}
+	bool getShowDebug()
+	{
+		return SHOW_Debug;
+	}
+	void toggleShowDebug()
+	{
+		SHOW_Debug = !SHOW_Debug;
+	}
 
 	void setShowPerformanceAllways(bool b = true)
 	{
