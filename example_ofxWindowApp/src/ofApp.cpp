@@ -2,9 +2,13 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+#ifdef USE_ofxWindowApp
 	windowApp.setSettingsFps(60);
 	windowApp.setSettingsVsync(true);
-	windowApp.setShowDebug(true);
+#else
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -19,8 +23,10 @@ void ofApp::draw() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
+#ifdef USE_ofxWindowApp
 	if (key == 'p')
 		windowApp.togglePosition();
+#endif
 }
 
 //--------------------------------------------------------------

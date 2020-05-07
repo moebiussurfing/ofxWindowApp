@@ -82,6 +82,8 @@ public:
 		SHOW_PerformanceAllways = b;
 	}
 
+	void CheckFolder(string _path);
+
 	//-
 
 	//easy callback to check from ofApp if some settings have changed
@@ -172,7 +174,7 @@ private:
 
 	//default folders
 	//this is to folder all files to avoid mixing with other addons data
-	string path_folder = "ofxWindowApp/";//NOTE: maybe you need to create this folder manually into project /data
+	string path_folder = "ofxWindowApp";//NOTE: maybe you need to create this folder manually into project /data
 	string path_filename = "AppWindow.json";
 	//string path_filename2 = "AppWindow_Extra.json";//to split settings in more than one files...
 

@@ -95,7 +95,7 @@ void ofxWindowApp::draw(ofEventArgs & args)
 //--------------------------------------------------------------
 void ofxWindowApp::saveWindow()
 {
-	ofLogNotice("ofxWindowApp") << "saveWindow: " << path_folder + path_filename;
+	ofLogNotice("ofxWindowApp") << "saveWindow: " << path_folder + "/" + path_filename;
 
 	//save window settings
 	ofWindowSettings AppWindow;
@@ -109,21 +109,24 @@ void ofxWindowApp::saveWindow()
 	ofSerialize(j2, params_Settings);
 
 	//A. using 2 files
-	//ofSavePrettyJson(path_folder + path_filename, j);
+	//ofSavePrettyJson(path_folder + "/"+path_filename, j);
 	//TODO:
 	//we can't get framerate and vsync mode from window app.
 	//should be setted by hand
 	//extra settings could be mixed in one json only for both
 	//TEST:
-	//ofSavePrettyJson(path_folder + path_filename2, j2);
+	//ofSavePrettyJson(path_folder + "/"+path_filename2, j2);
 
 	//B. settings in one file
 	ofJson data;
 	data.push_back(j);
 	data.push_back(j2);
 
-	std::cout << data.dump(4) << std::endl;
-	ofSavePrettyJson(path_folder + path_filename, data);
+	//check if we need to create data folder first
+	CheckFolder(path_folder);
+
+	ofLogNotice("ofxWindowApp") << data.dump(4);
+	ofSavePrettyJson(path_folder + "/" + path_filename, data);
 }
 
 //--------------------------------------------------------------
@@ -132,18 +135,18 @@ void ofxWindowApp::loadWindow()
 	//load window settings
 
 	//A. using 2 files
-	//ofJson j = ofLoadJson(path_folder + path_filename);
+	//ofJson j = ofLoadJson(path_folder + "/"+path_filename);
 	//ofx::Serializer::ApplyWindowSettings(j);
 	////extra settings could be mixed in one json only for both
 	////TEST:
 	//ofJson j2;
-	//j2 = ofLoadJson(path_folder + path_filename2);
+	//j2 = ofLoadJson(path_folder + "/"+path_filename2);
 	//ofLogNotice("ofxWindowApp") << "json: " << j2;
 	//ofDeserialize(j2, params_Settings);
 
 	//B. settings in one file
 	ofJson data;
-	data = ofLoadJson(path_folder + path_filename);
+	data = ofLoadJson(path_folder + "/" + path_filename);
 	ofLogNotice("ofxWindowApp") << "all json: " << data;
 	ofJson j = data[0];
 	ofJson j2 = data[1];
@@ -155,7 +158,7 @@ void ofxWindowApp::loadWindow()
 
 	applySettings();
 
-	ofLogNotice("ofxWindowApp") << "loadWindow: " << path_folder + path_filename;
+	ofLogNotice("ofxWindowApp") << "loadWindow: " << path_folder + "/" + path_filename;
 }
 
 //--------------------------------------------------------------
@@ -198,7 +201,7 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "SIZE " + screenStr;
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
-	
+
 	ofDrawBitmapStringHighlight(str, xx, yy);
 }
 
@@ -345,5 +348,27 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 			vSync = !vSync;
 			ofSetVerticalSync(vSync);
 		}
+	}
+}
+
+
+//--------------------------------------------------------------
+void ofxWindowApp::CheckFolder(string _path)
+{
+	ofDirectory dataDirectory(ofToDataPath(_path, true));
+
+	//check if target data folder exist
+	if (!dataDirectory.isDirectory())
+	{
+		ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
+
+		//create folder
+		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
+
+		//debug if creation has been succed
+		if (b)
+			ofLogNotice("__FUNCTION__") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+		else
+			ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
 	}
 }
