@@ -8,7 +8,7 @@
 //I need to found a workaround to this problem.
 //maybe must put all json libs to the same version (?)
 
-#define USE_ofxWindowApp
+//#define USE_ofxWindowApp
 #ifdef USE_ofxWindowApp
 #include "ofxWindowApp.h"
 #endif

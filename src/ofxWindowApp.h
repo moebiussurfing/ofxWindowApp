@@ -3,6 +3,11 @@
 #include "ofMain.h"
 #include "ofxSerializer.h"
 
+#define USE_ofxWindowApp
+#ifdef USE_ofxWindowApp
+#include "ofxWindowApp.h"
+#endif
+
 //TODO:
 //+++ add ofxScreenSetup addon to bundle all other features
 //+ add windowResize subscribed listener to auto refresh

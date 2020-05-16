@@ -1,2 +1,1 @@
-ofxSerializer
 ofxWindowApp
