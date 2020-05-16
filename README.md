@@ -81,9 +81,10 @@ Using this addon you can forget about this annoying behavior, as the app window 
 ## Dependencies
 
 ofxSerialize from @bakercp (Thanks!)  
-https://github.com/bakercp/ofxSerializer
+https://github.com/bakercp/ofxSerializer  
+Now it's included into \ofxWindowApp\libs\ofxSerializer to simplify.  
+You don't need to select and add with Project Generator.
 
-(Check and create the /data/ofxWindowApp folder if it's required to avoid startup crash!)
 
 
 ## Usage
