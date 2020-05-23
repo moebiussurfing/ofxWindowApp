@@ -9,8 +9,8 @@
 #endif
 
 //TODO:
-//+++ add ofxScreenSetup addon to bundle all other features
-//+ add windowResize subscribed listener to auto refresh
+// +++	add ofxScreenSetup addon to bundle all other features
+// +		add windowResize subscribed listener to auto refresh
 
 class ofxWindowApp : public ofBaseApp
 {
@@ -22,37 +22,43 @@ public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
+	ofWindowSettings BigWindow;
+	ofWindowSettings MiniWindow;
+
 	//-
 
 private:
 	void setup();
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-    void keyPressed(ofKeyEventArgs &eventArgs);
+	void keyPressed(ofKeyEventArgs &eventArgs);
 	void windowResized(int w, int h);
-    
+
+	//-
+
 	void drawDEBUG();
 	void drawPerformance();
 
-	//--
+	//----
 
 	//API
-public:
 
-	///setters. 
-	void setSettingsFps(float f)///required when used for first time into your project and no JSON file settings created yet
+public:
+	//setters
+	void setFrameRate(float f)///required when used for first time into your project and no JSON file settings created yet
 	{
 		targetFps = f;
 		ofSetFrameRate(targetFps);
 	}
-	void setSettingsVsync(bool b)
+	void setSetVerticalSync(bool b)
 	{
 		vSync = b;
 		ofSetVerticalSync(vSync);
 	}
 
-	void saveWindow();
-	void loadWindow();
+	void refreshGetWindowSettings();
+	void saveFileWindow();
+	void loadFileSettings();
 
 	void setPathFolder(string s)
 	{
@@ -68,7 +74,7 @@ public:
 	{
 		autoSaveLoad = b;
 	}
-	
+
 	void setShowDebug(bool b = true)
 	{
 		SHOW_Debug = b;
@@ -87,7 +93,7 @@ public:
 		SHOW_PerformanceAllways = b;
 	}
 
-	void CheckFolder(string _path);
+	void folderCheckAndCreate(string _path);
 
 	//-
 
@@ -103,16 +109,17 @@ public:
 		else
 			return false;
 	}
-	
+
 	//-
 
 private:
-	void applySettings()//fps and vsync only
+	void applyExtra()//fps and vsync only
 	{
-		ofLogNotice("ofxWindowApp") << "applySettings()";
-		ofLogNotice("ofxWindowApp") << "targetFps: " << targetFps;
-        ofLogNotice("ofxWindowApp") << "vSync: " << vSync;
-        ofLogNotice("ofxWindowApp") << "SHOW DEBUG: " <<SHOW_Debug.get();
+		ofLogVerbose(__FUNCTION__);
+		ofLogVerbose(__FUNCTION__) << "targetFps : " << targetFps;
+		ofLogVerbose(__FUNCTION__) << "vSync		: " << vSync;
+		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG: " << SHOW_Debug.get();
+		ofLogVerbose(__FUNCTION__) << "bModeMini : " << bModeMini.get();
 
 		ofSetFrameRate(targetFps);
 		ofSetVerticalSync(vSync);
@@ -128,7 +135,7 @@ private:
 	int positionLayout = DEBUG_POSITION_BOTTOM;
 
 public:
-	void setPosition(int POS)
+	void setPositionDebugInfo(int POS)
 	{
 		positionLayout = POS;
 	}
@@ -136,9 +143,9 @@ public:
 	{
 		return positionLayout;
 	}
-	void togglePosition()
+	void togglePositionDebugInfo()
 	{
-		setPosition((positionLayout == 1) ? 0 : 1);
+		setPositionDebugInfo((positionLayout == 1) ? 0 : 1);
 	}
 	void setEnableKeys(bool b)
 	{
@@ -147,12 +154,13 @@ public:
 
 	//-
 
+public:
 	//getters
-	float getSettingsFps()
+	float getFrameRate()
 	{
 		return targetFps.get();
 	}
-	bool getSettingsVsync()
+	bool getVerticalSync()
 	{
 		return vSync.get();
 	}
@@ -175,31 +183,112 @@ public:
 
 	//-
 
+	//mini/big mode
+public:
+	//TODO:
+	//void setShapeMiniMode(glm::vec2 pos, glm::vec2 size)
+	//{
+	//	position_Mini = pos;
+	//	size_Mini = size;
+	//}
+	//void setMiniMode()
+	//{
+	//}
+
+	bool isModeMini()
+	{
+		return bModeMini.get();
+	}
+	bool isModeBig()
+	{
+		return (!bModeMini.get());
+	}
+	void toggleMode()
+	{
+		if (autoSaveLoad) {
+			refreshGetWindowSettings();
+		}
+
+		bModeMini = !bModeMini;
+
+		//big
+		if (!bModeMini)
+		{
+			//if (windowBigMode == "OF_WINDOW") ofSetFullscreen(false);
+			//else if (windowBigMode == "OF_FULLSCREEN") ofSetFullscreen(true);
+		}
+		//mini
+		else
+		{
+			if (ofGetWindowMode() == OF_FULLSCREEN)
+				ofSetFullscreen(false);
+		}
+
+		applyMode();
+	}
+	void enableMiniMode(bool b)
+	{
+		if (autoSaveLoad) {
+			refreshGetWindowSettings();
+		}
+
+		bModeMini = b;
+
+		applyMode();
+	}
+
 private:
 
-	//default folders
+	void applyMode()
+	{
+		ofLogVerbose(__FUNCTION__);
+
+		//mini
+		if (bModeMini) {
+			ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
+			ofSetWindowShape(MiniWindow.getWidth(), MiniWindow.getHeight());
+		}
+		//big
+		else {
+			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
+			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
+
+			////TODO:
+			//if (BigWindow.windowMode == ofWindowMode(OF_FULLSCREEN)) ofSetFullscreen(true);
+			//if (windowBigMode == ("OF_FULLSCREEN")) ofSetFullscreen(true);
+		}
+
+		//apply extra
+		ofSetVerticalSync(vSync);
+		ofSetFrameRate(targetFps);
+	}
+
+	//-
+
+private:
+
 	//this is to folder all files to avoid mixing with other addons data
-	string path_folder = "ofxWindowApp";//NOTE: maybe you need to create this folder manually into project /data
-	string path_filename = "AppWindow.json";
-	//string path_filename2 = "AppWindow_Extra.json";//to split settings in more than one files...
+	string path_folder;
+	string path_filename;
 
 	bool autoSaveLoad = true;
 	bool bChanged = false;
 	bool ENABLE_Keys = true;//keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
-	ofParameterGroup params_Settings{ "extra settings" };
+	ofParameterGroup params_Extra{ "extra settings" };
 	ofParameter<bool> vSync{ "vsync", false };
-	ofParameter<float> targetFps{ "targetFps", 60.5, 1, 120 };
-    ofParameter<bool> SHOW_Debug{"debug", true};
-	//TODO: add full screen/window bool param
+	ofParameter<float> targetFps{ "fps", 60.5, 1, 120 };
+	ofParameter<bool> SHOW_Debug{ "showInfo", true };
+	ofParameter<bool> bModeMini{ "miniMode", false };
+	ofParameter<bool> SHOW_PerformanceAllways{ "debugPerformance", true };
 
-	ofParameter<bool> SHOW_PerformanceAllways{ "performance", true };
-
+	string windowBigMode;//fulscreen or window mode
 	float realFps;
-
 	int xx = 0;
 	int yy = 0;
+
+	//TODO: add full screen/window bool param
 };
 
 

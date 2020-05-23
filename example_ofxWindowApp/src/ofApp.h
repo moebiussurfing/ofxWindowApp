@@ -26,5 +26,6 @@ public:
 
 #ifdef USE_ofxWindowApp
 	ofxWindowApp windowApp;
+	bool bMiniWindow = false;
 #endif
 };

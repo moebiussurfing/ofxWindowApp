@@ -3,8 +3,17 @@
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp()
 {
-	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
-	//ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
+	ofSetLogLevel(__FUNCTION__, OF_LOG_NOTICE);
+
+	//default
+
+	BigWindow.setPosition(glm::vec2(10, 10));
+	BigWindow.setSize(800, 600);
+	BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
+
+	MiniWindow.setPosition(glm::vec2(20, 20));
+	MiniWindow.setSize(200, 200);
+	MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 
 	//auto call setup
 	setup();
@@ -14,7 +23,10 @@ ofxWindowApp::ofxWindowApp()
 ofxWindowApp::~ofxWindowApp()
 {
 	if (autoSaveLoad)
-		saveWindow();
+	{
+		refreshGetWindowSettings();
+		saveFileWindow();
+	}
 
 	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxWindowApp::draw);
@@ -24,25 +36,36 @@ ofxWindowApp::~ofxWindowApp()
 //--------------------------------------------------------------
 void ofxWindowApp::setup()
 {
-	ofLogVerbose("ofxWindowApp") << "called setup";
+	ofLogVerbose(__FUNCTION__);
+		
+	//default folders
+	path_folder = "ofxWindowApp";
+	path_filename = "ofxWindowApp.json";
 
+	//callbacks to auto call update/draw/keyPressed
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
-
-
+	
 	//extra settings
-	params_Settings.add(vSync);
-	params_Settings.add(targetFps);
-	params_Settings.add(SHOW_Debug);
-	params_Settings.add(SHOW_PerformanceAllways);
+	params_Extra.add(vSync);
+	params_Extra.add(targetFps);
+	params_Extra.add(SHOW_Debug);
+	params_Extra.add(SHOW_PerformanceAllways);
+	params_Extra.add(bModeMini);
 
 	//load
-	if (autoSaveLoad)
-		loadWindow();
+	if (autoSaveLoad) loadFileSettings();
 
 	//default
 	setShowPerformanceAllways(true);
+
+	//mini settings
+	params_Extra.add(vSync);
+	params_Extra.add(targetFps);
+	params_Extra.add(SHOW_Debug);
+	params_Extra.add(SHOW_PerformanceAllways);
+	params_Extra.add(bModeMini);
 
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
 }
@@ -50,19 +73,19 @@ void ofxWindowApp::setup()
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args)
 {
-	ofLogVerbose("ofxWindowApp") << "called update";
+	ofLogVerbose(__FUNCTION__);
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::draw(ofEventArgs & args)
 {
-	ofLogVerbose("ofxWindowApp") << "called draw";
+	ofLogVerbose(__FUNCTION__);
 
 	//--
 
 	realFps = ofGetFrameRate();
 
-	////WORKAROUND:
+	////workaround:
 	//until windowResize well implemented
 	//window_X = ofGetWindowPositionX();
 	//window_Y = ofGetWindowPositionY();
@@ -93,20 +116,40 @@ void ofxWindowApp::draw(ofEventArgs & args)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::saveWindow()
+void ofxWindowApp::refreshGetWindowSettings()
 {
-	ofLogNotice("ofxWindowApp") << "saveWindow: " << path_folder + "/" + path_filename;
+	ofLogVerbose(__FUNCTION__);
 
+	if (!bModeMini) {
+		BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
+		BigWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
+		BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
+	}
+	else {
+		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
+		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
+		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
+	}
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::saveFileWindow()
+{
+	string __path = path_folder + "/" + path_filename;
+	ofLogNotice(__FUNCTION__) << __path;
+	
+	//force mini to window, not fullscreen
+	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
+	
 	//save window settings
-	ofWindowSettings AppWindow;
-	AppWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
-	AppWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
-	AppWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 
-	ofJson j;
-	to_json(j, AppWindow);
-	ofJson j2;
-	ofSerialize(j2, params_Settings);
+	ofJson jApp;
+	ofJson jMini;
+	ofJson jExtra;
+
+	to_json(jApp, BigWindow);
+	to_json(jMini, MiniWindow);
+	ofSerialize(jExtra, params_Extra);
 
 	//A. using 2 files
 	//ofSavePrettyJson(path_folder + "/"+path_filename, j);
@@ -115,50 +158,114 @@ void ofxWindowApp::saveWindow()
 	//should be setted by hand
 	//extra settings could be mixed in one json only for both
 	//TEST:
-	//ofSavePrettyJson(path_folder + "/"+path_filename2, j2);
+	//ofSavePrettyJson(path_folder + "/"+path_filename2, jMini);
 
 	//B. settings in one file
 	ofJson data;
-	data.push_back(j);
-	data.push_back(j2);
+	data.push_back(jApp);
+	data.push_back(jMini);
+	data.push_back(jExtra);
 
 	//check if we need to create data folder first
-	CheckFolder(path_folder);
+	folderCheckAndCreate(path_folder);
 
-	ofLogNotice("ofxWindowApp") << data.dump(4);
-	ofSavePrettyJson(path_folder + "/" + path_filename, data);
+	//save file
+	ofLogNotice(__FUNCTION__) << data.dump(4);
+	ofSavePrettyJson(__path, data);
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::loadWindow()
+void ofxWindowApp::loadFileSettings()
 {
-	//load window settings
+	string __path = path_folder + "/" + path_filename;
 
-	//A. using 2 files
-	//ofJson j = ofLoadJson(path_folder + "/"+path_filename);
-	//ofx::Serializer::ApplyWindowSettings(j);
-	////extra settings could be mixed in one json only for both
-	////TEST:
-	//ofJson j2;
-	//j2 = ofLoadJson(path_folder + "/"+path_filename2);
-	//ofLogNotice("ofxWindowApp") << "json: " << j2;
-	//ofDeserialize(j2, params_Settings);
+	//TODO: check if file exist
+	ofFile file(__path);
+	bool _b = file.exists();
+	if (_b)
+	{
+		ofLogNotice(__FUNCTION__) << "File found: " << __path;
 
-	//B. settings in one file
-	ofJson data;
-	data = ofLoadJson(path_folder + "/" + path_filename);
-	ofLogNotice("ofxWindowApp") << "all json: " << data;
-	ofJson j = data[0];
-	ofJson j2 = data[1];
-	//recall both params groups
-	ofDeserialize(j2, params_Settings);
-	ofx::Serializer::ApplyWindowSettings(j);
+		//-
+
+		//load settings
+
+		//A. using 2 files
+		//ofJson j = ofLoadJson(path_folder + "/"+path_filename);
+		//ofx::Serializer::ApplyWindowSettings(j);
+		////extra settings could be mixed in one json only for both
+		////TEST:
+		//ofJson jMini;
+		//jMini = ofLoadJson(path_folder + "/"+path_filename2);
+		//ofLogVerbose(__FUNCTION__) << "json: " << jMini;
+		//ofDeserialize(jMini, params_Extra);
+
+		//B. settings in one file
+		ofJson data;
+		data = ofLoadJson(__path);
+		ofLogNotice(__FUNCTION__) << "All json: " << data;
+
+		ofJson jBig = data[0];//TODO: ugly workaround
+		ofJson jMini = data[1];
+		ofJson jExtra = data[2];
+
+		ofLogVerbose(__FUNCTION__) << "jBig  : " << jBig;
+		ofLogVerbose(__FUNCTION__) << "jMini : " << jMini;
+		ofLogVerbose(__FUNCTION__) << "jExtra: " << jExtra;
+
+		//recall both params groups
+		ofDeserialize(jExtra, params_Extra);
+
+		//-
+
+		int jx, jy, jw, jh;
+		string jm;
+
+		//mini
+		jx = jMini["position"]["x"];
+		jy = jMini["position"]["y"];
+		jw = jMini["size"]["width"];
+		jh = jMini["size"]["height"];
+		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
+		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
+		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
+		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
+		MiniWindow.setPosition(glm::vec2(jx, jy));
+		MiniWindow.setSize(jw, jh);
+
+		//big
+		jx = jBig["position"]["x"];
+		jy = jBig["position"]["y"];
+		jw = jBig["size"]["width"];
+		jh = jBig["size"]["height"];
+		jm = jBig["window_mode"];
+		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
+		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
+		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
+		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
+		ofLogVerbose(__FUNCTION__) << "jm: " << jm;
+		BigWindow.setPosition(glm::vec2(jx, jy));
+		BigWindow.setSize(jw, jh);
+		windowBigMode = jm;
+
+		////apply
+		//if (bModeMini) {
+		//	ofx::Serializer::ApplyWindowSettings(jBig);
+		//}
+		//else {
+		//	ofx::Serializer::ApplyWindowSettings(jMini);
+		//}
+	}
+	else
+	{
+		ofLogError(__FUNCTION__) << "File NOT found: " << __path;
+	}
 
 	//-
 
-	applySettings();
-
-	ofLogNotice("ofxWindowApp") << "loadWindow: " << path_folder + "/" + path_filename;
+	//apply
+	applyExtra();
+	applyMode();
 }
 
 //--------------------------------------------------------------
@@ -173,7 +280,7 @@ void ofxWindowApp::drawDEBUG()
 	string fpsTargetStr;
 	string strPad = "  ";//add spaces
 	string str;
-	//str = "ofxWindowApp" + strPad;
+	//str = __FUNCTION__ + strPad;
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
@@ -194,6 +301,7 @@ void ofxWindowApp::drawDEBUG()
 		bMode = true;
 	}
 	screenMode += bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE";
+	screenMode += bModeMini ? " [MINI]" : " [BIG]";
 
 	str += "FPS " + fpsRealStr;
 	str += " [" + fpsTargetStr + "]";
@@ -264,14 +372,14 @@ void ofxWindowApp::drawPerformance()
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h)
 {
-	window_X = ofGetWindowPositionX();
-	window_Y = ofGetWindowPositionY();
-
-	//window_W = ofGetWindowSize().x;
-	//window_H = ofGetWindowSize().y;
+	ofLogVerbose(__FUNCTION__) << ofToString(w) << "," << ofToString(h);
 
 	window_W = w;
 	window_H = h;
+	window_X = ofGetWindowPositionX();
+	window_Y = ofGetWindowPositionY();
+
+	refreshGetWindowSettings();
 
 	bChanged = true;
 }
@@ -288,14 +396,14 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
 
 		if (false)
-			ofLogNotice("ofxWindowApp") << "keyPressed: '" << (char)key << "' [" << key << "]";
+			ofLogNotice(__FUNCTION__) << "'" << (char)key << "' [" << key << "]";
 
 		//disable draw debug
 		if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' ||
 			key == 'W')
 		{
 			SHOW_Debug = !SHOW_Debug;
-			ofLogVerbose("ofxWindowApp") << "changed draw debug: " << (SHOW_Debug ? "ON" : "OFF");
+			ofLogNotice(__FUNCTION__) << "changed draw debug: " << (SHOW_Debug ? "ON" : "OFF");
 		}
 
 		//switch window mode
@@ -305,7 +413,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 			{
 				ofSetFullscreen(true);
 
-				////WORKAROUND
+				////workaround
 				//window_X = ofGetWindowPositionX();
 				//window_Y = 0;//align to top border
 				//ofSetWindowPosition(window_X, window_Y);
@@ -353,7 +461,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 
 
 //--------------------------------------------------------------
-void ofxWindowApp::CheckFolder(string _path)
+void ofxWindowApp::folderCheckAndCreate(string _path)
 {
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
