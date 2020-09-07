@@ -25,9 +25,11 @@ public:
 	ofWindowSettings BigWindow;
 	ofWindowSettings MiniWindow;
 
+	void exit();//TODO: test to avoid crashes on exit
+
 	//-
 
-private:
+//private:
 	void setup();
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
@@ -50,7 +52,7 @@ public:
 		targetFps = f;
 		ofSetFrameRate(targetFps);
 	}
-	void setSetVerticalSync(bool b)
+	void setVerticalSync(bool b)
 	{
 		vSync = b;
 		ofSetVerticalSync(vSync);
@@ -203,7 +205,7 @@ public:
 	{
 		return (!bModeMini.get());
 	}
-	void toggleMode()
+	void toggleModeWindowBigMini()
 	{
 		if (autoSaveLoad) {
 			refreshGetWindowSettings();

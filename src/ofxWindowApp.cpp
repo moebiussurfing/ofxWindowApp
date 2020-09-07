@@ -22,6 +22,15 @@ ofxWindowApp::ofxWindowApp()
 //--------------------------------------------------------------
 ofxWindowApp::~ofxWindowApp()
 {
+	ofLogNotice(__FUNCTION__) << "DONE!";
+
+	exit();
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::exit()
+{
+	ofLogNotice(__FUNCTION__);
 	if (autoSaveLoad)
 	{
 		refreshGetWindowSettings();
@@ -36,8 +45,8 @@ ofxWindowApp::~ofxWindowApp()
 //--------------------------------------------------------------
 void ofxWindowApp::setup()
 {
-	ofLogVerbose(__FUNCTION__);
-		
+	ofLogNotice(__FUNCTION__);
+
 	//default folders
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
@@ -46,7 +55,7 @@ void ofxWindowApp::setup()
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
-	
+
 	//extra settings
 	params_Extra.add(vSync);
 	params_Extra.add(targetFps);
@@ -73,13 +82,13 @@ void ofxWindowApp::setup()
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args)
 {
-	ofLogVerbose(__FUNCTION__);
+	//ofLogVerbose(__FUNCTION__);
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::draw(ofEventArgs & args)
 {
-	ofLogVerbose(__FUNCTION__);
+	//ofLogVerbose(__FUNCTION__);
 
 	//--
 
@@ -136,11 +145,11 @@ void ofxWindowApp::refreshGetWindowSettings()
 void ofxWindowApp::saveFileWindow()
 {
 	string __path = path_folder + "/" + path_filename;
-	ofLogNotice(__FUNCTION__) << __path;
-	
+	ofLogVerbose(__FUNCTION__) << __path;
+
 	//force mini to window, not fullscreen
 	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
-	
+
 	//save window settings
 
 	ofJson jApp;
@@ -205,16 +214,23 @@ void ofxWindowApp::loadFileSettings()
 		data = ofLoadJson(__path);
 		ofLogNotice(__FUNCTION__) << "All json: " << data;
 
-		ofJson jBig = data[0];//TODO: ugly workaround
-		ofJson jMini = data[1];
-		ofJson jExtra = data[2];
+		ofJson jBig;
+		ofJson jMini;
+		ofJson jExtra;
+
+		if (data.size() >= 3) {
+			jBig = data[0];//TODO: ugly workaround
+			jMini = data[1];
+			jExtra = data[2];
+
+			//recall both params groups
+			ofDeserialize(jExtra, params_Extra);
+		}
+		else ofLogError(__FUNCTION__) << "ERROR on data[] size = " << ofToString(data.size());
 
 		ofLogVerbose(__FUNCTION__) << "jBig  : " << jBig;
 		ofLogVerbose(__FUNCTION__) << "jMini : " << jMini;
 		ofLogVerbose(__FUNCTION__) << "jExtra: " << jExtra;
-
-		//recall both params groups
-		ofDeserialize(jExtra, params_Extra);
 
 		//-
 
@@ -456,13 +472,18 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 			vSync = !vSync;
 			ofSetVerticalSync(vSync);
 		}
+		else if (key == 'M')//switch window mode big/mini
+		{
+			toggleModeWindowBigMini();
+		}
 	}
 }
-
 
 //--------------------------------------------------------------
 void ofxWindowApp::folderCheckAndCreate(string _path)
 {
+	ofLogNotice(__FUNCTION__);
+
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
 	//check if target data folder exist
