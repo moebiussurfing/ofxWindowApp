@@ -34,32 +34,6 @@ To show or hide the window info you must call:
 windowApp.setShowDebug(true);
 ```
 
-The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.  
-The JSON file (bin/data/ofxWindowApp/ofxWindowApp.json) will look like:  
-```
-[
-    {
-        "position": {
-            "x": 0.0,
-            "y": 22.0
-        },
-        "size": {
-            "height": 878,
-            "width": 1436
-        },
-        "window_mode": "OF_WINDOW"
-    },
-    {
-        "extra_settings": {
-            "debug": "1",
-            "fps": "30",
-            "vsync": "0"
-        }
-    }
-]
-```
-
-
 
 ## Shortcuts
 
@@ -68,7 +42,6 @@ W: toggle show debug info.
 F: toggle fullscreen  
 V: toggle vsync state
 ```
-
 
 
 ## Why?
@@ -100,7 +73,7 @@ You don't need to add with Project Generator.
 ## ofApp.cpp
 Nothing more is required.
 
-```cpp 
+```.cpp 
 
 setup()
 
@@ -124,6 +97,30 @@ WindowApp.setSettingsVsync(false);
 //WindowApp.setShowDebug(true);//manually show/hide
 ```
 
+The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.  
+The JSON file (bin/data/ofxWindowApp/ofxWindowApp.json) will look like:  
+```.json
+[
+    {
+        "position": {
+            "x": 0.0,
+            "y": 22.0
+        },
+        "size": {
+            "height": 878,
+            "width": 1436
+        },
+        "window_mode": "OF_WINDOW"
+    },
+    {
+        "extra_settings": {
+            "debug": "1",
+            "fps": "30",
+            "vsync": "0"
+        }
+    }
+]
+```
 
 
 ## Tested on systems
