@@ -23,7 +23,7 @@ void ofApp::keyPressed(int key) {
 		windowApp.togglePositionDebugInfo();
 
 	if (key == 'm') {
-		windowApp.toggleMode();
+		windowApp.toggleModeWindowBigMini();
 
 		if (windowApp.isModeMini()) ofSetBackgroundColor(ofColor::blue);
 		else ofSetBackgroundColor(ofColor::green);

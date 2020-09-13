@@ -2,12 +2,12 @@
 
 ## Screencast
 
-![screenshot](/ofxWindowApp.gif?raw=true "MoebiusSurfing")
+![screenshot](readme_images/ofxWindowApp.gif?raw=true "MoebiusSurfing")
 
 
 ## Screenshot
 
-![screenshot](/screenshot2.JPG?raw=true "MoebiusSurfing")
+![screenshot](readme_images/screenshot2.JPG?raw=true "MoebiusSurfing")
 
 
 
@@ -18,23 +18,24 @@ This openFrameworks addon debugs, auto stores and recalls the basic app window s
 * Window position (x, y) 
 * Window size (w, h) 
 * Window mode (window/full screen)
-* App target fps settings, real current framerate, and vsync state
-* "Trigs Alert" and shows a performance bar when fps drops under the expected frame rate
+* App target FPS settings, real current framerate, and vsync state
+* "Trigs Alert" and shows a performance bar when FPS drops under the target (expected) frame rate.
 * Easy change the app settings just editing the JSON file not the app code.
+* Dual settings: big and mini settings to switch between both modes.
 
 When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:  
-```
+```.cpp
 windowApp.setSettingsFps(30);
 windowApp.setSettingsVsync(false);
 ```
 
 To show or hide the window info you must call:  
-```
+```.cpp
 windowApp.setShowDebug(true);
 ```
 
 The addon auto loads the settings when your app starts and stores too on app exit. Nothing more it's required.  
-The JSON file (AppWindow.json) will look like:  
+The JSON file (bin/data/ofxWindowApp/ofxWindowApp.json) will look like:  
 ```
 [
     {
@@ -83,14 +84,14 @@ Using this addon you can forget about this annoying behavior, as the app window 
 ofxSerialize from @bakercp (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into \ofxWindowApp\libs\ofxSerializer to simplify.  
-You don't need to select and add with Project Generator.
+You don't need to add with Project Generator.
 
 
 
 ## Usage
 
 ## ofApp.h
-```cpp
+```.cpp
     #include "ofxWindowApp.h"
 
     ofxWindowApp WindowApp;
@@ -113,14 +114,14 @@ WindowApp.setSettingsVsync(false);
 //WindowApp.setAutoSaveLoad(false);//to disable auto
 //WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
 
-update()//nothing to do.
-draw()//nothing to do.
-exit()//nothing to do.
+//update()//nothing to do.
+//draw()//nothing to do.
+//exit()//nothing to do.
        
-everywhere()       
-WindowApp.saveWindow();//manually save
-WindowApp.loadWindow();//manually load
-WindowApp.setShowDebug(true);//manually show/hide
+//everywhere()       
+//WindowApp.saveWindow();//manually save
+//WindowApp.loadWindow();//manually load
+//WindowApp.setShowDebug(true);//manually show/hide
 ```
 
 

@@ -1,0 +1,33 @@
+[
+    {
+        "position": {
+            "x": -1637.0,
+            "y": 196.0
+        },
+        "size": {
+            "height": 714,
+            "width": 1320
+        },
+        "window_mode": "OF_WINDOW"
+    },
+    {
+        "position": {
+            "x": 2380.0,
+            "y": 642.0
+        },
+        "size": {
+            "height": 77,
+            "width": 966
+        },
+        "window_mode": "OF_WINDOW"
+    },
+    {
+        "extra_settings": {
+            "debugPerformance": "1",
+            "fps": "60",
+            "miniMode": "0",
+            "showInfo": "1",
+            "vsync": "1"
+        }
+    }
+]
