@@ -8,6 +8,8 @@
 #include "ofxWindowApp.h"
 #endif
 
+#define SIZE_SECURE_GAP_INISDE_SCREEN 15 // to avoid that window border it's outside screen monitor
+
 //TODO:
 // +++	add ofxScreenSetup addon to bundle all other features
 // +		add windowResize subscribed listener to auto refresh

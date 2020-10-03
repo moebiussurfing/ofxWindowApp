@@ -129,12 +129,12 @@ void ofxWindowApp::refreshGetWindowSettings()
 {
 	ofLogVerbose(__FUNCTION__);
 
-	if (!bModeMini) {
+	if (!bModeMini) {// big
 		BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		BigWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 	}
-	else {
+	else {// mini
 		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
@@ -260,6 +260,12 @@ void ofxWindowApp::loadFileSettings()
 		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
 		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
 		ofLogVerbose(__FUNCTION__) << "jm: " << jm;
+
+
+		if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
+			jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
+		}
+
 		BigWindow.setPosition(glm::vec2(jx, jy));
 		BigWindow.setSize(jw, jh);
 		windowBigMode = jm;
