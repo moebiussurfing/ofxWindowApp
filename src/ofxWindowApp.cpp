@@ -85,23 +85,24 @@ void ofxWindowApp::update(ofEventArgs & args)
 {
 	//ofLogVerbose(__FUNCTION__);
 
-	if (isChanged()) {
-		ofLogNotice(__FUNCTION__) << "isChanged()";
+	//TODO: WIP lock mode
+	//if (isChanged()) {
+	//	ofLogNotice(__FUNCTION__) << "isChanged()";
 
-		if (bLock) {// we want to lock windowResize changed. reload settings from file
-			ofLogWarning(__FUNCTION__) << "Force lock!";
+	//	if (bLock) {// we want to lock windowResize changed. reload settings from file
+	//		ofLogWarning(__FUNCTION__) << "Force lock!";
 
-			//restore last state
-			//loadFileSettings();
-			ofSetWindowPosition(WindowPRE.getPosition().x, WindowPRE.getPosition().y);
-			ofSetWindowShape(WindowPRE.getWidth(), WindowPRE.getHeight());
-		}
-	}
+	//		//restore last state
+	//		//loadFileSettings();
+	//		ofSetWindowPosition(WindowPRE.getPosition().x, WindowPRE.getPosition().y);
+	//		ofSetWindowShape(WindowPRE.getWidth(), WindowPRE.getHeight());
+	//	}
+	//}
 
-	//TODO:
-	//store last states
-	WindowPRE.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
-	WindowPRE.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
+	////TODO:
+	////store last states
+	//WindowPRE.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
+	//WindowPRE.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 }
 
 //--------------------------------------------------------------
