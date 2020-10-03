@@ -62,6 +62,7 @@ void ofxWindowApp::setup()
 	params_Extra.add(SHOW_Debug);
 	params_Extra.add(SHOW_PerformanceAllways);
 	params_Extra.add(bModeMini);
+	params_Extra.add(bLock);
 
 	//load
 	if (autoSaveLoad) loadFileSettings();
@@ -83,6 +84,24 @@ void ofxWindowApp::setup()
 void ofxWindowApp::update(ofEventArgs & args)
 {
 	//ofLogVerbose(__FUNCTION__);
+
+	if (isChanged()) {
+		ofLogNotice(__FUNCTION__) << "isChanged()";
+
+		if (bLock) {// we want to lock windowResize changed. reload settings from file
+			ofLogWarning(__FUNCTION__) << "Force lock!";
+
+			//restore last state
+			//loadFileSettings();
+			ofSetWindowPosition(WindowPRE.getPosition().x, WindowPRE.getPosition().y);
+			ofSetWindowShape(WindowPRE.getWidth(), WindowPRE.getHeight());
+		}
+	}
+
+	//TODO:
+	//store last states
+	WindowPRE.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
+	WindowPRE.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 }
 
 //--------------------------------------------------------------
@@ -145,7 +164,7 @@ void ofxWindowApp::refreshGetWindowSettings()
 void ofxWindowApp::saveFileWindow()
 {
 	string __path = path_folder + "/" + path_filename;
-	ofLogVerbose(__FUNCTION__) << __path;
+	ofLogNotice(__FUNCTION__) << __path;
 
 	//force mini to window, not fullscreen
 	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
@@ -331,6 +350,7 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + "SIZE " + screenStr;
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
+	str += strPad + (bLock ? "LOCKED ON" : "LOCKED OFF");
 
 	ofDrawBitmapStringHighlight(str, xx, yy);
 }
@@ -394,7 +414,7 @@ void ofxWindowApp::drawPerformance()
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h)
 {
-	ofLogVerbose(__FUNCTION__) << ofToString(w) << "," << ofToString(h);
+	ofLogNotice(__FUNCTION__) << ofToString(w) << "," << ofToString(h);
 
 	window_W = w;
 	window_H = h;
@@ -403,7 +423,7 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	refreshGetWindowSettings();
 
-	bChanged = true;
+	bChangedWindow = true;
 }
 
 //--------------------------------------------------------------
@@ -481,6 +501,17 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		else if (key == 'M')//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
+		}
+		else if (key == 'L')//toggle lock
+		{
+			bLock = !bLock;
+		}
+		else if (key == 'R')//reset to full HD
+		{
+			BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
+			BigWindow.setSize(1920, 1080);
+			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
+			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
 		}
 	}
 }

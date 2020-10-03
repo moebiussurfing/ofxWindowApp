@@ -12,7 +12,7 @@
 
 //TODO:
 // +++	add ofxScreenSetup addon to bundle all other features
-// +		add windowResize subscribed listener to auto refresh
+// +	add windowResize subscribed listener to auto refresh
 
 class ofxWindowApp : public ofBaseApp
 {
@@ -24,6 +24,7 @@ public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
+	ofWindowSettings WindowPRE;
 	ofWindowSettings BigWindow;
 	ofWindowSettings MiniWindow;
 
@@ -104,9 +105,9 @@ public:
 	//easy callback to check from ofApp if some settings have changed
 	bool isChanged()
 	{
-		if (bChanged)
+		if (bChangedWindow)
 		{
-			bChanged = false;
+			bChangedWindow = false;
 			return true;
 		}
 
@@ -124,6 +125,7 @@ private:
 		ofLogVerbose(__FUNCTION__) << "vSync		: " << vSync;
 		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG: " << SHOW_Debug.get();
 		ofLogVerbose(__FUNCTION__) << "bModeMini : " << bModeMini.get();
+		ofLogVerbose(__FUNCTION__) << "bLock : " << bLock.get();
 
 		ofSetFrameRate(targetFps);
 		ofSetVerticalSync(vSync);
@@ -240,6 +242,9 @@ public:
 
 		applyMode();
 	}
+	void setLock(bool b) {
+		bLock = b;
+	}
 
 private:
 
@@ -276,7 +281,7 @@ private:
 	string path_filename;
 
 	bool autoSaveLoad = true;
-	bool bChanged = false;
+	bool bChangedWindow = false;
 	bool ENABLE_Keys = true;//keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
@@ -286,6 +291,7 @@ private:
 	ofParameter<bool> SHOW_Debug{ "showInfo", true };
 	ofParameter<bool> bModeMini{ "miniMode", false };
 	ofParameter<bool> SHOW_PerformanceAllways{ "debugPerformance", true };
+	ofParameter<bool> bLock{ "lock", false };
 
 	string windowBigMode;//fulscreen or window mode
 	float realFps;
