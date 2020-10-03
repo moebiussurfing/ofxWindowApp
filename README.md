@@ -43,10 +43,10 @@ R: Set Full HD size on main monitor
 
 ## Why?
 
-It can be useful to auto-maintain window settings between your app sessions.  
+It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
 Usually when you start a clean OF project you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...
-Using this addon you can forget about this annoying behavior, as the app window will be open in the same place and with the same size and settings.  
+Using this addon you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**.  
 
 ## Dependencies
 
