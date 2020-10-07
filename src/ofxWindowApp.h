@@ -289,9 +289,9 @@ private:
 	ofParameter<bool> vSync{ "vsync", false };
 	ofParameter<float> targetFps{ "fps", 60.5, 1, 120 };
 	ofParameter<bool> SHOW_Debug{ "showInfo", true };
-	ofParameter<bool> bModeMini{ "miniMode", false };
+	ofParameter<bool> bModeMini{ "miniPreset", false };
 	ofParameter<bool> SHOW_PerformanceAllways{ "debugPerformance", true };
-	ofParameter<bool> bLock{ "lock", false };
+	ofParameter<bool> bLock{ "lockMode", false };
 
 	string windowBigMode;//fulscreen or window mode
 	float realFps;

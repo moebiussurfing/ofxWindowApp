@@ -180,6 +180,9 @@ void ofxWindowApp::saveFileWindow()
 	to_json(jMini, MiniWindow);
 	ofSerialize(jExtra, params_Extra);
 
+	jApp["Preset"] = "Big";
+	jMini["Preset"] = "Mini";
+
 	//A. using 2 files
 	//ofSavePrettyJson(path_folder + "/"+path_filename, j);
 	//TODO:
@@ -240,7 +243,7 @@ void ofxWindowApp::loadFileSettings()
 
 		if (data.size() >= 3) {
 			jBig = data[0];//TODO: ugly workaround
-			jMini = data[1];
+			jMini = data[1];//TODO: should add a tag mini or extra to mark the file section
 			jExtra = data[2];
 
 			//recall both params groups
