@@ -70,28 +70,46 @@ void ofxWindowApp::setup()
 	//default
 	setShowPerformanceAllways(true);
 
-	//mini settings
-	params_Extra.add(vSync);
-	params_Extra.add(targetFps);
-	params_Extra.add(SHOW_Debug);
-	params_Extra.add(SHOW_PerformanceAllways);
-	params_Extra.add(bModeMini);
+	////mini settings
+	//params_Extra.add(vSync);
+	//params_Extra.add(targetFps);
+	//params_Extra.add(SHOW_Debug);
+	//params_Extra.add(SHOW_PerformanceAllways);
+	//params_Extra.add(bModeMini);
 
+	//-
+
+	//workarounds
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
+
+	if (!bModeMini) {
+		if (bigFullScreen) {
+			ofSetFullscreen(bigFullScreen);
+			ofSetWindowPosition(0, 0);
+			ofSetWindowShape(ofGetWidth(), ofGetHeight());
+		}
+	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args)
 {
-	//ofLogVerbose(__FUNCTION__);
+	if (ofGetFrameNum() == 1) {
+		//workaround: 
+
+		////works but slow
+		//refreshTogleWindowMode();
+		//refreshTogleWindowMode();
+
+		ofToggleFullscreen();
+		ofToggleFullscreen();
+	}
 
 	//TODO: WIP lock mode
 	//if (isChanged()) {
 	//	ofLogNotice(__FUNCTION__) << "isChanged()";
-
 	//	if (bLock) {// we want to lock windowResize changed. reload settings from file
 	//		ofLogWarning(__FUNCTION__) << "Force lock!";
-
 	//		//restore last state
 	//		//loadFileSettings();
 	//		ofSetWindowPosition(WindowPRE.getPosition().x, WindowPRE.getPosition().y);
@@ -153,6 +171,12 @@ void ofxWindowApp::refreshGetWindowSettings()
 		BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		BigWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
+
+		//?
+		if (BigWindow.windowMode == ofWindowMode(0)) bigFullScreen = false;
+		else if (BigWindow.windowMode == ofWindowMode(1)) bigFullScreen = true;
+		else if (BigWindow.windowMode == ofWindowMode(2)) bigFullScreen = false;
+
 	}
 	else {// mini
 		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
@@ -209,6 +233,8 @@ void ofxWindowApp::saveFileWindow()
 //--------------------------------------------------------------
 void ofxWindowApp::loadFileSettings()
 {
+	ofSetFullscreen(false);
+
 	string __path = path_folder + "/" + path_filename;
 
 	//TODO: check if file exist
@@ -265,12 +291,21 @@ void ofxWindowApp::loadFileSettings()
 		jy = jMini["position"]["y"];
 		jw = jMini["size"]["width"];
 		jh = jMini["size"]["height"];
+
 		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
 		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
 		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
 		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
+
 		MiniWindow.setPosition(glm::vec2(jx, jy));
 		MiniWindow.setSize(jw, jh);
+		MiniWindow.windowMode = ofWindowMode(0);// ? allways windowed
+
+		if (jm == "OF_WINDOW") MiniWindow.windowMode = ofWindowMode(0);
+		else if (jm == "OF_FULLSCREEN") MiniWindow.windowMode = ofWindowMode(1);
+		else if (jm == "OF_GAME_MODE") MiniWindow.windowMode = ofWindowMode(2);
+
+		//-
 
 		//big
 		jx = jBig["position"]["x"];
@@ -278,20 +313,41 @@ void ofxWindowApp::loadFileSettings()
 		jw = jBig["size"]["width"];
 		jh = jBig["size"]["height"];
 		jm = jBig["window_mode"];
+
 		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
 		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
 		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
 		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
 		ofLogVerbose(__FUNCTION__) << "jm: " << jm;
 
-
+		// TODO:
+		//workaround
 		if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
 			jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
 		}
 
-		BigWindow.setPosition(glm::vec2(jx, jy));
-		BigWindow.setSize(jw, jh);
-		windowBigMode = jm;
+		//OF_WINDOW = 0
+		//OF_FULLSCREEN = 1
+		//OF_GAME_MODE = 2
+		if (jm == "OF_WINDOW") BigWindow.windowMode = ofWindowMode(0);
+		else if (jm == "OF_FULLSCREEN") BigWindow.windowMode = ofWindowMode(1);
+		else if (jm == "OF_GAME_MODE") BigWindow.windowMode = ofWindowMode(2);
+
+		if (jm == "OF_WINDOW") bigFullScreen = false;
+		else if (jm == "OF_FULLSCREEN") bigFullScreen = true;
+		else if (jm == "OF_GAME_MODE") bigFullScreen = false;
+
+		if (!bigFullScreen) {
+			BigWindow.setPosition(glm::vec2(jx, jy));
+			BigWindow.setSize(jw, jh);
+		}
+		else {
+			BigWindow.setPosition(glm::vec2(0, 0));
+			BigWindow.setSize(jw, jh);
+			//BigWindow.setSize(ofGetWidth(), ofGetHeight);
+		}
+		
+		//windowBigMode = jm;// ?
 
 		////apply
 		//if (bModeMini) {
@@ -309,7 +365,7 @@ void ofxWindowApp::loadFileSettings()
 	//-
 
 	//apply
-	applyExtra();
+	//applyExtra();
 	applyMode();
 }
 
@@ -331,7 +387,7 @@ void ofxWindowApp::drawDEBUG()
 	string screenMode = "";
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
-	vSyncStr = ofToString((vSync ? "ON " : "OFF"));
+	vSyncStr = ((vSync ? "ON " : "OFF"));
 	fpsRealStr = ofToString(realFps, 1);
 	fpsTargetStr = ofToString(targetFps);
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -440,12 +496,13 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		//modifier
 		bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
 		bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
+		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 
 		if (false)
 			ofLogNotice(__FUNCTION__) << "'" << (char)key << "' [" << key << "]";
 
 		//disable draw debug
-		if (mod_COMMAND && key == 'w' || mod_CONTROL && key == 'w' ||
+		if (mod_CONTROL && key == 'w' || mod_CONTROL && key == 'w' ||
 			key == 'W')
 		{
 			SHOW_Debug = !SHOW_Debug;
@@ -455,62 +512,24 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		//switch window mode
 		else if (key == 'F')
 		{
-			if (ofGetWindowMode() == OF_WINDOW)//go full screen
-			{
-				ofSetFullscreen(true);
-
-				////workaround
-				//window_X = ofGetWindowPositionX();
-				//window_Y = 0;//align to top border
-				//ofSetWindowPosition(window_X, window_Y);
-			}
-			else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
-			{
-				ofSetFullscreen(false);
-
-				//WORKAROUND: to fit window and his bar visible into the screen
-				float windowBar_h = 25;
-
-				//TODO:
-				//rare behaviour with black screen in secondary monitors..
-
-				//WORKAROUND
-				//kick a little down to avoid hidden window title bar
-				window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
-				window_X = ofGetWindowPositionX();
-				ofSetWindowPosition(window_X, window_Y);
-
-				////window_W = ofGetWindowWidth();
-				////window_H = ofGetWindowHeight();
-
-				//if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
-				//{
-				//	//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
-				//	float hMax = 1080 - window_Y;// -windowBar_h;
-				//	
-				//	window_H = hMax;
-				//	//ofSetWindowPosition(window_X, window_Y);
-				//	ofSetWindowShape(window_W, window_H);
-				//}
-			}
-
-			//update
-			windowResized(ofGetWidth(), ofGetHeight());
+			refreshTogleWindowMode();
 		}
 		else if (key == 'V')//switch Vsync mode
 		{
 			vSync = !vSync;
 			ofSetVerticalSync(vSync);
 		}
-		else if (key == 'M')//switch window mode big/mini
+		else if (key == 'M' && mod_ALT)//switch window mode big/mini
+		//else if (key == 'M')//switch window mode big/mini
+		//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
 		}
-		else if (key == 'L')//toggle lock
+		else if (key == 'L' && mod_ALT)//toggle lock
 		{
 			bLock = !bLock;
 		}
-		else if (key == 'R')//reset to full HD
+		else if (key == 'R' && mod_ALT)//reset to full HD
 		{
 			BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
 			BigWindow.setSize(1920, 1080);
@@ -541,4 +560,117 @@ void ofxWindowApp::folderCheckAndCreate(string _path)
 		else
 			ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
 	}
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::refreshTogleWindowMode()
+{
+	if (ofGetWindowMode() == OF_WINDOW)//go full screen
+	{
+		ofSetFullscreen(true);
+
+		////workaround
+		//window_X = ofGetWindowPositionX();
+		//window_Y = 0;//align to top border
+		//ofSetWindowPosition(window_X, window_Y);
+
+		bigFullScreen = true;
+	}
+	else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
+	{
+		ofSetFullscreen(false);
+
+		//TODO:
+		//rare behaviour with black screen in secondary monitors..
+
+		//workaround:
+		//to fit window and his bar visible into the screen
+		float windowBar_h = 25;
+
+		//workaround
+		//it's window mode..
+		//kick a little down to avoid hidden window title bar
+		window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
+		window_X = ofGetWindowPositionX();
+		ofSetWindowPosition(window_X, window_Y);
+
+		////window_W = ofGetWindowWidth();
+		////window_H = ofGetWindowHeight();
+
+		//if (window_Y + window_H + windowBar_h > 1080)//bottom border goes out of v screen
+		//{
+		//	//float hMax = ofGetScreenHeight() - window_Y;// -windowBar_h;
+		//	float hMax = 1080 - window_Y;// -windowBar_h;
+		//	
+		//	window_H = hMax;
+		//	//ofSetWindowPosition(window_X, window_Y);
+		//	ofSetWindowShape(window_W, window_H);
+		//}
+
+		bigFullScreen = false;
+	}
+
+	//update
+	windowResized(ofGetWidth(), ofGetHeight());
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::applyMode()
+{
+	ofLogVerbose(__FUNCTION__);
+
+	//apply extra
+	ofSetVerticalSync(vSync);
+	ofSetFrameRate(targetFps);
+
+	//-
+
+	//mini preset
+	if (bModeMini)
+	{
+		ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
+		ofSetWindowShape(MiniWindow.getWidth(), MiniWindow.getHeight());
+		ofSetFullscreen(false);
+	}
+
+	//big preset
+	else 
+	{
+		//ofSetFullscreen(bigFullScreen);
+
+		if (bigFullScreen) {
+			ofSetWindowPosition(0, 0);
+			ofSetWindowShape(ofGetWidth(), ofGetHeight());
+		}
+		else {
+			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
+			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
+		}
+
+		//ofSetFullscreen(false);
+		ofSetFullscreen(bigFullScreen);
+
+		////TODO:
+		//if (BigWindow.windowMode == ofWindowMode(OF_FULLSCREEN)) ofSetFullscreen(true);
+		//if (windowBigMode == ("OF_FULLSCREEN")) ofSetFullscreen(true);
+	}
+
+	//-
+
+	////apply
+	//if (bModeMini) {
+	//	ofx::Serializer::ApplyWindowSettings(BigWindow);
+	//}
+	//else {
+	//	ofx::Serializer::ApplyWindowSettings(MiniWindow);
+	//}
+
+	//-
+
+	//if (!bModeMini) {
+	//	ofSetFullscreen(false);
+	//	ofSetFullscreen(bigFullScreen);
+	//	if (bigFullScreen) ofSetWindowPosition(0, 0);
+	//}
+
 }

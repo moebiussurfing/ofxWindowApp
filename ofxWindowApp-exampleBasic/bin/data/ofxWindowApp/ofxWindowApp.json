@@ -1,23 +1,25 @@
 [
     {
+        "Preset": "Big",
         "position": {
-            "x": -1637.0,
-            "y": 196.0
+            "x": 0.0,
+            "y": 0.0
         },
         "size": {
-            "height": 714,
-            "width": 1320
+            "height": 1080,
+            "width": 1920
         },
-        "window_mode": "OF_WINDOW"
+        "window_mode": "OF_FULLSCREEN"
     },
     {
+        "Preset": "Mini",
         "position": {
-            "x": 2380.0,
-            "y": 642.0
+            "x": 553.0,
+            "y": 253.0
         },
         "size": {
-            "height": 77,
-            "width": 966
+            "height": 375,
+            "width": 1060
         },
         "window_mode": "OF_WINDOW"
     },
@@ -25,7 +27,8 @@
         "extra_settings": {
             "debugPerformance": "1",
             "fps": "60",
-            "miniMode": "0",
+            "lockMode": "0",
+            "miniPreset": "0",
             "showInfo": "1",
             "vsync": "1"
         }

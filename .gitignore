@@ -131,3 +131,5 @@ Desktop.ini
 *.sql
 *.sqlite
 
+ofxWindowApp-exampleBasic/.vs/ofxWindowApp-exampleBasic/v15/Solution.VC.db-shm
+ofxWindowApp-exampleBasic/.vs/ofxWindowApp-exampleBasic/v15/Solution.VC.db-wal

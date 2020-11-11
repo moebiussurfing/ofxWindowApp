@@ -24,6 +24,7 @@ public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
+private:
 	ofWindowSettings WindowPRE;
 	ofWindowSettings BigWindow;
 	ofWindowSettings MiniWindow;
@@ -64,7 +65,10 @@ public:
 	void refreshGetWindowSettings();
 	void saveFileWindow();
 	void loadFileSettings();
+private:
+	void applyMode();
 
+public:
 	void setPathFolder(string s)
 	{
 		path_folder = s;
@@ -121,11 +125,11 @@ private:
 	void applyExtra()//fps and vsync only
 	{
 		ofLogVerbose(__FUNCTION__);
-		ofLogVerbose(__FUNCTION__) << "targetFps : " << targetFps;
-		ofLogVerbose(__FUNCTION__) << "vSync		: " << vSync;
-		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG: " << SHOW_Debug.get();
-		ofLogVerbose(__FUNCTION__) << "bModeMini : " << bModeMini.get();
-		ofLogVerbose(__FUNCTION__) << "bLock : " << bLock.get();
+		ofLogVerbose(__FUNCTION__) << "targetFps  : " << targetFps;
+		ofLogVerbose(__FUNCTION__) << "vSync	  : " << vSync;
+		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG : " << SHOW_Debug.get();
+		ofLogVerbose(__FUNCTION__) << "bModeMini  : " << bModeMini.get();
+		ofLogVerbose(__FUNCTION__) << "bLock      : " << bLock.get();
 
 		ofSetFrameRate(targetFps);
 		ofSetVerticalSync(vSync);
@@ -217,17 +221,25 @@ public:
 
 		bModeMini = !bModeMini;
 
-		//big
+		//big preset
 		if (!bModeMini)
 		{
+			ofSetFullscreen(bigFullScreen);
+
+			if (bigFullScreen) {
+				ofSetWindowPosition(0, 0);
+				ofSetWindowShape(ofGetWidth(), ofGetHeight());
+			}
+
 			//if (windowBigMode == "OF_WINDOW") ofSetFullscreen(false);
 			//else if (windowBigMode == "OF_FULLSCREEN") ofSetFullscreen(true);
 		}
-		//mini
+		//mini preset
 		else
 		{
-			if (ofGetWindowMode() == OF_FULLSCREEN)
-				ofSetFullscreen(false);
+			//if (ofGetWindowMode() == OF_FULLSCREEN)
+
+			ofSetFullscreen(false);
 		}
 
 		applyMode();
@@ -244,32 +256,6 @@ public:
 	}
 	void setLock(bool b) {
 		bLock = b;
-	}
-
-private:
-
-	void applyMode()
-	{
-		ofLogVerbose(__FUNCTION__);
-
-		//mini
-		if (bModeMini) {
-			ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
-			ofSetWindowShape(MiniWindow.getWidth(), MiniWindow.getHeight());
-		}
-		//big
-		else {
-			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
-			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
-
-			////TODO:
-			//if (BigWindow.windowMode == ofWindowMode(OF_FULLSCREEN)) ofSetFullscreen(true);
-			//if (windowBigMode == ("OF_FULLSCREEN")) ofSetFullscreen(true);
-		}
-
-		//apply extra
-		ofSetVerticalSync(vSync);
-		ofSetFrameRate(targetFps);
 	}
 
 	//-
@@ -293,12 +279,34 @@ private:
 	ofParameter<bool> SHOW_PerformanceAllways{ "debugPerformance", true };
 	ofParameter<bool> bLock{ "lockMode", false };
 
-	string windowBigMode;//fulscreen or window mode
+	//string windowBigMode;//fulscreen or window mode
 	float realFps;
 	int xx = 0;
 	int yy = 0;
 
 	//TODO: add full screen/window bool param
+
+	bool bigFullScreen = false;
+
+	void refreshTogleWindowMode();
+
+public:
+	//--------------------------------------------------------------
+	void drawInfo() {
+		string ss;
+		ss += "KEYS:\n";
+		ss += "W: SHOW INFO\n";
+		ss += "V: VERTICAL SYNC " + ofToString(vSync ? "ON " : "OFF") + "\n";
+		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
+		ss += "F: SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
+		ss += "Alt + M: PRESET ";
+		if (bModeMini) ss += "*MINI  BIG";
+		else ss += " MINI *BIG";
+		ss += "\n";
+		ss += "Alt + R: RESET TO FULLHD\n";
+		ss += "Alt + L: LOCK SETTINGS";// \n";//TODO: WIP lock mode
+		ofDrawBitmapStringHighlight(ss, 50, 50);
+	}
 };
 
 
