@@ -13,7 +13,7 @@
 
 ## Overview
 
-This **openFrameworks** addon **auto stores** and recalls the basic app **window state/settings** and **debugs**:
+This **openFrameworks** addon **auto stores** and **recalls** the basic app **window state/settings**:
 
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
@@ -21,9 +21,9 @@ This **openFrameworks** addon **auto stores** and recalls the basic app **window
 * App target **FPS** settings, real current **framerate**, and **vSync** state. 
 * "Trigs **Alert**" and shows a **performance** bar when **low FPS drops** under the target (expected) frame rate.
 * Easy change the app settings just editing the **JSON file** not the app code.
-* **Dual** settings: **big** and **mini** settings to **switch** between both modes. (WIP)
-* Lock mode to avoid future changes after modifiying window. (WIP)
-* Command to restore **standard Full HD** settings.
+* **Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)
+* **Lock mode** to avoid future changes after modifiying window. (WIP)
+* Command to restore **1080p Full HD** settings.
 
 When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:  
 ```.c++
@@ -40,7 +40,6 @@ V: vSync state
 L: Lock mode  
 R: Set Full HD size on the main monitor  
 M: Switch Big/Mini modes (WIP)  
-
 ```
 
 ## Why?
@@ -63,7 +62,7 @@ You don't need to add with Project Generator.
 ```.c++
     #include "ofxWindowApp.h"
 
-    ofxWindowApp WindowApp;
+    ofxWindowApp windowApp;
 ```
 
 ## ofApp.cpp
@@ -73,24 +72,17 @@ Nothing more is required on ```update()``` or ```draw()```!
 
 //setup()
 
-//only required if no previous session JSON file settings present
-WindowApp.setFrameRate(30);
-WindowApp.setVerticalSync(false);
+// only required if no previous session JSON file settings present
+windowApp.setFrameRate(30);
+windowApp.setVerticalSync(false);
 
-//optional customization:  
-//WindowApp.setPathFolder("settings/");//default folder is "data/ofxWindowApp/"
-//WindowApp.setPathFilename("AppWindow.json");
-//WindowApp.setAutoSaveLoad(false);//to disable auto
-//WindowApp.setShowPerformanceAllways(true)//show performance alert also when debug is hidden
-       
-//available methods:         
-//WindowApp.saveWindow();//save  
-//WindowApp.loadWindow();//load  
-//WindowApp.setShowDebug(true);//show/hide
+// Nothing more!
 ```
 
-The addon **auto loads** the settings when your **app starts** and **stores** too on **app exit**.  
-Nothing more it's required!  
+The addon **auto-loads** the settings when your **app starts** and **auto-stores** too on **app exit**.  
+
+**Nothing more it's required!**  
+
 The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:  
 ```.json
 [
