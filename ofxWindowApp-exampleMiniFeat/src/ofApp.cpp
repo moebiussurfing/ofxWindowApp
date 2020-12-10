@@ -4,8 +4,9 @@
 void ofApp::setup() {
 
 #ifdef USE_ofxWindowApp
-	//windowApp.setFrameRate(60);//required when started for first time or no file settings present
-	//windowApp.setSetVerticalSync(true);
+	//required when started for first time or no file settings present
+	//windowApp.setFrameRate(60);
+	//windowApp.setVerticalSync(true);
 
 	//can get some addon settings if required
 	if (windowApp.isModeMini()) ofSetBackgroundColor(ofColor::blue);

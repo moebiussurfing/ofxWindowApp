@@ -5,11 +5,10 @@ void ofApp::setup() {
 	// required when addon started for first time on your project
 	// or when no json file settings is present into /bin/data/ofxWindowApp/ofxWindowApp.json
 	// or if you want hardcode the settings
-	//windowApp.setFrameRate(60);
+	windowApp.setFrameRate(60);
 	//windowApp.setVerticalSync(true);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	windowApp.drawInfo();
 }

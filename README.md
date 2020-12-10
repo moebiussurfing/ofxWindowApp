@@ -15,10 +15,10 @@
 
 This **openFrameworks** addon **auto stores** and recalls the basic app **window state/settings** and **debugs**:
 
-* Window **Position** (x, y) 
-* Window **Size** (w, h) 
-* Window **Mode** (window/full screen)
-* App target **FPS** settings, real current **framerate**, and **vSync** state
+* Window **Position** (x, y). 
+* Window **Size** (w, h). 
+* Window **Mode** (window/full screen).
+* App target **FPS** settings, real current **framerate**, and **vSync** state. 
 * "Trigs **Alert**" and shows a **performance** bar when **low FPS drops** under the target (expected) frame rate.
 * Easy change the app settings just editing the **JSON file** not the app code.
 * **Dual** settings: **big** and **mini** settings to **switch** between both modes. (WIP)
@@ -39,6 +39,8 @@ F: Fullscreen
 V: vSync state  
 L: Lock mode  
 R: Set Full HD size on the main monitor  
+M: Switch Big/Mini modes (WIP)  
+
 ```
 
 ## Why?
@@ -71,7 +73,7 @@ Nothing more is required on ```update()``` or ```draw()```!
 
 //setup()
 
-//only required if no previous session ```JSON``` file settings present
+//only required if no previous session JSON file settings present
 WindowApp.setFrameRate(30);
 WindowApp.setVerticalSync(false);
 
@@ -131,7 +133,7 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:
 
 ### TODO
 
-* Mix with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
+* Join with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## Tested systems
 - **Windows10** / **VS2017** / **OF ~0.11**
