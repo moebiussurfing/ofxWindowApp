@@ -135,17 +135,23 @@ private:
 		ofSetVerticalSync(vSync);
 	}
 
-private:
+//private:
+public:
 	//layout modes
 	enum DEBUG_Position
 	{
 		DEBUG_POSITION_TOP = 0,
 		DEBUG_POSITION_BOTTOM
 	};
+private:
 	int positionLayout = DEBUG_POSITION_BOTTOM;
 
 public:
 	void setPositionDebugInfo(int POS)
+	{
+		positionLayout = POS;
+	}
+	void setPositionDebugInfo(DEBUG_Position POS = DEBUG_POSITION_BOTTOM)
 	{
 		positionLayout = POS;
 	}

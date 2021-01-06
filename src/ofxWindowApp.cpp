@@ -381,7 +381,6 @@ void ofxWindowApp::drawDEBUG()
 	string fpsTargetStr;
 	string strPad = "  ";//add spaces
 	string str;
-	//str = __FUNCTION__ + strPad;
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";

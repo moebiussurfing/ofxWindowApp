@@ -7,6 +7,7 @@ void ofApp::setup() {
 	// or if you want hardcode the settings
 	windowApp.setFrameRate(60);
 	//windowApp.setVerticalSync(true);
+	//WindowApp.setPositionDebugInfo(ofxWindowApp::DEBUG_POSITION_TOP);
 }
 
 //--------------------------------------------------------------
