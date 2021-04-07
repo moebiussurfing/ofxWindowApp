@@ -87,6 +87,7 @@ public:
 	void setShowDebug(bool b = true)
 	{
 		SHOW_Debug = b;
+		SHOW_PerformanceAllways = b;
 	}
 	bool getShowDebug()
 	{

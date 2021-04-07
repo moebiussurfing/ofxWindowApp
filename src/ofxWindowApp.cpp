@@ -15,6 +15,10 @@ ofxWindowApp::ofxWindowApp()
 	MiniWindow.setSize(200, 200);
 	MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 
+	setFrameRate(60);
+	setVerticalSync(false);
+	setShowDebug(false);
+
 	//auto call setup
 	setup();
 }
@@ -346,7 +350,7 @@ void ofxWindowApp::loadFileSettings()
 			BigWindow.setSize(jw, jh);
 			//BigWindow.setSize(ofGetWidth(), ofGetHeight);
 		}
-		
+
 		//windowBigMode = jm;// ?
 
 		////apply
@@ -568,10 +572,18 @@ void ofxWindowApp::refreshTogleWindowMode()
 	{
 		ofSetFullscreen(true);
 
-		////workaround
-		//window_X = ofGetWindowPositionX();
-		//window_Y = 0;//align to top border
+		////TODO. not works
+		////workaround to force windows correct full screen place...
+		//float _offset = 500;
+		//window_Y = ofGetWindowPositionY();
+		//window_X = ofGetWindowPositionX() + _offset;
 		//ofSetWindowPosition(window_X, window_Y);
+		//window_X -= _offset;
+		////ofSetWindowPosition(window_X, window_Y);
+		//////workaround
+		////window_X = ofGetWindowPositionX();
+		////window_Y = 0;//align to top border
+		////ofSetWindowPosition(window_X, window_Y);
 
 		bigFullScreen = true;
 	}
@@ -588,7 +600,7 @@ void ofxWindowApp::refreshTogleWindowMode()
 
 		//workaround
 		//it's window mode..
-		//kick a little down to avoid hidden window title bar
+		//kick a little down to avoid hidden window title barF
 		window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
 		window_X = ofGetWindowPositionX();
 		ofSetWindowPosition(window_X, window_Y);
@@ -633,7 +645,7 @@ void ofxWindowApp::applyMode()
 	}
 
 	//big preset
-	else 
+	else
 	{
 		//ofSetFullscreen(bigFullScreen);
 
