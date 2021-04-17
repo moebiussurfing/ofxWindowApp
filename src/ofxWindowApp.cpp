@@ -145,7 +145,8 @@ void ofxWindowApp::draw(ofEventArgs & args)
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM)
 	{
-		yy = window_H - 6;
+		yy = window_H - 10;//little air
+		//yy = window_H - 6;
 	}
 	else if (positionLayout == DEBUG_POSITION_TOP)
 	{
@@ -446,8 +447,12 @@ void ofxWindowApp::drawPerformance()
 		fwMax = 100.f;//max width
 		fh = 10.f;
 		fPad = 5.f;//pad to border
+
+		//position
 		fx = window_W - fwMax - fPad;
-		fy = yy - fh + 1.0f;
+		//fy = yy - fh - 50.0f;//little air
+		fy = yy - fh + 1.0f;//to the border
+
 		fw = ofMap(realFps, 0.0f*targetFps, targetFps, 0, fwMax, true);
 		int fa = 150;//alpha
 		int iDiff = (int)targetFps - realFps;
