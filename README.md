@@ -13,7 +13,7 @@
 
 ## Overview
 
-This **openFrameworks** addon **auto stores** and **recalls** the basic app **window state/settings**:
+**openFrameworks** add-on to **auto stores** and **recalls** the basic app **window state/settings**:
 
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
@@ -30,7 +30,7 @@ This **openFrameworks** addon **auto stores** and **recalls** the basic app **wi
 ```
 W: Show debug info  
 F: Fullscreen  
-V: vSync state  
+V: vSync state (on/off)  
 L: Lock mode  
 R: Set Full HD size on the main monitor  
 M: Switch Big/Mini modes (WIP)  
@@ -61,15 +61,13 @@ You don't need to add with Project Generator.
 
 ## ofApp.cpp
 Nothing more is required on ```update()``` or ```draw()```!
-
+Some settings can be configured using key commands.  
 ```.c++ 
 ofApp::setup(){
-    // default is 60 fps, vSync = off
+    // default FPS is 60 fps, vSync = off
     //windowApp.setFrameRate(30);
     //windowApp.setVerticalSync(false);
 }
-
-// Nothing more!
 ```
 
 The addon **auto-loads** the settings when your **app starts** and **auto-stores** too on **app exit**.  
@@ -118,7 +116,7 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:
 
 ### TODO
 
-* Join with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
+* Join with another add-on to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## Tested systems
 - **Windows10** / **VS2017** / **OF ~0.11**
