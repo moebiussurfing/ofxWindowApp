@@ -25,12 +25,6 @@ This **openFrameworks** addon **auto stores** and **recalls** the basic app **wi
 * **Lock mode** to avoid future changes after modifiying window. (WIP)
 * Command to restore **1080p Full HD** settings.
 
-When you use the addon for the first time into a project and no JSON file is present, you need to set the initial settings:  
-```.c++
-windowApp.setFrameRate(30);
-windowApp.setVerticalSync(false);
-```
-
 ## Shortcuts
 
 ```
@@ -46,12 +40,12 @@ M: Switch Big/Mini modes (WIP)
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
-Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...
-Using this addon you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**.  
+(_Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times..._
+_Using this addon you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._)  
 
 ## Dependencies
 
-**ofxSerialize** from @bakercp (Thanks!)  
+**ofxSerialize** from **@bakercp** (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
 You don't need to add with Project Generator.
@@ -69,12 +63,11 @@ You don't need to add with Project Generator.
 Nothing more is required on ```update()``` or ```draw()```!
 
 ```.c++ 
-
-//setup()
-
-// only required if no previous session JSON file settings present
-windowApp.setFrameRate(30);
-windowApp.setVerticalSync(false);
+ofApp::setup(){
+    // default is 60 fps, vSync = off
+    //windowApp.setFrameRate(30);
+    //windowApp.setVerticalSync(false);
+}
 
 // Nothing more!
 ```
