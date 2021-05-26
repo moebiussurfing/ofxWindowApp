@@ -13,7 +13,7 @@
 
 ## Overview
 
-**openFrameworks** add-on to **auto stores** and **recalls** the basic app **window state/settings**:
+**openFrameworks** add-on to **auto store** and **recall** the basic app **window state/settings**:
 
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
@@ -48,19 +48,18 @@ _Using this addon you can forget about this "annoying behavior", as the **app wi
 **ofxSerialize** from **@bakercp** (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
-You don't need to add with Project Generator.
+You don't need to add with **Project Generator**.
 
 ## Usage
 
 ## ofApp.h
 ```.c++
     #include "ofxWindowApp.h"
-
     ofxWindowApp windowApp;
 ```
 
 ## ofApp.cpp
-Nothing more is required on ```update()``` or ```draw()```!
+Nothing more is required on ```update()``` or ```draw()```!  
 Some settings can be configured using key commands.  
 ```.c++ 
 ofApp::setup(){
@@ -70,7 +69,7 @@ ofApp::setup(){
 }
 ```
 
-The addon **auto-loads** the settings when your **app starts** and **auto-stores** too on **app exit**.  
+The add-on will **auto-load** the settings when your **app starts** and **auto-stores** too on **app exit**.  
 
 **Nothing more it's required!**  
 
