@@ -6,9 +6,10 @@ ofxWindowApp::ofxWindowApp()
 	ofSetLogLevel(__FUNCTION__, OF_LOG_NOTICE);
 
 	//default
-
-	BigWindow.setPosition(glm::vec2(10, 10));
-	BigWindow.setSize(800, 600);
+	int _h = 25;//bar height
+	BigWindow.setPosition(glm::vec2(0, _h));
+	//BigWindow.setSize(800, 600);
+	BigWindow.setSize(1920, 1080 - _h);
 	BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 
 	MiniWindow.setPosition(glm::vec2(20, 20));
