@@ -38,7 +38,28 @@ private:
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 	void keyPressed(ofKeyEventArgs &eventArgs);
+
 	void windowResized(int w, int h);
+	//void windowResized(ofEventArgs &e) {
+	//	e.
+	//}
+
+	////TODO: fix
+	////autosave
+	//void windowIsMoved() {
+	//	if (autoSaveLoad)
+	//	{
+	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
+	//		saveFileWindow();
+	//	}
+	//};
+	//void windowIsMoved() {
+	//	if (autoSaveLoad)
+	//	{
+	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
+	//		saveFileWindow();
+	//	}
+	//};
 
 	//-
 
@@ -136,7 +157,7 @@ private:
 		ofSetVerticalSync(vSync);
 	}
 
-//private:
+	//private:
 public:
 	//layout modes
 	enum DEBUG_Position

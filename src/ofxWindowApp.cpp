@@ -60,6 +60,8 @@ void ofxWindowApp::setup()
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
+	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);
+	//ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowIsResized);
 
 	//extra settings
 	params_Extra.add(vSync);
@@ -126,6 +128,18 @@ void ofxWindowApp::update(ofEventArgs & args)
 	////store last states
 	//WindowPRE.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	//WindowPRE.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
+
+	////TODO: fix
+	////autosave
+	//if (isChanged()) 
+	//{
+	//	if (autoSaveLoad)
+	//	{
+	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
+	//		//refreshGetWindowSettings();
+	//		saveFileWindow();
+	//	}
+	//}
 }
 
 //--------------------------------------------------------------
@@ -493,6 +507,13 @@ void ofxWindowApp::windowResized(int w, int h)
 	refreshGetWindowSettings();
 
 	bChangedWindow = true;
+
+	//TODO: fix
+	if (autoSaveLoad)
+	{
+		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
+		saveFileWindow();
+	}
 }
 
 //--------------------------------------------------------------
