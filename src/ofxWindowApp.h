@@ -8,6 +8,8 @@
 #include "ofxWindowApp.h"
 #endif
 
+#define USING__OFX_WINDOW_APP
+
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
 
 //TODO:
@@ -21,10 +23,16 @@ class ofxWindowApp : public ofBaseApp
 	//but it exposes several not needed methods (?)
 
 public:
+
 	ofxWindowApp();
 	~ofxWindowApp();
 
+	//void dragEvent(ofDragInfo dragInfo) {};
+
+	//--
+
 private:
+
 	ofWindowSettings WindowPRE;
 	ofWindowSettings BigWindow;
 	ofWindowSettings MiniWindow;
@@ -34,6 +42,7 @@ private:
 	//-
 
 //private:
+
 	void setup();
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
@@ -47,14 +56,14 @@ private:
 	////TODO: fix
 	////autosave
 	//void windowIsMoved() {
-	//	if (autoSaveLoad)
+	//	if (bAutoSaveLoad)
 	//	{
 	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
 	//		saveFileWindow();
 	//	}
 	//};
 	//void windowIsMoved() {
-	//	if (autoSaveLoad)
+	//	if (bAutoSaveLoad)
 	//	{
 	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
 	//		saveFileWindow();
@@ -68,57 +77,93 @@ private:
 
 	//----
 
-	//API
+	// API
 
 public:
-	//setters
+
+	// Setters
+	//--------------------------------------------------------------
 	void setFrameRate(float f)///required when used for first time into your project and no JSON file settings created yet
 	{
 		targetFps = f;
 		ofSetFrameRate(targetFps);
 	}
+	//--------------------------------------------------------------
 	void setVerticalSync(bool b)
 	{
 		vSync = b;
 		ofSetVerticalSync(vSync);
 	}
+	//--------------------------------------------------------------
+	void setFullScreen(bool b)
+	{
+		if (b) {
+
+			ofSetFullscreen(true);
+			bigFullScreen = true;
+		}
+		else {
+			ofSetFullscreen(false);
+
+			float windowBar_h = 25;
+
+			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
+			window_X = ofGetWindowPositionX();
+			ofSetWindowPosition(window_X, window_Y);
+
+			bigFullScreen = false;
+		}
+
+		// Update
+		windowResized(ofGetWidth(), ofGetHeight());
+	}
 
 	void refreshGetWindowSettings();
 	void saveFileWindow();
 	void loadFileSettings();
+
 private:
+
 	void applyMode();
 
 public:
+
+	//--------------------------------------------------------------
 	void setPathFolder(string s)
 	{
 		path_folder = s;
 	}
 
+	//--------------------------------------------------------------
 	void setPathFilename(string s)
 	{
 		path_filename = s;
 	}
 
+	//--------------------------------------------------------------
 	void setAutoSaveLoad(bool b)
 	{
-		autoSaveLoad = b;
+		bAutoSaveLoad = b;
 	}
 
+	//--------------------------------------------------------------
 	void setShowDebug(bool b = true)
 	{
 		SHOW_Debug = b;
 		SHOW_PerformanceAllways = b;
 	}
+	//--------------------------------------------------------------
 	bool getShowDebug()
 	{
 		return SHOW_Debug;
 	}
+	//--------------------------------------------------------------
 	void toggleShowDebug()
 	{
 		SHOW_Debug = !SHOW_Debug;
 	}
 
+	//--------------------------------------------------------------
 	void setShowPerformanceAllways(bool b = true)
 	{
 		SHOW_PerformanceAllways = b;
@@ -129,6 +174,7 @@ public:
 	//-
 
 	//easy callback to check from ofApp if some settings have changed
+	//--------------------------------------------------------------
 	bool isChanged()
 	{
 		if (bChangedWindow)
@@ -144,6 +190,7 @@ public:
 	//-
 
 private:
+
 	void applyExtra()//fps and vsync only
 	{
 		ofLogVerbose(__FUNCTION__);
@@ -159,16 +206,20 @@ private:
 
 	//private:
 public:
+
 	//layout modes
 	enum DEBUG_Position
 	{
 		DEBUG_POSITION_TOP = 0,
 		DEBUG_POSITION_BOTTOM
 	};
+
 private:
+
 	int positionLayout = DEBUG_POSITION_BOTTOM;
 
 public:
+
 	void setPositionDebugInfo(int POS)
 	{
 		positionLayout = POS;
@@ -193,6 +244,7 @@ public:
 	//-
 
 public:
+
 	//getters
 	float getFrameRate()
 	{
@@ -222,7 +274,9 @@ public:
 	//-
 
 	//mini/big mode
+
 public:
+
 	//TODO:
 	//void setShapeMiniMode(glm::vec2 pos, glm::vec2 size)
 	//{
@@ -243,7 +297,7 @@ public:
 	}
 	void toggleModeWindowBigMini()
 	{
-		if (autoSaveLoad) {
+		if (bAutoSaveLoad) {
 			refreshGetWindowSettings();
 		}
 
@@ -274,7 +328,7 @@ public:
 	}
 	void enableMiniMode(bool b)
 	{
-		if (autoSaveLoad) {
+		if (bAutoSaveLoad) {
 			refreshGetWindowSettings();
 		}
 
@@ -288,13 +342,26 @@ public:
 
 	//-
 
+public:
+	void setEnableTimerSaver(bool b) {
+		bAutoSaverTimed = b;
+	}
+	void setTimerSaver(int t) {
+		timerSaverMax = t;
+	}
+private:
+
+	bool bAutoSaverTimed = false;
+	int timerSaverMax = 10000;
+	uint32_t timerSaver = 0;
+
 private:
 
 	//this is to folder all files to avoid mixing with other addons data
 	string path_folder;
 	string path_filename;
 
-	bool autoSaveLoad = true;
+	bool bAutoSaveLoad = true;
 	bool bChangedWindow = false;
 	bool ENABLE_Keys = true;//keys enabled by default
 
@@ -319,6 +386,7 @@ private:
 	void refreshTogleWindowMode();
 
 public:
+
 	//--------------------------------------------------------------
 	void drawInfo() {
 		string ss;

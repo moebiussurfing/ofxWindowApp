@@ -36,7 +36,7 @@ ofxWindowApp::~ofxWindowApp()
 void ofxWindowApp::exit()
 {
 	ofLogNotice(__FUNCTION__);
-	if (autoSaveLoad)
+	if (bAutoSaveLoad)
 	{
 		refreshGetWindowSettings();
 		saveFileWindow();
@@ -72,7 +72,7 @@ void ofxWindowApp::setup()
 	params_Extra.add(bLock);
 
 	//load
-	if (autoSaveLoad) loadFileSettings();
+	if (bAutoSaveLoad) loadFileSettings();
 
 	//default
 	setShowPerformanceAllways(true);
@@ -133,13 +133,25 @@ void ofxWindowApp::update(ofEventArgs & args)
 	////autosave
 	//if (isChanged()) 
 	//{
-	//	if (autoSaveLoad)
+	//	if (bAutoSaveLoad)
 	//	{
 	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
 	//		//refreshGetWindowSettings();
 	//		saveFileWindow();
 	//	}
 	//}
+
+	//--
+
+	// Autosaver timer
+	// is no required to resize the window or to close the app window to save.
+	// then the app can carsh an window shape will be stored 1 time each 10 seconds by default.
+	if (bAutoSaverTimed)
+		if ((ofGetElapsedTimeMillis() - timerSaver) > timerSaverMax)
+		{
+			saveFileWindow();
+			timerSaver = ofGetElapsedTimeMillis();
+		}
 }
 
 //--------------------------------------------------------------
@@ -407,7 +419,7 @@ void ofxWindowApp::drawDEBUG()
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ((vSync ? "ON " : "OFF"));
-	fpsRealStr = ofToString(realFps, 1);
+	fpsRealStr = ofToString(realFps, 0);
 	fpsTargetStr = ofToString(targetFps);
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 
@@ -509,7 +521,7 @@ void ofxWindowApp::windowResized(int w, int h)
 	bChangedWindow = true;
 
 	//TODO: fix
-	if (autoSaveLoad)
+	if (bAutoSaveLoad)
 	{
 		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
 		saveFileWindow();
@@ -568,6 +580,10 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		}
 	}
 }
+
+////--------------------------------------------------------------
+//void ofxWindowApp::dragEvent(ofDragInfo info) {
+//}
 
 //--------------------------------------------------------------
 void ofxWindowApp::folderCheckAndCreate(string _path)
