@@ -568,7 +568,9 @@ inline void from_json(const nlohmann::json& j, ofWindowSettings& v)
         else if (key == "size")
             v.setSize(value.value("width", 100),
                       value.value("height", 100));
-        else if (key == "title") v.title = value;
+        //else if (key == "title") v.title = value;
+        else if (key == "title") v.title = ofToString(value);
+        //else if (key == "title") v.title = (string) value;
         else if (key == "window_mode") v.windowMode = value;
         ++iter;
     }

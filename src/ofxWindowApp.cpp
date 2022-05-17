@@ -344,7 +344,8 @@ void ofxWindowApp::loadFileSettings()
 		jy = jBig["position"]["y"];
 		jw = jBig["size"]["width"];
 		jh = jBig["size"]["height"];
-		jm = jBig["window_mode"];
+		jm = ofToString(jBig["window_mode"]);
+		//jm = jBig["window_mode"];
 
 		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
 		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
