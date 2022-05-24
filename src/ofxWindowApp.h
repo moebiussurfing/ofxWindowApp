@@ -376,7 +376,7 @@ private:
 
 	//string windowBigMode;//fulscreen or window mode
 	float realFps;
-	int xx = 0;
+	int xx = 10;
 	int yy = 0;
 
 	//TODO: add full screen/window bool param
