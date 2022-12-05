@@ -16,7 +16,7 @@
 // +++	add ofxScreenSetup addon to bundle all other features
 // +	add windowResize subscribed listener to auto refresh
 
-class ofxWindowApp : public ofBaseApp
+class ofxWindowApp/* : public ofBaseApp*/
 {
 	//TODO:
 	//I used public ofBaseApp to make auto update/draw without any call to them is required to made manually...
@@ -44,9 +44,9 @@ private:
 //private:
 
 	void setup();
-	void update(ofEventArgs & args);
-	void draw(ofEventArgs & args);
-	void keyPressed(ofKeyEventArgs &eventArgs);
+	void update(ofEventArgs& args);
+	void draw(ofEventArgs& args);
+	void keyPressed(ofKeyEventArgs& eventArgs);
 
 	void windowResized(int w, int h);
 	//void windowResized(ofEventArgs &e) {
@@ -118,7 +118,47 @@ public:
 		windowResized(ofGetWidth(), ofGetHeight());
 	}
 
+	//--
+
+	//--------------------------------------------------------------
+	void setEscapeQuitsApp(bool b) {
+		ofSetEscapeQuitsApp(b);
+	};
+
+	//--------------------------------------------------------------
+	void setToggleAlwaysOnTop() {
+		setAlwaysOnTop(!isOnTop);
+	}
+	//--------------------------------------------------------------
+	void setAlwaysOnTop(bool b) {
+#if defined(TARGET_WIN32)
+		ofLogNotice("ofxWindowApp") << (__FUNCTION__) << b;
+		if (b) {
+			// Make app always on top
+			HWND W = GetActiveWindow();
+			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+		}
+		else {
+			// Disable make app always on top
+			HWND W = GetActiveWindow();
+			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+		}
+		isOnTop = b;
+#else
+		ofLogError("ofxWindowApp") << "Not implemented. Only TARGET_WIN32 yet!";
+#endif
+	};
+
+private:
+
+	bool isOnTop = false;
+
+	//--
+
+public:
+
 	void refreshGetWindowSettings();
+
 	void saveFileWindow();
 	void loadFileSettings();
 
