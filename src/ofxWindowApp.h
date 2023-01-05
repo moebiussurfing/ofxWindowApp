@@ -12,6 +12,8 @@
 
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
 
+#define BAR_HEIGHT 25 // probably on Win32 only.
+
 //TODO:
 // +++	add ofxScreenSetup addon to bundle all other features
 // +	add windowResize subscribed listener to auto refresh
@@ -157,6 +159,24 @@ private:
 
 public:
 
+	// from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
+	//--------------------------------------------------------------
+	void setConsoleVisible(bool show)
+	{
+#if defined(TARGET_WIN32)
+		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
+#endif
+	}
+	//--------------------------------------------------------------
+	bool getConsoleVisible() {
+		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
+	}
+
+
+	//--
+
+public:
+
 	void refreshGetWindowSettings();
 
 	void saveFileWindow();
@@ -189,24 +209,24 @@ public:
 	//--------------------------------------------------------------
 	void setShowDebug(bool b = true)
 	{
-		SHOW_Debug = b;
-		SHOW_PerformanceAllways = b;
+		bDebug = b;
+		bShowPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
 	bool getShowDebug()
 	{
-		return SHOW_Debug;
+		return bDebug;
 	}
 	//--------------------------------------------------------------
 	void toggleShowDebug()
 	{
-		SHOW_Debug = !SHOW_Debug;
+		bDebug = !bDebug;
 	}
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAllways(bool b = true)
 	{
-		SHOW_PerformanceAllways = b;
+		bShowPerformanceAlways = b;
 	}
 
 	void folderCheckAndCreate(string _path);
@@ -236,7 +256,7 @@ private:
 		ofLogVerbose(__FUNCTION__);
 		ofLogVerbose(__FUNCTION__) << "targetFps  : " << targetFps;
 		ofLogVerbose(__FUNCTION__) << "vSync	  : " << vSync;
-		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG : " << SHOW_Debug.get();
+		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG : " << bDebug.get();
 		ofLogVerbose(__FUNCTION__) << "bModeMini  : " << bModeMini.get();
 		ofLogVerbose(__FUNCTION__) << "bLock      : " << bLock.get();
 
@@ -409,12 +429,12 @@ private:
 	ofParameterGroup params_Extra{ "extra settings" };
 	ofParameter<bool> vSync{ "vsync", false };
 	ofParameter<float> targetFps{ "fps", 60.5, 1, 120 };
-	ofParameter<bool> SHOW_Debug{ "showInfo", true };
+	ofParameter<bool> bDebug{ "showInfo", true };
 	ofParameter<bool> bModeMini{ "miniPreset", false };
-	ofParameter<bool> SHOW_PerformanceAllways{ "debugPerformance", true };
+	ofParameter<bool> bShowPerformanceAlways{ "debugPerformance", true };
 	ofParameter<bool> bLock{ "lockMode", false };
 
-	//string windowBigMode;//fulscreen or window mode
+	//string windowBigMode;//full screen or window mode
 	float realFps;
 	int xx = 10;
 	int yy = 0;
@@ -426,6 +446,22 @@ private:
 	void refreshTogleWindowMode();
 
 public:
+
+	//--------------------------------------------------------------
+	void doReset() {
+		bigFullScreen = false;
+		vSync = false;
+		bModeMini= false;
+		targetFps = 60;
+
+		BigWindow.setPosition(glm::vec2(0, BAR_HEIGHT));
+		BigWindow.setSize(1920, 1080 - BAR_HEIGHT);
+
+		MiniWindow.setPosition(glm::vec2(20, 20));
+		MiniWindow.setSize(200, 200);
+
+		applyMode();
+	};
 
 	//--------------------------------------------------------------
 	void drawInfo() {

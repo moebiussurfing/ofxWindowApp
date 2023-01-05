@@ -6,7 +6,7 @@ ofxWindowApp::ofxWindowApp()
 	ofSetLogLevel(__FUNCTION__, OF_LOG_NOTICE);
 
 	//default
-	int _h = 25;//bar height
+	int _h = BAR_HEIGHT;//bar height
 	BigWindow.setPosition(glm::vec2(0, _h));
 	//BigWindow.setSize(800, 600);
 	BigWindow.setSize(1920, 1080 - _h);
@@ -27,7 +27,7 @@ ofxWindowApp::ofxWindowApp()
 //--------------------------------------------------------------
 ofxWindowApp::~ofxWindowApp()
 {
-	ofLogNotice(__FUNCTION__) << "DONE!";
+	ofLogNotice("ofxWindowApp") << (__FUNCTION__) << "DONE!";
 
 	exit();
 }
@@ -35,7 +35,7 @@ ofxWindowApp::~ofxWindowApp()
 //--------------------------------------------------------------
 void ofxWindowApp::exit()
 {
-	ofLogNotice(__FUNCTION__);
+	ofLogNotice("ofxWindowApp") << (__FUNCTION__);
 	if (bAutoSaveLoad)
 	{
 		refreshGetWindowSettings();
@@ -50,7 +50,7 @@ void ofxWindowApp::exit()
 //--------------------------------------------------------------
 void ofxWindowApp::setup()
 {
-	ofLogNotice(__FUNCTION__);
+	ofLogNotice("ofxWindowApp") << (__FUNCTION__);
 
 	//default folders
 	path_folder = "ofxWindowApp";
@@ -66,8 +66,8 @@ void ofxWindowApp::setup()
 	//extra settings
 	params_Extra.add(vSync);
 	params_Extra.add(targetFps);
-	params_Extra.add(SHOW_Debug);
-	params_Extra.add(SHOW_PerformanceAllways);
+	params_Extra.add(bDebug);
+	params_Extra.add(bShowPerformanceAlways);
 	params_Extra.add(bModeMini);
 	params_Extra.add(bLock);
 
@@ -80,8 +80,8 @@ void ofxWindowApp::setup()
 	////mini settings
 	//params_Extra.add(vSync);
 	//params_Extra.add(targetFps);
-	//params_Extra.add(SHOW_Debug);
-	//params_Extra.add(SHOW_PerformanceAllways);
+	//params_Extra.add(bDebug);
+	//params_Extra.add(bShowPerformanceAlways);
 	//params_Extra.add(bModeMini);
 
 	//-
@@ -99,7 +99,7 @@ void ofxWindowApp::setup()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::update(ofEventArgs & args)
+void ofxWindowApp::update(ofEventArgs& args)
 {
 	if (ofGetFrameNum() == 1) {
 		//workaround: 
@@ -114,9 +114,9 @@ void ofxWindowApp::update(ofEventArgs & args)
 
 	//TODO: WIP lock mode
 	//if (isChanged()) {
-	//	ofLogNotice(__FUNCTION__) << "isChanged()";
+	//	ofLogNotice("ofxWindowApp")<<(__FUNCTION__) << "isChanged()";
 	//	if (bLock) {// we want to lock windowResize changed. reload settings from file
-	//		ofLogWarning(__FUNCTION__) << "Force lock!";
+	//		ofLogWarning("ofxWindowApp")<<(__FUNCTION__) << "Force lock!";
 	//		//restore last state
 	//		//loadFileSettings();
 	//		ofSetWindowPosition(WindowPRE.getPosition().x, WindowPRE.getPosition().y);
@@ -135,7 +135,7 @@ void ofxWindowApp::update(ofEventArgs & args)
 	//{
 	//	if (bAutoSaveLoad)
 	//	{
-	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
+	//		ofLogNotice("ofxWindowApp")<<(__FUNCTION__) << "Just saved after window been resized";
 	//		//refreshGetWindowSettings();
 	//		saveFileWindow();
 	//	}
@@ -155,9 +155,9 @@ void ofxWindowApp::update(ofEventArgs & args)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::draw(ofEventArgs & args)
+void ofxWindowApp::draw(ofEventArgs& args)
 {
-	//ofLogVerbose(__FUNCTION__);
+	//ofLogVerbose("ofxWindowApp")<<(__FUNCTION__);
 
 	//--
 
@@ -182,14 +182,14 @@ void ofxWindowApp::draw(ofEventArgs & args)
 
 	//--
 
-	if (SHOW_Debug)
+	if (bDebug)
 	{
 		drawDEBUG();
 		drawPerformance();
 	}
 	else
 	{
-		if (SHOW_PerformanceAllways)
+		if (bShowPerformanceAlways)
 			drawPerformance();
 	}
 }
@@ -197,7 +197,7 @@ void ofxWindowApp::draw(ofEventArgs & args)
 //--------------------------------------------------------------
 void ofxWindowApp::refreshGetWindowSettings()
 {
-	ofLogVerbose(__FUNCTION__);
+	ofLogVerbose("ofxWindowApp") << (__FUNCTION__);
 
 	if (!bModeMini) {// big
 		BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
@@ -221,7 +221,7 @@ void ofxWindowApp::refreshGetWindowSettings()
 void ofxWindowApp::saveFileWindow()
 {
 	string __path = path_folder + "/" + path_filename;
-	ofLogNotice(__FUNCTION__) << __path;
+	ofLogNotice("ofxWindowApp") << (__FUNCTION__) << __path;
 
 	//force mini to window, not fullscreen
 	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
@@ -258,7 +258,7 @@ void ofxWindowApp::saveFileWindow()
 	folderCheckAndCreate(path_folder);
 
 	//save file
-	ofLogNotice(__FUNCTION__) << data.dump(4);
+	ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
 }
 
@@ -274,7 +274,7 @@ void ofxWindowApp::loadFileSettings()
 	bool _b = file.exists();
 	if (_b)
 	{
-		ofLogNotice(__FUNCTION__) << "File found: " << __path;
+		ofLogNotice("ofxWindowApp") << (__FUNCTION__) << "File found: " << __path;
 
 		//-
 
@@ -287,13 +287,13 @@ void ofxWindowApp::loadFileSettings()
 		////TEST:
 		//ofJson jMini;
 		//jMini = ofLoadJson(path_folder + "/"+path_filename2);
-		//ofLogVerbose(__FUNCTION__) << "json: " << jMini;
+		//ofLogVerbose("ofxWindowApp")<<(__FUNCTION__) << "json: " << jMini;
 		//ofDeserialize(jMini, params_Extra);
 
 		//B. settings in one file
 		ofJson data;
 		data = ofLoadJson(__path);
-		ofLogNotice(__FUNCTION__) << "All json: " << data;
+		ofLogNotice("ofxWindowApp") << "All json: " << data;
 
 		ofJson jBig;
 		ofJson jMini;
@@ -307,11 +307,11 @@ void ofxWindowApp::loadFileSettings()
 			//recall both params groups
 			ofDeserialize(jExtra, params_Extra);
 		}
-		else ofLogError(__FUNCTION__) << "ERROR on data[] size = " << ofToString(data.size());
+		else ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 
-		ofLogVerbose(__FUNCTION__) << "jBig  : " << jBig;
-		ofLogVerbose(__FUNCTION__) << "jMini : " << jMini;
-		ofLogVerbose(__FUNCTION__) << "jExtra: " << jExtra;
+		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
+		ofLogVerbose("ofxWindowApp") << "jMini : " << jMini;
+		ofLogVerbose("ofxWindowApp") << "jExtra: " << jExtra;
 
 		//-
 
@@ -324,10 +324,10 @@ void ofxWindowApp::loadFileSettings()
 		jw = jMini["size"]["width"];
 		jh = jMini["size"]["height"];
 
-		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
-		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
-		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
-		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
+		ofLogVerbose("ofxWindowApp") << "jx: " << jx;
+		ofLogVerbose("ofxWindowApp") << "jy: " << jy;
+		ofLogVerbose("ofxWindowApp") << "jw: " << jw;
+		ofLogVerbose("ofxWindowApp") << "jh: " << jh;
 
 		MiniWindow.setPosition(glm::vec2(jx, jy));
 		MiniWindow.setSize(jw, jh);
@@ -347,11 +347,11 @@ void ofxWindowApp::loadFileSettings()
 		jm = ofToString(jBig["window_mode"]);
 		//jm = jBig["window_mode"];
 
-		ofLogVerbose(__FUNCTION__) << "jx: " << jx;
-		ofLogVerbose(__FUNCTION__) << "jy: " << jy;
-		ofLogVerbose(__FUNCTION__) << "jw: " << jw;
-		ofLogVerbose(__FUNCTION__) << "jh: " << jh;
-		ofLogVerbose(__FUNCTION__) << "jm: " << jm;
+		ofLogVerbose("ofxWindowApp") << "jx: " << jx;
+		ofLogVerbose("ofxWindowApp") << "jy: " << jy;
+		ofLogVerbose("ofxWindowApp") << "jw: " << jw;
+		ofLogVerbose("ofxWindowApp") << "jh: " << jh;
+		ofLogVerbose("ofxWindowApp") << "jm: " << jm;
 
 		// TODO:
 		//workaround
@@ -392,7 +392,7 @@ void ofxWindowApp::loadFileSettings()
 	}
 	else
 	{
-		ofLogError(__FUNCTION__) << "File NOT found: " << __path;
+		ofLogError("ofxWindowApp") << "File NOT found: " << __path;
 	}
 
 	//-
@@ -481,7 +481,7 @@ void ofxWindowApp::drawPerformance()
 		//fy = yy - fh - 50.0f;//little air
 		fy = yy - fh + 1.0f;//to the border
 
-		fw = ofMap(realFps, 0.0f*targetFps, targetFps, 0, fwMax, true);
+		fw = ofMap(realFps, 0.0f * targetFps, targetFps, 0, fwMax, true);
 		int fa = 150;//alpha
 		int iDiff = (int)targetFps - realFps;
 		string diff;
@@ -510,7 +510,7 @@ void ofxWindowApp::drawPerformance()
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h)
 {
-	ofLogNotice(__FUNCTION__) << ofToString(w) << "," << ofToString(h);
+	ofLogNotice("ofxWindowApp") << (__FUNCTION__) << ofToString(w) << "," << ofToString(h);
 
 	window_W = w;
 	window_H = h;
@@ -524,17 +524,17 @@ void ofxWindowApp::windowResized(int w, int h)
 	//TODO: fix
 	if (bAutoSaveLoad)
 	{
-		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
+		ofLogNotice("ofxWindowApp") << (__FUNCTION__) << "Just saved after window been resized";
 		saveFileWindow();
 	}
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
+void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 {
 	if (ENABLE_Keys)
 	{
-		const int &key = eventArgs.key;
+		const int& key = eventArgs.key;
 
 		//modifier
 		bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
@@ -542,14 +542,14 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 
 		if (false)
-			ofLogNotice(__FUNCTION__) << "'" << (char)key << "' [" << key << "]";
+			ofLogNotice("ofxWindowApp") << (__FUNCTION__) << "'" << (char)key << "' [" << key << "]";
 
 		//disable draw debug
 		if (mod_CONTROL && key == 'w' || mod_CONTROL && key == 'w' ||
 			key == 'W')
 		{
-			SHOW_Debug = !SHOW_Debug;
-			ofLogNotice(__FUNCTION__) << "changed draw debug: " << (SHOW_Debug ? "ON" : "OFF");
+			bDebug = !bDebug;
+			ofLogNotice("ofxWindowApp") << (__FUNCTION__) << "changed draw debug: " << (bDebug ? "ON" : "OFF");
 		}
 
 		//switch window mode
@@ -563,8 +563,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 			ofSetVerticalSync(vSync);
 		}
 		else if (key == 'M' && mod_ALT)//switch window mode big/mini
-		//else if (key == 'M')//switch window mode big/mini
-		//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
+			//else if (key == 'M')//switch window mode big/mini
+			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
 		}
@@ -589,7 +589,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs &eventArgs)
 //--------------------------------------------------------------
 void ofxWindowApp::folderCheckAndCreate(string _path)
 {
-	ofLogNotice(__FUNCTION__);
+	ofLogNotice("ofxWindowApp") << (__FUNCTION__);
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
@@ -672,7 +672,7 @@ void ofxWindowApp::refreshTogleWindowMode()
 //--------------------------------------------------------------
 void ofxWindowApp::applyMode()
 {
-	ofLogVerbose(__FUNCTION__);
+	ofLogVerbose("ofxWindowApp") << (__FUNCTION__);
 
 	//apply extra
 	ofSetVerticalSync(vSync);
