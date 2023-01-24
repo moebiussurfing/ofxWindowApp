@@ -264,10 +264,9 @@ private:
 		ofSetVerticalSync(vSync);
 	}
 
-	//private:
 public:
 
-	//layout modes
+	// Layout modes
 	enum DEBUG_Position
 	{
 		DEBUG_POSITION_TOP = 0,
@@ -305,7 +304,6 @@ public:
 
 public:
 
-	//getters
 	float getFrameRate()
 	{
 		return targetFps.get();
