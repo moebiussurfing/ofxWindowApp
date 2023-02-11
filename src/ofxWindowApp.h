@@ -48,7 +48,14 @@ private:
 	void setup();
 	void update(ofEventArgs& args);
 	void draw(ofEventArgs& args);
+
 	void keyPressed(ofKeyEventArgs& eventArgs);
+	void keyReleased(ofKeyEventArgs& eventArgs);
+	
+	//modifiers
+	bool mod_COMMAND = false;
+	bool mod_CONTROL = false;
+	bool mod_ALT = false;
 
 	void windowResized(int w, int h);
 	//void windowResized(ofEventArgs &e) {
@@ -297,7 +304,7 @@ public:
 	}
 	void setEnableKeys(bool b)
 	{
-		ENABLE_Keys = b;
+		bKeys = b;
 	}
 
 	//-
@@ -421,7 +428,7 @@ private:
 
 	bool bAutoSaveLoad = true;
 	bool bChangedWindow = false;
-	bool ENABLE_Keys = true;//keys enabled by default
+	bool bKeys = true;//keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 	ofParameterGroup params_Extra{ "extra settings" };
@@ -449,7 +456,7 @@ public:
 	void doReset() {
 		bigFullScreen = false;
 		vSync = false;
-		bModeMini= false;
+		bModeMini = false;
 		targetFps = 60;
 
 		BigWindow.setPosition(glm::vec2(0, BAR_HEIGHT));

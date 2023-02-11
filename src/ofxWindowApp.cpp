@@ -45,6 +45,7 @@ void ofxWindowApp::exit()
 	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofRemoveListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
+	ofRemoveListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
 }
 
 //--------------------------------------------------------------
@@ -60,6 +61,7 @@ void ofxWindowApp::setup()
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
+	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
 	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);
 	//ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowIsResized);
 
@@ -532,14 +534,14 @@ void ofxWindowApp::windowResized(int w, int h)
 //--------------------------------------------------------------
 void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 {
-	if (ENABLE_Keys)
+	if (bKeys)
 	{
 		const int& key = eventArgs.key;
 
 		//modifier
-		bool mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
-		bool mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
-		bool mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
+		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
+		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 
 		if (false)
 			ofLogNotice("ofxWindowApp") << (__FUNCTION__) << "'" << (char)key << "' [" << key << "]";
@@ -579,6 +581,23 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
 			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
 		}
+
+		else if (key == OF_KEY_BACKSPACE && mod_CONTROL) {
+			doReset();
+		}
+	}
+}
+//--------------------------------------------------------------
+void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
+{
+	if (bKeys)
+	{
+		const int& key = eventArgs.key;
+
+		//modifier
+		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
+		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
+		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 	}
 }
 
