@@ -11,7 +11,7 @@
 
 
 
-## Overview
+## OVERVIEW
 
 **openFrameworks** add-on to **auto store** and **recall** the basic app **window state/settings**:
 
@@ -21,11 +21,13 @@
 * App target **FPS** settings, real current **framerate**, and **vSync** state. 
 * "Trigs **Alert**" and shows a **performance** bar when **low FPS drops** under the target (expected) frame rate.
 * Easy change the app settings just editing the **JSON file** not the app code.
-* **Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)
+* ~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~
+        * Currently mini mode is disabled. 
 * **Lock mode** to avoid future changes after modifiying window. (WIP)
-* Command to restore **1080p Full HD** settings.
+* Reset command to restore **1080p Full HD** settings.
+* Custom TTF font.
 
-## Shortcuts
+## SHORTCUTS
 
 ```
 W: Show debug info  
@@ -36,21 +38,21 @@ R: Set Full HD size on the main monitor
 M: Switch Big/Mini modes (WIP)  
 ```
 
-## Why?
+## WHY?
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
 (_Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times..._
 _Using this addon you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._)  
 
-## Dependencies
+## DEPENDENCIES
 
 **ofxSerialize** from **@bakercp** (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
 You don't need to add with **Project Generator**.
 
-## Usage
+## USAGE
 
 ## ofApp.h
 ```.c++
@@ -89,18 +91,6 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:
         "window_mode": "OF_WINDOW"
     },
     {
-        "Preset": "Mini",
-        "position": {
-            "x": 20.0,
-            "y": 20.0
-        },
-        "size": {
-            "height": 200,
-            "width": 200
-        },
-        "window_mode": "OF_WINDOW"
-    },
-    {
         "extra_settings": {
             "debugPerformance": "1",
             "fps": "60",
@@ -117,13 +107,13 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:
 
 * Join with another add-on to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
-## Tested systems
+## TESTED SYSTEMS
 - **Windows10** / **VS2017** / **OF ~0.11**
 - **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11**
 
-## Author
-Addon by **@moebiusSurfing**  
+## AUTHOR
+Add-on by **@moebiusSurfing**  
 *(ManuMolina). 2020.*
 
-## License
+## LICENSE
 *MIT License.*
