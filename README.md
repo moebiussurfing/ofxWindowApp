@@ -21,8 +21,8 @@
 * App target **FPS** settings, real current **framerate**, and **vSync** state. 
 * "Trigs **Alert**" and shows a **performance** bar when **low FPS drops** under the target (expected) frame rate.
 * Easy change the app settings just editing the **JSON file** not the app code.
-* ~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~
-        * Currently mini mode is disabled. 
+* ~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~  
+    * Currently mini mode is disabled. 
 * **Lock mode** to avoid future changes after modifiying window. (WIP)
 * Reset command to restore **1080p Full HD** settings.
 * Custom TTF font.
