@@ -3,23 +3,11 @@
         "Preset": "Big",
         "position": {
             "x": 0.0,
-            "y": 0.0
+            "y": 18.0
         },
         "size": {
             "height": 1080,
             "width": 1920
-        },
-        "window_mode": "OF_FULLSCREEN"
-    },
-    {
-        "Preset": "Mini",
-        "position": {
-            "x": 553.0,
-            "y": 253.0
-        },
-        "size": {
-            "height": 375,
-            "width": 1060
         },
         "window_mode": "OF_WINDOW"
     },
@@ -28,9 +16,8 @@
             "debugPerformance": "1",
             "fps": "60",
             "lockMode": "0",
-            "miniPreset": "0",
             "showInfo": "1",
-            "vsync": "1"
+            "vsync": "0"
         }
     }
 ]

@@ -3,24 +3,27 @@
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp()
 {
-	ofSetLogLevel(__FUNCTION__, OF_LOG_NOTICE);
+	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	//default
+	// default
 	int _h = BAR_HEIGHT;//bar height
 	BigWindow.setPosition(glm::vec2(0, _h));
 	//BigWindow.setSize(800, 600);
 	BigWindow.setSize(1920, 1080 - _h);
 	BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
 
+
+#ifdef USE_MINI_WINDOW
 	MiniWindow.setPosition(glm::vec2(20, 20));
 	MiniWindow.setSize(200, 200);
 	MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
+#endif
 
 	setFrameRate(60);
 	setVerticalSync(false);
 	setShowDebug(false);
 
-	//auto call setup
+	// auto call setup
 	setup();
 }
 
@@ -53,11 +56,11 @@ void ofxWindowApp::setup()
 {
 	ofLogNotice("ofxWindowApp") << (__FUNCTION__);
 
-	//default folders
+	// default folders
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
 
-	//callbacks to auto call update/draw/keyPressed
+	// callbacks to auto call update/draw/keyPressed
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
@@ -65,21 +68,24 @@ void ofxWindowApp::setup()
 	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);
 	//ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowIsResized);
 
-	//extra settings
+	// extra settings
 	params_Extra.add(vSync);
 	params_Extra.add(targetFps);
 	params_Extra.add(bDebug);
 	params_Extra.add(bShowPerformanceAlways);
+
+#ifdef USE_MINI_WINDOW
 	params_Extra.add(bModeMini);
+#endif
 	params_Extra.add(bLock);
 
-	//load
+	// load
 	if (bAutoSaveLoad) loadFileSettings();
 
-	//default
+	// default
 	setShowPerformanceAllways(true);
 
-	////mini settings
+	//// mini settings
 	//params_Extra.add(vSync);
 	//params_Extra.add(targetFps);
 	//params_Extra.add(bDebug);
@@ -88,25 +94,40 @@ void ofxWindowApp::setup()
 
 	//-
 
-	//workarounds
+	// workarounds
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
 
-	if (!bModeMini) {
+#ifdef USE_MINI_WINDOW
+	if (!bModeMini)
+#endif
+	{
 		if (bigFullScreen) {
 			ofSetFullscreen(bigFullScreen);
 			ofSetWindowPosition(0, 0);
 			ofSetWindowShape(ofGetWidth(), ofGetHeight());
 		}
 	}
+
+	//--
+
+#ifdef USE_CUSTOM_FONT
+	// font
+	fontSize = 10;
+	string _path = "assets/fonts/"; // assets folder
+	string _f = "JetBrainsMono-Bold.ttf";
+	_path += _f;
+	bool b = font.load(_path, fontSize);
+	if (!b) font.load(OF_TTF_MONO, fontSize);
+#endif
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs& args)
 {
 	if (ofGetFrameNum() == 1) {
-		//workaround: 
+		// workaround: 
 
-		////works but slow
+		//// works but slow
 		//refreshTogleWindowMode();
 		//refreshTogleWindowMode();
 
@@ -114,7 +135,8 @@ void ofxWindowApp::update(ofEventArgs& args)
 		ofToggleFullscreen();
 	}
 
-	//TODO: WIP lock mode
+	//TODO: 
+	// WIP lock mode
 	//if (isChanged()) {
 	//	ofLogNotice("ofxWindowApp")<<(__FUNCTION__) << "isChanged()";
 	//	if (bLock) {// we want to lock windowResize changed. reload settings from file
@@ -127,12 +149,12 @@ void ofxWindowApp::update(ofEventArgs& args)
 	//}
 
 	////TODO:
-	////store last states
+	//// store last states
 	//WindowPRE.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	//WindowPRE.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 
 	////TODO: fix
-	////autosave
+	//// autosave
 	//if (isChanged()) 
 	//{
 	//	if (bAutoSaveLoad)
@@ -165,7 +187,7 @@ void ofxWindowApp::draw(ofEventArgs& args)
 
 	realFps = ofGetFrameRate();
 
-	////workaround:
+	//// workaround:
 	//until windowResize well implemented
 	//window_X = ofGetWindowPositionX();
 	//window_Y = ofGetWindowPositionY();
@@ -174,19 +196,29 @@ void ofxWindowApp::draw(ofEventArgs& args)
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM)
 	{
-		yy = window_H - 10;//little air
-		//yy = window_H - 6;
+#ifndef USE_CUSTOM_FONT
+		yy = window_H - 10; // little air
+#endif
+#ifdef USE_CUSTOM_FONT
+		yy = window_H - fontSize + 5;
+#endif
 	}
+
 	else if (positionLayout == DEBUG_POSITION_TOP)
 	{
+#ifndef USE_CUSTOM_FONT
 		yy = 15;
+#endif
+#ifdef USE_CUSTOM_FONT
+		yy = fontSize;
+#endif
 	}
 
 	//--
 
 	if (bDebug)
 	{
-		drawDEBUG();
+		drawDebug();
 		drawPerformance();
 	}
 	else
@@ -201,7 +233,11 @@ void ofxWindowApp::refreshGetWindowSettings()
 {
 	ofLogVerbose("ofxWindowApp") << (__FUNCTION__);
 
-	if (!bModeMini) {// big
+#ifdef USE_MINI_WINDOW
+	if (!bModeMini)
+#endif
+	{
+		// big
 		BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		BigWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
@@ -210,13 +246,17 @@ void ofxWindowApp::refreshGetWindowSettings()
 		if (BigWindow.windowMode == ofWindowMode(0)) bigFullScreen = false;
 		else if (BigWindow.windowMode == ofWindowMode(1)) bigFullScreen = true;
 		else if (BigWindow.windowMode == ofWindowMode(2)) bigFullScreen = false;
-
 	}
-	else {// mini
+
+#ifdef USE_MINI_WINDOW
+	else
+	{
+		// mini
 		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
 	}
+#endif
 }
 
 //--------------------------------------------------------------
@@ -225,41 +265,54 @@ void ofxWindowApp::saveFileWindow()
 	string __path = path_folder + "/" + path_filename;
 	ofLogNotice("ofxWindowApp") << (__FUNCTION__) << __path;
 
-	//force mini to window, not fullscreen
+	// force mini to window, not full screen
+#ifdef USE_MINI_WINDOW
 	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
+#endif
 
-	//save window settings
+	// save window settings
 
 	ofJson jApp;
 	ofJson jMini;
 	ofJson jExtra;
 
 	to_json(jApp, BigWindow);
+
+#ifdef USE_MINI_WINDOW
 	to_json(jMini, MiniWindow);
+#endif
+
 	ofSerialize(jExtra, params_Extra);
 
 	jApp["Preset"] = "Big";
-	jMini["Preset"] = "Mini";
 
-	//A. using 2 files
+
+#ifdef USE_MINI_WINDOW
+	jMini["Preset"] = "Mini";
+#endif
+
+	// A. using 2 files
 	//ofSavePrettyJson(path_folder + "/"+path_filename, j);
 	//TODO:
-	//we can't get framerate and vsync mode from window app.
-	//should be setted by hand
-	//extra settings could be mixed in one json only for both
-	//TEST:
+	// we can't get framerate and vsync mode from window app.
+	// should be settled by hand
+	// extra settings could be mixed in one json only for both
+	// TEST:
 	//ofSavePrettyJson(path_folder + "/"+path_filename2, jMini);
 
 	//B. settings in one file
 	ofJson data;
 	data.push_back(jApp);
+
+#ifdef USE_MINI_WINDOW
 	data.push_back(jMini);
+#endif
 	data.push_back(jExtra);
 
-	//check if we need to create data folder first
+	// check if we need to create data folder first
 	folderCheckAndCreate(path_folder);
 
-	//save file
+	// save file
 	ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
 }
@@ -280,13 +333,13 @@ void ofxWindowApp::loadFileSettings()
 
 		//-
 
-		//load settings
+		// Load settings
 
-		//A. using 2 files
+		// A. using 2 files
 		//ofJson j = ofLoadJson(path_folder + "/"+path_filename);
 		//ofx::Serializer::ApplyWindowSettings(j);
-		////extra settings could be mixed in one json only for both
-		////TEST:
+		//// extra settings could be mixed in one json only for both
+		//// TEST:
 		//ofJson jMini;
 		//jMini = ofLoadJson(path_folder + "/"+path_filename2);
 		//ofLogVerbose("ofxWindowApp")<<(__FUNCTION__) << "json: " << jMini;
@@ -298,6 +351,8 @@ void ofxWindowApp::loadFileSettings()
 		ofLogNotice("ofxWindowApp") << "All json: " << data;
 
 		ofJson jBig;
+
+#ifdef USE_MINI_WINDOW
 		ofJson jMini;
 		ofJson jExtra;
 
@@ -314,13 +369,31 @@ void ofxWindowApp::loadFileSettings()
 		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
 		ofLogVerbose("ofxWindowApp") << "jMini : " << jMini;
 		ofLogVerbose("ofxWindowApp") << "jExtra: " << jExtra;
+#endif
+
+#ifndef USE_MINI_WINDOW
+		ofJson jExtra;
+
+		if (data.size() >= 2) {
+			jBig = data[0];//TODO: ugly workaround
+			jExtra = data[1];
+
+			//recall both params groups
+			ofDeserialize(jExtra, params_Extra);
+		}
+		else ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
+
+		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
+		ofLogVerbose("ofxWindowApp") << "jExtra: " << jExtra;
+#endif
 
 		//-
 
 		int jx, jy, jw, jh;
 		string jm;
 
-		//mini
+#ifdef USE_MINI_WINDOW
+		// mini
 		jx = jMini["position"]["x"];
 		jy = jMini["position"]["y"];
 		jw = jMini["size"]["width"];
@@ -338,10 +411,11 @@ void ofxWindowApp::loadFileSettings()
 		if (jm == "OF_WINDOW") MiniWindow.windowMode = ofWindowMode(0);
 		else if (jm == "OF_FULLSCREEN") MiniWindow.windowMode = ofWindowMode(1);
 		else if (jm == "OF_GAME_MODE") MiniWindow.windowMode = ofWindowMode(2);
+#endif
 
 		//-
 
-		//big
+		// big
 		jx = jBig["position"]["x"];
 		jy = jBig["position"]["y"];
 		jw = jBig["size"]["width"];
@@ -356,7 +430,7 @@ void ofxWindowApp::loadFileSettings()
 		ofLogVerbose("ofxWindowApp") << "jm: " << jm;
 
 		// TODO:
-		//workaround
+		// workaround
 		if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
 			jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
 		}
@@ -384,7 +458,7 @@ void ofxWindowApp::loadFileSettings()
 
 		//windowBigMode = jm;// ?
 
-		////apply
+		//// apply
 		//if (bModeMini) {
 		//	ofx::Serializer::ApplyWindowSettings(jBig);
 		//}
@@ -399,17 +473,17 @@ void ofxWindowApp::loadFileSettings()
 
 	//-
 
-	//apply
+	// apply
 	//applyExtra();
 	applyMode();
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawDEBUG()
+void ofxWindowApp::drawDebug()
 {
 	//----
 
-	//debug overlay screen modes
+	// debug overlay screen modes
 
 	string vSyncStr;
 	string fpsRealStr;
@@ -436,7 +510,10 @@ void ofxWindowApp::drawDEBUG()
 		bMode = true;
 	}
 	screenMode += bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE";
+
+#ifdef USE_MINI_WINDOW
 	screenMode += bModeMini ? " [MINI]" : " [BIG]";
+#endif
 
 	str += "FPS " + fpsRealStr;
 	str += " [" + fpsTargetStr + "]";
@@ -446,42 +523,70 @@ void ofxWindowApp::drawDEBUG()
 	str += strPad + screenMode;
 	str += strPad + (bLock ? "LOCKED ON" : "LOCKED OFF");
 
+#ifndef USE_CUSTOM_FONT
 	ofDrawBitmapStringHighlight(str, xx, yy);
+#endif
+#ifdef USE_CUSTOM_FONT
+	ofPushStyle();
+	ofFill();
+	auto bb = font.getStringBoundingBox(str, xx, yy);
+	bb.setWidth(bb.getWidth() + pad);
+	bb.setHeight(bb.getHeight() + pad);
+	bb.translateX(-pad / 2);
+	bb.translateY(-pad / 2);
+	ofSetColor(0);
+	ofDrawRectangle(bb);
+	ofSetColor(255);
+	font.drawString(str, xx, yy);
+	ofPopStyle();
+#endif
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawPerformance()
 {
-	//monitor fps performance alert
+	// monitor fps performance alert
 
 	bool bPreShow;//starts draw black
 	bool bAlert;//draws red
 	float fpsThreshold;
 
-	////A. thresholds by factor fps between target and real fps
+	//// A. Thresholds by factor fps between target and real fps
 	//fpsThreshold = 0.9f;//below this trigs alert red state
 	//bPreShow = (realFps < targetFps*0.999);//by ratio
 	//bAlert = (realFps < targetFps*fpsThreshold);//A. by ratio
 
-	//B. thresholds by absolute fps difference between desired target and real fps
-	//monitor fps performance
+	// B. Thresholds by absolute fps difference between desired target and real fps
+	// monitor fps performance
 	fpsThreshold = 10.f;//num frames below this trigs alert red state
 	bPreShow = (realFps < targetFps - 5); //below 5 fps starts showing bar
 	bAlert = (realFps < (targetFps - fpsThreshold));//B. by absolute fps diff
 
 	//-
 
-	if (bPreShow)//to draw only under pre threshold
+	// Bar
+
+	if (bPreShow) // to draw only under pre threshold
 	{
 		float fx, fy, fw, fh, fwMax, fPad;
 		fwMax = 100.f;//max width
+
+#ifndef USE_CUSTOM_FONT
 		fh = 10.f;
 		fPad = 5.f;//pad to border
+#endif
+#ifdef USE_CUSTOM_FONT
+		fPad = 4.f;//pad to border
+		//fh = fontSize + pad - 4;
+#endif
 
-		//position
+		// position
 		fx = window_W - fwMax - fPad;
+
+#ifndef USE_CUSTOM_FONT
 		//fy = yy - fh - 50.0f;//little air
 		fy = yy - fh + 1.0f;//to the border
+#endif
 
 		fw = ofMap(realFps, 0.0f * targetFps, targetFps, 0, fwMax, true);
 		int fa = 150;//alpha
@@ -492,18 +597,49 @@ void ofxWindowApp::drawPerformance()
 		if (iDiff < 10) diff = " " + diff;
 		diff += " FPS";
 
+		ofColor cAlert(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
+
 		ofPushStyle();
 
-		ofFill();
-		ofColor cAlert(bAlert ? (ofColor(ofColor::red, fa)) : (ofColor(ofColor::black, fa)));
-		ofSetColor(cAlert);
-		ofDrawRectangle(fx, fy, fw, fh);//out-performance bar
-		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255));//text fps diff
+		float _xx = fx - 68.f;
+		float _yy = yy;
 
+		// fps label
+		string str = diff;
+#ifndef USE_CUSTOM_FONT
+		//ofDrawBitmapStringHighlight(str, xx, yy);
+		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255));//text fps diff
+#endif
+#ifdef USE_CUSTOM_FONT
+		ofPushStyle();
+		ofFill();
+		auto bb = font.getStringBoundingBox(str, _xx, _yy);
+		bb.setWidth(bb.getWidth() + pad);
+		bb.setHeight(bb.getHeight() + pad);
+		bb.translateX(-pad / 2);
+		bb.translateY(-pad / 2);
+		ofSetColor(cAlert);
+		ofDrawRectangle(bb);
+		ofSetColor(255);
+		font.drawString(str, _xx, _yy);
+		ofPopStyle();
+#endif
+
+#ifdef USE_CUSTOM_FONT
+		fy = bb.getY();
+		fh = bb.getHeight()  - 2;
+#endif
+
+		// out-performance bar
+		ofFill();
+		ofSetColor(cAlert);
+		ofDrawRectangle(fx, fy, fw, fh);
+
+		// rect border
 		ofNoFill();
 		ofSetLineWidth(2.0f);
 		ofSetColor(cAlert);
-		ofDrawRectangle(fx, fy, fwMax, fh);//rect border
+		ofDrawRectangle(fx, fy, fwMax, fh); 
 
 		ofPopStyle();
 	}
@@ -564,12 +700,17 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			vSync = !vSync;
 			ofSetVerticalSync(vSync);
 		}
+
+
+#ifdef USE_MINI_WINDOW
 		else if (key == 'M' && mod_ALT)//switch window mode big/mini
 			//else if (key == 'M')//switch window mode big/mini
 			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
 		}
+#endif
+
 		else if (key == 'L' && mod_ALT)//toggle lock
 		{
 			bLock = !bLock;
@@ -578,6 +719,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		{
 			BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
 			BigWindow.setSize(1920, 1080);
+
 			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
 			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
 		}
@@ -594,7 +736,7 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 	{
 		const int& key = eventArgs.key;
 
-		//modifier
+		// modifier
 		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
 		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
 		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
@@ -612,7 +754,7 @@ void ofxWindowApp::folderCheckAndCreate(string _path)
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
-	//check if target data folder exist
+	// check if target data folder exist
 	if (!dataDirectory.isDirectory())
 	{
 		ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
@@ -631,7 +773,7 @@ void ofxWindowApp::folderCheckAndCreate(string _path)
 //--------------------------------------------------------------
 void ofxWindowApp::refreshTogleWindowMode()
 {
-	if (ofGetWindowMode() == OF_WINDOW)//go full screen
+	if (ofGetWindowMode() == OF_WINDOW) // go full screen
 	{
 		ofSetFullscreen(true);
 
@@ -650,20 +792,20 @@ void ofxWindowApp::refreshTogleWindowMode()
 
 		bigFullScreen = true;
 	}
-	else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
+	else if (ofGetWindowMode() == OF_FULLSCREEN) // go window mode
 	{
 		ofSetFullscreen(false);
 
 		//TODO:
-		//rare behaviour with black screen in secondary monitors..
+		// rare behavior with black screen in secondary monitors..
 
-		//workaround:
-		//to fit window and his bar visible into the screen
+		// workaround:
+		// to fit window and his bar visible into the screen
 		float windowBar_h = 25;
 
-		//workaround
-		//it's window mode..
-		//kick a little down to avoid hidden window title barF
+		// workaround
+		// it's window mode..
+		// kick a little down to avoid hidden window title barF
 		window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
 		window_X = ofGetWindowPositionX();
 		ofSetWindowPosition(window_X, window_Y);
@@ -699,7 +841,9 @@ void ofxWindowApp::applyMode()
 
 	//-
 
-	//mini preset
+	// mini preset
+
+#ifdef USE_MINI_WINDOW
 	if (bModeMini)
 	{
 		ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
@@ -707,8 +851,9 @@ void ofxWindowApp::applyMode()
 		ofSetFullscreen(false);
 	}
 
-	//big preset
+	// big preset
 	else
+#endif
 	{
 		//ofSetFullscreen(bigFullScreen);
 
@@ -731,7 +876,7 @@ void ofxWindowApp::applyMode()
 
 	//-
 
-	////apply
+	//// apply
 	//if (bModeMini) {
 	//	ofx::Serializer::ApplyWindowSettings(BigWindow);
 	//}
@@ -746,5 +891,4 @@ void ofxWindowApp::applyMode()
 	//	ofSetFullscreen(bigFullScreen);
 	//	if (bigFullScreen) ofSetWindowPosition(0, 0);
 	//}
-
 }

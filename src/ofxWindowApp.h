@@ -1,5 +1,15 @@
 #pragma once
 
+/*
+
+	TODO:
+
+	 +	add ofxScreenSetup addon to bundle all other features
+	 +	add windowResize subscribed listener to auto refresh
+
+ */
+
+
 #include "ofMain.h"
 #include "ofxSerializer.h"
 
@@ -8,22 +18,24 @@
 #include "ofxWindowApp.h"
 #endif
 
+#define SIZE_SECURE_GAP_INISDE_SCREEN 18 
+ // to avoid that window border it's outside screen monitor
+
+#define BAR_HEIGHT 25 
+// probably fits on Win32 only.
+
+#define USE_CUSTOM_FONT
+
 #define USING__OFX_WINDOW_APP
 
-#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
+ //#define USE_MINI_WINDOW
+ // Mini window mode can be switched to normal/big mode.
+ // both states will be handled in parallel
 
-#define BAR_HEIGHT 25 // probably on Win32 only.
 
-//TODO:
-// +++	add ofxScreenSetup addon to bundle all other features
-// +	add windowResize subscribed listener to auto refresh
-
-class ofxWindowApp/* : public ofBaseApp*/
+//class ofxWindowApp : public ofBaseApp
+class ofxWindowApp
 {
-	//TODO:
-	//I used public ofBaseApp to make auto update/draw without any call to them is required to made manually...
-	//but it exposes several not needed methods (?)
-
 public:
 
 	ofxWindowApp();
@@ -37,13 +49,21 @@ private:
 
 	ofWindowSettings WindowPRE;
 	ofWindowSettings BigWindow;
+
+#ifdef USE_MINI_WINDOW
 	ofWindowSettings MiniWindow;
+#endif
 
 	void exit();//TODO: test to avoid crashes on exit
 
+#ifdef USE_CUSTOM_FONT
+	ofTrueTypeFont font;
+	int fontSize;
+#endif
+
 	//-
 
-//private:
+private:
 
 	void setup();
 	void update(ofEventArgs& args);
@@ -51,19 +71,20 @@ private:
 
 	void keyPressed(ofKeyEventArgs& eventArgs);
 	void keyReleased(ofKeyEventArgs& eventArgs);
-	
-	//modifiers
+
+	// modifiers
 	bool mod_COMMAND = false;
 	bool mod_CONTROL = false;
 	bool mod_ALT = false;
 
 	void windowResized(int w, int h);
+	//TODO:
 	//void windowResized(ofEventArgs &e) {
 	//	e.
 	//}
 
 	////TODO: fix
-	////autosave
+	//// auto save
 	//void windowIsMoved() {
 	//	if (bAutoSaveLoad)
 	//	{
@@ -81,7 +102,7 @@ private:
 
 	//-
 
-	void drawDEBUG();
+	void drawDebug();
 	void drawPerformance();
 
 	//----
@@ -91,8 +112,10 @@ private:
 public:
 
 	// Setters
+	// required when used for first time into your project and no JSON file settings created yet.
+	// Default will be 60 fps if not defined!
 	//--------------------------------------------------------------
-	void setFrameRate(float f)///required when used for first time into your project and no JSON file settings created yet
+	void setFrameRate(float f)
 	{
 		targetFps = f;
 		ofSetFrameRate(targetFps);
@@ -116,8 +139,10 @@ public:
 
 			float windowBar_h = 25;
 
-			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
+			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);
+			// avoid negative out of screen. minimal h is 25
 			window_X = ofGetWindowPositionX();
+
 			ofSetWindowPosition(window_X, window_Y);
 
 			bigFullScreen = false;
@@ -166,7 +191,7 @@ private:
 
 public:
 
-	// from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
+	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
 	//--------------------------------------------------------------
 	void setConsoleVisible(bool show)
 	{
@@ -178,7 +203,6 @@ public:
 	bool getConsoleVisible() {
 		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
 	}
-
 
 	//--
 
@@ -240,7 +264,7 @@ public:
 
 	//-
 
-	//easy callback to check from ofApp if some settings have changed
+	// easy callback to check from ofApp if some settings have changed
 	//--------------------------------------------------------------
 	bool isChanged()
 	{
@@ -264,7 +288,9 @@ private:
 		ofLogVerbose(__FUNCTION__) << "targetFps  : " << targetFps;
 		ofLogVerbose(__FUNCTION__) << "vSync	  : " << vSync;
 		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG : " << bDebug.get();
+#ifdef USE_MINI_WINDOW
 		ofLogVerbose(__FUNCTION__) << "bModeMini  : " << bModeMini.get();
+#endif
 		ofLogVerbose(__FUNCTION__) << "bLock      : " << bLock.get();
 
 		ofSetFrameRate(targetFps);
@@ -338,7 +364,7 @@ public:
 
 	//-
 
-	//mini/big mode
+	// mini/big mode
 
 public:
 
@@ -352,6 +378,7 @@ public:
 	//{
 	//}
 
+#ifdef USE_MINI_WINDOW
 	bool isModeMini()
 	{
 		return bModeMini.get();
@@ -368,7 +395,7 @@ public:
 
 		bModeMini = !bModeMini;
 
-		//big preset
+		// big preset
 		if (!bModeMini)
 		{
 			ofSetFullscreen(bigFullScreen);
@@ -401,6 +428,10 @@ public:
 
 		applyMode();
 	}
+#endif
+
+	//-
+
 	void setLock(bool b) {
 		bLock = b;
 	}
@@ -408,12 +439,14 @@ public:
 	//-
 
 public:
+
 	void setEnableTimerSaver(bool b) {
 		bAutoSaverTimed = b;
 	}
 	void setTimerSaver(int t) {
 		timerSaverMax = t;
 	}
+
 private:
 
 	bool bAutoSaverTimed = false;
@@ -422,27 +455,39 @@ private:
 
 private:
 
-	//this is to folder all files to avoid mixing with other addons data
+	// this is to folder all files to avoid mixing with other addons data
 	string path_folder;
 	string path_filename;
 
 	bool bAutoSaveLoad = true;
 	bool bChangedWindow = false;
-	bool bKeys = true;//keys enabled by default
+	bool bKeys = true; // keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 	ofParameterGroup params_Extra{ "extra settings" };
 	ofParameter<bool> vSync{ "vsync", false };
-	ofParameter<float> targetFps{ "fps", 60.5, 1, 120 };
+	ofParameter<float> targetFps{ "fps", 60.f, 1, 120 };
 	ofParameter<bool> bDebug{ "showInfo", true };
-	ofParameter<bool> bModeMini{ "miniPreset", false };
 	ofParameter<bool> bShowPerformanceAlways{ "debugPerformance", true };
 	ofParameter<bool> bLock{ "lockMode", false };
 
-	//string windowBigMode;//full screen or window mode
+#ifdef USE_MINI_WINDOW
+	ofParameter<bool> bModeMini{ "miniPreset", false };
+#endif
+
+	//string windowBigMode; // full screen or window mode
+
 	float realFps;
+
+#ifndef USE_CUSTOM_FONT
 	int xx = 10;
 	int yy = 0;
+#endif
+	int pad = 8;
+#ifdef USE_CUSTOM_FONT
+	int xx = pad / 2;
+	int yy = 0;
+#endif
 
 	//TODO: add full screen/window bool param
 
@@ -456,14 +501,19 @@ public:
 	void doReset() {
 		bigFullScreen = false;
 		vSync = false;
-		bModeMini = false;
 		targetFps = 60;
+
+#ifdef USE_MINI_WINDOW
+		bModeMini = false;
+#endif
 
 		BigWindow.setPosition(glm::vec2(0, BAR_HEIGHT));
 		BigWindow.setSize(1920, 1080 - BAR_HEIGHT);
 
+#ifdef USE_MINI_WINDOW
 		MiniWindow.setPosition(glm::vec2(20, 20));
 		MiniWindow.setSize(200, 200);
+#endif
 
 		applyMode();
 	};
@@ -477,8 +527,12 @@ public:
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
 		ss += "F: SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
 		ss += "Alt + M: PRESET ";
+
+#ifdef USE_MINI_WINDOW
 		if (bModeMini) ss += "*MINI  BIG";
 		else ss += " MINI *BIG";
+#endif
+
 		ss += "\n";
 		ss += "Alt + R: RESET TO FULLHD\n";
 		ss += "Alt + L: LOCK SETTINGS";// \n";//TODO: WIP lock mode
