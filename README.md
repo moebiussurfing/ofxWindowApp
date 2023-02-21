@@ -46,24 +46,24 @@ R: Reset Full HD size on the main monitor
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
-(_Not only for final user, but also usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times... Using this add-on you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._)  
+_Not only for final user, but also usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times... Using this add-on you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._  
 
-## DEPENDENCIES
+## POWERED BY
 
 **ofxSerialize** from **@bakercp** (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
-You don't need to add with **Project Generator**.
+You don't need to add with **PROJECT GENERATOR**!
 
 ## USAGE
 
-### ofApp.h
+#### ofApp.h
 ```.c++
     #include "ofxWindowApp.h"
     ofxWindowApp windowApp;
 ```
 
-### ofApp.cpp
+#### ofApp.cpp
 Nothing more is required on ```update()``` or ```draw()```!  
 Some settings can be configured using key commands.  
 ```.c++ 
