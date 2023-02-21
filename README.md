@@ -15,6 +15,9 @@
 
 **openFrameworks** add-on to **auto store** and **recall** the basic app **window state/settings**:
 
+
+## FEATURES
+
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
 * Window **Mode** (window/full screen).
@@ -26,24 +29,24 @@
 * **Lock mode** to avoid future changes after modifiying window. (WIP)
 * Reset command to restore **1080p Full HD** settings.
 * Custom TTF font.
+* On top mode, easy console window disabler. (WIN 32 only)
 
-## SHORTCUTS
+## KEY COMMANDS
 
 ```
 W: Show debug info  
-F: Fullscreen  
-V: vSync state (on/off)  
+F: Full screen / Windowed  
+V: vSync state (On/Off)  
 L: Lock mode  
-R: Set Full HD size on the main monitor  
-M: Switch Big/Mini modes (WIP)  
+R: Reset Full HD size on the main monitor  
+~~M: Switch Big/Mini modes (WIP)~~  
 ```
 
 ## WHY?
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
-(_Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times..._
-_Using this addon you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._)  
+(_Not only for final user, but also usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times... Using this add-on you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._)  
 
 ## DEPENDENCIES
 
@@ -54,13 +57,13 @@ You don't need to add with **Project Generator**.
 
 ## USAGE
 
-## ofApp.h
+### ofApp.h
 ```.c++
     #include "ofxWindowApp.h"
     ofxWindowApp windowApp;
 ```
 
-## ofApp.cpp
+### ofApp.cpp
 Nothing more is required on ```update()``` or ```draw()```!  
 Some settings can be configured using key commands.  
 ```.c++ 
