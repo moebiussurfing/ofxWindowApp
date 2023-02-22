@@ -66,6 +66,7 @@ private:
 private:
 
 	void setup();
+	void startup();
 	void update(ofEventArgs& args);
 	void draw(ofEventArgs& args);
 
@@ -117,8 +118,8 @@ public:
 	//--------------------------------------------------------------
 	void setFrameRate(float f)
 	{
-		targetFps = f;
-		ofSetFrameRate(targetFps);
+		fpsTarget = f;
+		ofSetFrameRate(fpsTarget);
 	}
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b)
@@ -156,31 +157,19 @@ public:
 
 	//--------------------------------------------------------------
 	void setEscapeQuitsApp(bool b) {
+		ofLogNotice("ofxWindowApp::setEscapeQuitsApp");
 		ofSetEscapeQuitsApp(b);
 	};
 
 	//--------------------------------------------------------------
 	void setToggleAlwaysOnTop() {
+		ofLogNotice("ofxWindowApp::setToggleAlwaysOnTop");
 		setAlwaysOnTop(!isOnTop);
 	}
 	//--------------------------------------------------------------
 	void setAlwaysOnTop(bool b) {
-#if defined(TARGET_WIN32)
-		ofLogNotice("ofxWindowApp") << (__FUNCTION__) << b;
-		if (b) {
-			// Make app always on top
-			HWND W = GetActiveWindow();
-			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-		}
-		else {
-			// Disable make app always on top
-			HWND W = GetActiveWindow();
-			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-		}
-		isOnTop = b;
-#else
-		ofLogError("ofxWindowApp") << "Not implemented. Only TARGET_WIN32 yet!";
-#endif
+		ofLogNotice("ofxWindowApp::setAlwaysOnTop") << b;
+		bOnTop = b;
 	};
 
 private:
@@ -198,11 +187,11 @@ public:
 #if defined(TARGET_WIN32)
 		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
 #endif
-	}
+	};
 	//--------------------------------------------------------------
 	bool getConsoleVisible() {
 		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
-	}
+	};
 
 	//--
 
@@ -223,48 +212,48 @@ public:
 	void setPathFolder(string s)
 	{
 		path_folder = s;
-	}
+	};
 
 	//--------------------------------------------------------------
 	void setPathFilename(string s)
 	{
 		path_filename = s;
-	}
+	};
 
 	//--------------------------------------------------------------
 	void setAutoSaveLoad(bool b)
 	{
 		bAutoSaveLoad = b;
-	}
+	};
 
 	//--------------------------------------------------------------
 	void setShowDebug(bool b = true)
 	{
 		bDebug = b;
 		bShowPerformanceAlways = b;
-	}
+	};
 	//--------------------------------------------------------------
 	bool getShowDebug()
 	{
 		return bDebug;
-	}
+	};
 	//--------------------------------------------------------------
 	void toggleShowDebug()
 	{
 		bDebug = !bDebug;
-	}
+	};
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAllways(bool b = true)
 	{
 		bShowPerformanceAlways = b;
-	}
+	};
 
 	void folderCheckAndCreate(string _path);
 
 	//-
 
-	// easy callback to check from ofApp if some settings have changed
+	// Easy callback to check from ofApp if some settings have changed
 	//--------------------------------------------------------------
 	bool isChanged()
 	{
@@ -276,26 +265,26 @@ public:
 
 		else
 			return false;
-	}
+	};
 
 	//-
 
 private:
 
-	void applyExtra()//fps and vsync only
+	void applyExtra() // fps and vsync only
 	{
-		ofLogVerbose(__FUNCTION__);
-		ofLogVerbose(__FUNCTION__) << "targetFps  : " << targetFps;
-		ofLogVerbose(__FUNCTION__) << "vSync	  : " << vSync;
-		ofLogVerbose(__FUNCTION__) << "SHOW DEBUG : " << bDebug.get();
+		ofLogVerbose("ofxWindowApp::applyExtra");
+		ofLogVerbose("ofxWindowApp") << "FpsTarget  : " << fpsTarget;
+		ofLogVerbose("ofxWindowApp") << "vSync	  : " << vSync;
+		ofLogVerbose("ofxWindowApp") << "Show Debug : " << bDebug.get();
+		ofLogVerbose("ofxWindowApp") << "bLock      : " << bLock.get();
 #ifdef USE_MINI_WINDOW
-		ofLogVerbose(__FUNCTION__) << "bModeMini  : " << bModeMini.get();
+		ofLogVerbose("ofxWindowApp") << "bModeMini  : " << bModeMini.get();
 #endif
-		ofLogVerbose(__FUNCTION__) << "bLock      : " << bLock.get();
 
-		ofSetFrameRate(targetFps);
+		ofSetFrameRate(fpsTarget);
 		ofSetVerticalSync(vSync);
-	}
+	};
 
 public:
 
@@ -315,23 +304,23 @@ public:
 	void setPositionDebugInfo(int POS)
 	{
 		positionLayout = POS;
-	}
+	};
 	void setPositionDebugInfo(DEBUG_Position POS = DEBUG_POSITION_BOTTOM)
 	{
 		positionLayout = POS;
-	}
+	};
 	int getDEBUG_Position()
 	{
 		return positionLayout;
-	}
+	};
 	void togglePositionDebugInfo()
 	{
 		setPositionDebugInfo((positionLayout == 1) ? 0 : 1);
-	}
+	};
 	void setEnableKeys(bool b)
 	{
 		bKeys = b;
-	}
+	};
 
 	//-
 
@@ -339,28 +328,28 @@ public:
 
 	float getFrameRate()
 	{
-		return targetFps.get();
-	}
+		return fpsTarget.get();
+	};
 	bool getVerticalSync()
 	{
 		return vSync.get();
-	}
+	};
 	float getWindowWidth()
 	{
 		return window_W;
-	}
+	};
 	float getWindowHeight()
 	{
 		return window_H;
-	}
+	};
 	float getWindowPositionX()
 	{
 		return window_X;
-	}
+	};
 	float getWindowPositionY()
 	{
 		return window_Y;
-	}
+	};
 
 	//-
 
@@ -455,7 +444,7 @@ private:
 
 private:
 
-	// this is to folder all files to avoid mixing with other addons data
+	// this is to folder all files to avoid mixing with other add-ons data
 	string path_folder;
 	string path_filename;
 
@@ -464,18 +453,24 @@ private:
 	bool bKeys = true; // keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
-	ofParameterGroup params_Extra{ "extra settings" };
-	ofParameter<bool> vSync{ "vsync", false };
-	ofParameter<float> targetFps{ "fps", 60.f, 1, 120 };
-	ofParameter<bool> bDebug{ "showInfo", true };
-	ofParameter<bool> bShowPerformanceAlways{ "debugPerformance", true };
-	ofParameter<bool> bLock{ "lockMode", false };
+
+	ofParameterGroup params{ "Extra" };
+	ofParameter<bool> vSync{ "vSync", false };
+	ofParameter<float> fpsTarget{ "Fps", 60.f, 1, 120 };
+	ofParameter<bool> bDebug{ "ShowInfo", true };
+	ofParameter<bool> bShowPerformanceAlways{ "DebugPerformance", true };
+	ofParameter<bool> bLock{ "LockMode", false };//kind of autoload
+	ofParameter<bool> bOnTop{ "OnTop", false };
+
+	bool bDoneStartup = false;
 
 #ifdef USE_MINI_WINDOW
 	ofParameter<bool> bModeMini{ "miniPreset", false };
 #endif
 
 	//string windowBigMode; // full screen or window mode
+
+	void Changed_Params(ofAbstractParameter& e);
 
 	float realFps;
 
@@ -490,7 +485,6 @@ private:
 #endif
 
 	//TODO: add full screen/window bool param
-
 	bool bigFullScreen = false;
 
 	void refreshTogleWindowMode();
@@ -501,7 +495,7 @@ public:
 	void doReset() {
 		bigFullScreen = false;
 		vSync = false;
-		targetFps = 60;
+		fpsTarget = 60;
 
 #ifdef USE_MINI_WINDOW
 		bModeMini = false;
@@ -521,23 +515,26 @@ public:
 	//--------------------------------------------------------------
 	void drawInfo() {
 		string ss;
-		ss += "KEYS:\n";
-		ss += "W: SHOW INFO\n";
-		ss += "V: VERTICAL SYNC " + ofToString(vSync ? "ON " : "OFF") + "\n";
+		ss += "KEYS\n\n";
+		ss += "W : SHOW INFO\n";
+		ss += "V : VERTICAL SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
-		ss += "F: SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
-		ss += "Alt + M: PRESET ";
+		ss += "F : SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
 
 #ifdef USE_MINI_WINDOW
+		ss += "Alt + M: PRESET ";
 		if (bModeMini) ss += "*MINI  BIG";
 		else ss += " MINI *BIG";
 #endif
 
 		ss += "\n";
-		ss += "Alt + R: RESET TO FULLHD\n";
-		ss += "Alt + L: LOCK SETTINGS";// \n";//TODO: WIP lock mode
+		ss += "Alt + R : RESET TO FULLHD \n";
+		ss += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
+		ss += "Alt + L : LOCK = " + ofToString(bLock ? "TRUE" : "FALSE") /*+ "\n"*/;
+		//TODO: WIP lock mode
+
 		ofDrawBitmapStringHighlight(ss, 50, 50);
-	}
+	};
 };
 
 

@@ -10,5 +10,5 @@ public:
 	void setup();
 	void draw();
 
-	ofxWindowApp windowApp;
+	ofxWindowApp w;
 };
