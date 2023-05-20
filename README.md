@@ -22,32 +22,37 @@
 * Window **Size** (w, h). 
 * Window **Mode** (window/full screen).
 * App target **FPS** settings, real current **framerate**, and **vSync** state. 
-* "Trigs **Alert**" and shows a **performance** bar when **low FPS drops** under the target (expected) frame rate.
-* Easy change the app settings just editing the **JSON file** not the app code.
-* ~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~  
-    * Currently mini mode is disabled. 
-* **Lock mode** to avoid future changes after modifiying window. (WIP)
-* Reset command to restore **1080p Full HD** settings.
+* "**Alert**" with a **performance** red bar when **low FPS drops** under the expected target frame rate.
+* Easy change the app settings just by editing the **JSON** file**, not the app code.
+* **Lock mode** to avoid future changes after modifying the window. (WIP)
+* Reset the command to restore **1080p Full HD** settings.
 * Custom TTF font.
 * On top mode, easy console window disabler. (WIN 32 only)
+* ~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~
+    Currently, Mini mode is disabled. 
 
 
 ## KEY COMMANDS
 
 ```
+ALT  
+(caps enabled or SHIFT)  
++  
 W: Show debug info  
 F: Full screen / Windowed  
 V: vSync state (On/Off)  
 L: Lock mode  
 R: Reset Full HD size on the main monitor  
-~~M: Switch Big/Mini modes (WIP)~~  
+BACKSAPCE: Reset  
+T: Always on top (Window only)  
+
 ```
 
 ## WHY?
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
-_Not only for final user, but also usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...  
+_Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...  
 Using this add-on you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._  
 
 ## POWERED BY
@@ -62,17 +67,18 @@ You don't need to add with **PROJECT GENERATOR**!
 #### ofApp.h
 ```.c++
     #include "ofxWindowApp.h"
-    ofxWindowApp windowApp;
+    ofxWindowApp w;
 ```
 
 #### ofApp.cpp
 Nothing more is required on ```update()``` or ```draw()```!  
 Some settings can be configured using key commands.  
 ```.c++ 
-ofApp::setup(){
+ofApp::setup()
+{
     // default FPS is 60 fps, vSync = off
-    //windowApp.setFrameRate(30);
-    //windowApp.setVerticalSync(false);
+    //w.setFrameRate(30);
+    //w.setVerticalSync(false);
 }
 ```
 
@@ -80,7 +86,7 @@ The add-on will **auto-load** the settings when your **app starts** and **auto-s
 
 **Nothing more it's required!**  
 
-The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:  
+The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like this:  
 ```.json
 [
     {
@@ -110,7 +116,7 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like:
 
 ### TODO
 
-* Join with another add-on to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
+* Join with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## TESTED SYSTEMS
 - **Windows10** / **VS2017** / **OF ~0.11**
