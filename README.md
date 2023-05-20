@@ -45,9 +45,9 @@ W: Show debug info.
 F: Full screen / Windowed.  
 V: vSync state (On/Off).  
 L: Lock mode.  
+T: Always on top (Window only). 
 R: Reset Full HD size on the main monitor.  
 BACKSAPCE: Reset.  
-T: Always on top (Window only). 
 
 ```
 
