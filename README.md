@@ -29,15 +29,15 @@
 * Custom TTF font.
 * On top mode, easy console window disabler. (WIN 32 only)
 
-~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~
-    Currently, Mini mode is disabled. 
+~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~  
+  Currently, Mini mode is disabled. 
 
 
 ## KEY COMMANDS
 
 ```
 ALT  
-(caps enabled or SHIFT)  
+( caps enabled or SHIFT )  
 
 +  
 
@@ -55,9 +55,9 @@ T: Always on top (Window only).
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
-_Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times...  
+_Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times..._  
 
-Using this add-on you can forget about this "annoying behavior", as the **App Window will be open in the same place** and with the **same size and settings**._  
+_Using this add-on you can forget about this "annoying behavior", as the **App Window will be open in the same place** and with the **same size and settings**._  
 
 ## POWERED BY
 
