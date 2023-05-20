@@ -28,7 +28,8 @@
 * Reset the command to restore **1080p Full HD** settings.
 * Custom TTF font.
 * On top mode, easy console window disabler. (WIN 32 only)
-* ~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~
+
+~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~
     Currently, Mini mode is disabled. 
 
 
@@ -38,6 +39,7 @@
 ALT  
 (caps enabled or SHIFT)  
 +  
+
 W: Show debug info  
 F: Full screen / Windowed  
 V: vSync state (On/Off)  
