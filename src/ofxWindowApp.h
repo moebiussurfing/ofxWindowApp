@@ -4,8 +4,10 @@
 
 	TODO:
 
-	 +	add ofxScreenSetup addon to bundle all other features
-	 +	add windowResize subscribed listener to auto refresh
+	+ each resize window frame, will save the file again.
+		could set a timer to save after 1 second from first change.
+	+ add ofxScreenSetup addon to bundle all other features
+	+ add windowResize subscribed listener to auto refresh
 
  */
 
@@ -77,13 +79,12 @@ private:
 	bool mod_COMMAND = false;
 	bool mod_CONTROL = false;
 	bool mod_ALT = false;
+	bool mod_SHIFT= false;
 
 	void windowResized(int w, int h);
-	//TODO:
-	//void windowResized(ofEventArgs &e) {
-	//	e.
-	//}
+	void windowResized(ofResizeEventArgs& e);
 
+	//TODO:
 	////TODO: fix
 	//// auto save
 	//void windowIsMoved() {
@@ -100,6 +101,9 @@ private:
 	//		saveFileWindow();
 	//	}
 	//};
+
+	bool bFlagSave = 0;
+	float timerFlag;
 
 	//-
 
@@ -253,7 +257,7 @@ public:
 
 	//-
 
-	// Easy callback to check from ofApp if some settings have changed
+	// Easy callback only to check from parent scope/ofApp if window shape has changed.
 	//--------------------------------------------------------------
 	bool isChanged()
 	{

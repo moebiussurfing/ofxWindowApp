@@ -28,7 +28,7 @@ ofxWindowApp::ofxWindowApp()
 //--------------------------------------------------------------
 ofxWindowApp::~ofxWindowApp()
 {
-	ofLogNotice("ofxWindowApp") << "destructor";
+	ofLogNotice("ofxWindowApp") << "Destructor";
 
 	exit();
 }
@@ -54,7 +54,7 @@ void ofxWindowApp::startup()
 	ofToggleFullscreen();
 
 	//--
-	
+
 	// workaround
 	//refresh
 #if defined(TARGET_WIN32)			
@@ -81,6 +81,7 @@ void ofxWindowApp::exit()
 	ofRemoveListener(ofEvents().draw, this, &ofxWindowApp::draw);
 	ofRemoveListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
 	ofRemoveListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
+	ofRemoveListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
 
 	ofRemoveListener(params.parameterChangedE(), this, &ofxWindowApp::Changed_Params);
 }
@@ -116,8 +117,8 @@ void ofxWindowApp::setup()
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
 	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
 
+	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
 	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);
-	//ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowIsResized);
 
 	//--
 
@@ -211,6 +212,18 @@ void ofxWindowApp::update(ofEventArgs& args)
 
 	//--
 
+	if (bFlagSave) {
+		if (ofGetElapsedTimef() >= timerFlag)
+		{
+			bFlagSave = 0;
+			bChangedWindow = true;
+			ofLogNotice("ofxWindowApp::windowResized") << "Just saved after window been resized (timed)";
+			saveFileWindow();
+		}
+	}
+
+	//--
+
 	// Autosaver timer
 	// is no required to resize the window or to close the app window to save.
 	// then the app can crash an window shape will be stored 1 time each 10 seconds by default.
@@ -301,7 +314,7 @@ void ofxWindowApp::refreshGetWindowSettings()
 		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
 	}
 #endif
-	}
+}
 
 //--------------------------------------------------------------
 void ofxWindowApp::saveFileWindow()
@@ -408,7 +421,7 @@ void ofxWindowApp::loadFileSettings()
 
 			//recall both params groups
 			ofDeserialize(jExtra, params);
-	}
+		}
 		else ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 
 		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
@@ -511,7 +524,7 @@ void ofxWindowApp::loadFileSettings()
 		//else {
 		//	ofx::Serializer::ApplyWindowSettings(jMini);
 		//}
-}
+	}
 	else
 	{
 		ofLogError("ofxWindowApp") << "File NOT found: " << __path;
@@ -554,7 +567,7 @@ void ofxWindowApp::drawDebug()
 	else if (ofGetWindowMode() == OF_FULLSCREEN)//go window mode
 	{
 		bMode = true;
-}
+	}
 	screenMode += bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE";
 
 #ifdef USE_MINI_WINDOW
@@ -569,6 +582,11 @@ void ofxWindowApp::drawDebug()
 	str += strPad + screenMode;
 	str += strPad + (bLock ? "LOCKED ON" : "LOCKED OFF");
 	str += strPad + (bOnTop ? "ON-TOP TRUE" : "ON-TOP FALSE");
+	str += strPad + "  ";
+	str += strPad + (mod_COMMAND ? "CMD" : "   ");
+	str += strPad + (mod_ALT ? "ALT" : "   ");
+	str += strPad + (mod_CONTROL ? "CTRL" : "    ");
+	str += strPad + (mod_SHIFT ? "SHIFT" : "     ");
 
 	//--
 
@@ -691,14 +709,12 @@ void ofxWindowApp::drawPerformance()
 		ofDrawRectangle(fx, fy, fwMax, fh);
 
 		ofPopStyle();
-}
+	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h)
 {
-	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << "," << ofToString(h);
-
 	window_W = w;
 	window_H = h;
 	window_X = ofGetWindowPositionX();
@@ -706,14 +722,40 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	refreshGetWindowSettings();
 
+	if (bFlagSave == 1) return;
+
+	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << "," << ofToString(h);
+
 	bChangedWindow = true;
 
-	//TODO: fix
-	if (bAutoSaveLoad && !bLock)
-	{
-		ofLogNotice("ofxWindowApp::windowResized") << "Just saved after window been resized";
-		saveFileWindow();
+	bFlagSave = 1;
+	timerFlag = ofGetElapsedTimef() + 0.5f;
+
+	////TODO: fix
+	//if (bAutoSaveLoad && !bLock)
+	//{
+	//	ofLogNotice("ofxWindowApp::windowResized") << "Just saved after window been resized";
+	//	saveFileWindow();
+	//}
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowResized(ofResizeEventArgs& resize)
+{
+	//ofLogNotice("ofxWindowApp::windowResized(ofResizeEventArgs)") << resize.width << "," << resize.height;
+	static int w = -1;
+	static int h = -1;
+	bool bChanged = 0;
+	if (w != resize.width) {
+		bChanged = 1;
+		w = resize.width;
 	}
+	if (h != resize.height) {
+		bChanged = 1;
+		h = resize.height;
+	}
+	if (bChanged) windowResized(w, h);
+	//else ofLogNotice("ofxWindowApp::windowResized(ofResizeEventArgs)") << "Not changed";
 }
 
 //--------------------------------------------------------------
@@ -724,16 +766,33 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		const int& key = eventArgs.key;
 
 		// modifier
+
+		////TODO:
+		//mod_COMMAND = key == OF_KEY_COMMAND; // macOS
+		//mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
+		//mod_ALT = key == OF_KEY_ALT;
+		//mod_SHIFT = key == OF_KEY_SHIFT;
+
 		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
 		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
 		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+		mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
-		if (false)
-			ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
+		// Pick and enable your preferred key modifier to allow the key commands
+		// *or to ignore keys when un pressed)
+		// global required modifier
+		//if (!mod_COMMAND) return;
+		//if (!mod_CONTROL) return;
+		if (!mod_ALT) return;
+
+		//--
+
+		if (0) ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
 
 		// disable draw debug
-		if (mod_CONTROL && key == 'w' || mod_CONTROL && key == 'w' ||
-			key == 'W')
+		//if (mod_CONTROL && key == 'w' || 
+		//mod_CONTROL && key == 'w' ||
+		if (key == 'W')
 		{
 			bDebug = !bDebug;
 			ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bDebug ? "ON" : "OFF");
@@ -750,21 +809,31 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			ofSetVerticalSync(vSync);
 		}
 
-		else if (key == 'L' && mod_ALT) // toggle lock
+		else if (key == 'L') // toggle lock
 		{
-			bLock = !bLock;
+			//if (mod_ALT)
+			{
+				bLock = !bLock;
+			}
 		}
-		else if (key == 'R' && mod_ALT) // reset to full HD
+		else if (key == 'R') // reset to full HD
 		{
-			BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
-			BigWindow.setSize(1920, 1080);
+			//if (mod_ALT)
+			{
+				setToggleAlwaysOnTop();
+				BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
+				BigWindow.setSize(1920, 1080);
 
-			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
-			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
+				ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
+				ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
+			}
 		}
 
-		else if (key == OF_KEY_BACKSPACE && mod_CONTROL) {
-			doReset();
+		else if (key == OF_KEY_BACKSPACE) {
+			//if (mod_CONTROL)
+			{
+				doReset();
+			}
 		}
 
 		else if (key == 'L' && mod_ALT)
@@ -772,9 +841,12 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			bLock = !bLock;
 		}
 
-		else if (key == 'T' && mod_ALT)
+		else if (key == 'T')
 		{
-			setToggleAlwaysOnTop();
+			//if (mod_ALT)
+			{
+				setToggleAlwaysOnTop();
+			}
 		}
 
 #ifdef USE_MINI_WINDOW
@@ -783,10 +855,18 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
-		}
-#endif
 	}
+#endif
+		//--
+
+		////TODO:
+		////Release modifiers
+		//mod_COMMAND = false; // macOS
+		//mod_CONTROL = false; // Windows. not working
+		//mod_ALT = false;
+		//mod_SHIFT = false;
 }
+		}
 //--------------------------------------------------------------
 void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 {
@@ -794,10 +874,17 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 	{
 		const int& key = eventArgs.key;
 
-		// modifier
-		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
-		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
-		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+		//// modifier
+		//if (eventArgs.hasModifier(OF_KEY_COMMAND)) mod_COMMAND = false; // macOS
+		//if (eventArgs.hasModifier(OF_KEY_CONTROL)) mod_CONTROL = false; // Windows. not working
+		//if (eventArgs.hasModifier(OF_KEY_ALT)) mod_ALT = false;
+		//if (eventArgs.hasModifier(OF_KEY_SHIFT)) mod_SHIFT = false;
+
+		//Release modifiers
+		mod_COMMAND = key == OF_KEY_COMMAND; // macOS
+		mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
+		mod_ALT = key == OF_KEY_ALT;
+		mod_SHIFT = key == OF_KEY_SHIFT;
 	}
 }
 
@@ -907,7 +994,7 @@ void ofxWindowApp::applyMode()
 		ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
 		ofSetWindowShape(MiniWindow.getWidth(), MiniWindow.getHeight());
 		ofSetFullscreen(false);
-}
+	}
 
 	// big preset
 	else
