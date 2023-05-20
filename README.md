@@ -13,7 +13,7 @@
 
 ## OVERVIEW
 
-**openFrameworks** add-on to **auto store** and **recall** the basic app **window state/settings**:
+**openFrameworks** addon to **auto store** and **recall** the basic app **window state/settings**:
 
 
 ## FEATURES
@@ -29,7 +29,7 @@
 * Custom TTF font.
 * On top mode, easy console window disabler. (WIN 32 only)
 
-~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~
+~~**Dual settings**: **Big** and **Mini** settings to **switch** between both presets. (WIP)~~
     Currently, Mini mode is disabled. 
 
 
@@ -38,15 +38,16 @@
 ```
 ALT  
 (caps enabled or SHIFT)  
+
 +  
 
-W: Show debug info  
-F: Full screen / Windowed  
-V: vSync state (On/Off)  
-L: Lock mode  
-R: Reset Full HD size on the main monitor  
-BACKSAPCE: Reset  
-T: Always on top (Window only)  
+W: Show debug info.  
+F: Full screen / Windowed.  
+V: vSync state (On/Off).  
+L: Lock mode.  
+R: Reset Full HD size on the main monitor.  
+BACKSAPCE: Reset.  
+T: Always on top (Window only). 
 
 ```
 
@@ -54,8 +55,9 @@ T: Always on top (Window only)
 
 It can be useful to **auto-maintain** window settings between your **app sessions**.  
 
-_Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and to move the app window out your IDE window several times...  
-Using this add-on you can forget about this "annoying behavior", as the **app window will be open in the same place** and with the **same size and settings**._  
+_Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times...  
+
+Using this add-on you can forget about this "annoying behavior", as the **App Window will be open in the same place** and with the **same size and settings**._  
 
 ## POWERED BY
 
@@ -76,19 +78,20 @@ You don't need to add with **PROJECT GENERATOR**!
 Nothing more is required on ```update()``` or ```draw()```!  
 Some settings can be configured using key commands.  
 ```.c++ 
+// Optional
 ofApp::setup()
 {
-    // default FPS is 60 fps, vSync = off
+    // Default FPS is 60 fps, vSync = off
     //w.setFrameRate(30);
     //w.setVerticalSync(false);
 }
 ```
 
-The add-on will **auto-load** the settings when your **app starts** and **auto-stores** too on **app exit**.  
+The add-on will **auto-load** the settings when your **app starts** and **auto stores** too on **App exit**.  
 
 **Nothing more it's required!**  
 
-The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like this:  
+The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will look like this:  
 ```.json
 [
     {
@@ -121,12 +124,12 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will looks like this
 * Join with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## TESTED SYSTEMS
-- **Windows10** / **VS2017** / **OF ~0.11**
+- **Windows10** / **VS2022** / **OF ~0.11**
 - **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11**
 
 ## AUTHOR
-Add-on by **@moebiusSurfing**  
-*(ManuMolina). 2020.*
+Addon by **@moebiusSurfing**  
+*( ManuMolina ). 2020-2023.*
 
 ## LICENSE
 *MIT License.*
