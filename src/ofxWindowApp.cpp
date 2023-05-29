@@ -47,8 +47,8 @@ void ofxWindowApp::startup()
 	//--
 
 	//// works but slow
-	//refreshTogleWindowMode();
-	//refreshTogleWindowMode();
+	//refreshToggleWindowMode();
+	//refreshToggleWindowMode();
 
 	ofToggleFullscreen();
 	ofToggleFullscreen();
@@ -583,6 +583,7 @@ void ofxWindowApp::drawDebug()
 	str += strPad + (bLock ? "LOCKED ON" : "LOCKED OFF");
 	str += strPad + (bOnTop ? "ON-TOP TRUE" : "ON-TOP FALSE");
 	str += strPad + "  ";
+	str += strPad + "[MOD ALT] ";//TODO: show mod key. hardcoded
 	str += strPad + (mod_COMMAND ? "CMD" : "   ");
 	str += strPad + (mod_ALT ? "ALT" : "   ");
 	str += strPad + (mod_CONTROL ? "CTRL" : "    ");
@@ -801,7 +802,13 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		// Switch window mode
 		else if (key == 'F')
 		{
-			refreshTogleWindowMode();
+			//TODO; fix monitor jump when fullscreen.
+			// try settings.windowMode = OF_GAME_MODE;
+			//auto m = ofGetWindowMode();
+			//ofSetWindow
+			//ofSetupScreen()
+
+			refreshToggleWindowMode();
 		}
 		else if (key == 'V') // switch v-sync mode
 		{
@@ -836,7 +843,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			}
 		}
 
-		else if (key == 'L' && mod_ALT)
+		else if (key == 'L')
 		{
 			bLock = !bLock;
 		}
@@ -850,12 +857,12 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		}
 
 #ifdef USE_MINI_WINDOW
-		else if (key == 'M' && mod_ALT)//switch window mode big/mini
+		else if (key == 'M')//switch window mode big/mini
 			//else if (key == 'M')//switch window mode big/mini
 			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
-	}
+		}
 #endif
 		//--
 
@@ -865,8 +872,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		//mod_CONTROL = false; // Windows. not working
 		//mod_ALT = false;
 		//mod_SHIFT = false;
+	}
 }
-		}
 //--------------------------------------------------------------
 void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 {
@@ -916,8 +923,9 @@ void ofxWindowApp::folderCheckAndCreate(string _path)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::refreshTogleWindowMode()
+void ofxWindowApp::refreshToggleWindowMode()
 {
+	// Toggle
 	if (ofGetWindowMode() == OF_WINDOW) // go full screen
 	{
 		ofSetFullscreen(true);
@@ -933,7 +941,8 @@ void ofxWindowApp::refreshTogleWindowMode()
 		//////workaround
 		////window_X = ofGetWindowPositionX();
 		////window_Y = 0;//align to top border
-		////ofSetWindowPosition(window_X, window_Y);
+		//ofSetWindowPosition(window_X, window_Y);
+		//ofSetFullscreen(true);
 
 		bigFullScreen = true;
 	}
@@ -971,7 +980,7 @@ void ofxWindowApp::refreshTogleWindowMode()
 		bigFullScreen = false;
 	}
 
-	//update
+	// update
 	windowResized(ofGetWidth(), ofGetHeight());
 }
 
@@ -1066,5 +1075,5 @@ void ofxWindowApp::Changed_Params(ofAbstractParameter& e)
 #else
 		ofLogError("ofxWindowApp") << "Not implemented for current platform. Only TARGET_WIN32 yet!";
 #endif
+		}
 	}
-}

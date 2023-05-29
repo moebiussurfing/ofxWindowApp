@@ -491,7 +491,7 @@ private:
 	//TODO: add full screen/window bool param
 	bool bigFullScreen = false;
 
-	void refreshTogleWindowMode();
+	void refreshToggleWindowMode();
 
 public:
 
