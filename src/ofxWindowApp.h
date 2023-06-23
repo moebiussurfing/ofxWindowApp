@@ -4,6 +4,7 @@
 
 	TODO:
 
+	+ broken full screen save load?
 	+ each resize window frame, will save the file again.
 		could set a timer to save after 1 second from first change.
 	+ add ofxScreenSetup addon to bundle all other features
