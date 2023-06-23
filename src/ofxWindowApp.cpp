@@ -219,6 +219,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 
 	//--
 
+	// Marked to save
 	if (bFlagSave) {
 		if (ofGetElapsedTimef() >= timerFlag)
 		{
@@ -237,7 +238,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 	if (bAutoSaverTimed && !bLock)
 		if ((ofGetElapsedTimeMillis() - timerSaver) > timerSaverMax)
 		{
-			saveFileWindow();
+			saveFileWindow(true);
 			timerSaver = ofGetElapsedTimeMillis();
 		}
 }
@@ -327,7 +328,7 @@ void ofxWindowApp::refreshGetWindowSettings()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::saveFileWindow()
+void ofxWindowApp::saveFileWindow(bool bSlient )
 {
 	string __path = path_folder + "/" + path_filename;
 	ofLogNotice("ofxWindowApp::saveFileWindow") << __path;
@@ -380,7 +381,7 @@ void ofxWindowApp::saveFileWindow()
 	folderCheckAndCreate(path_folder);
 
 	// save file
-	ofLogNotice("ofxWindowApp") << data.dump(4);
+	if(!bSlient) ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
 }
 
@@ -920,7 +921,7 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 //--------------------------------------------------------------
 void ofxWindowApp::folderCheckAndCreate(string _path)
 {
-	ofLogNotice("ofxWindowApp::folderCheckAndCreate");
+	//ofLogNotice("ofxWindowApp::folderCheckAndCreate");
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 

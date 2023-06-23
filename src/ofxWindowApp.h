@@ -203,7 +203,7 @@ public:
 
 	void refreshGetWindowSettings();
 
-	void saveFileWindow();
+	void saveFileWindow(bool bSlient=false);
 	void loadFileSettings();
 
 private:
