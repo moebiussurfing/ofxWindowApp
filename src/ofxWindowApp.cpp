@@ -559,8 +559,8 @@ void ofxWindowApp::drawDebug()
 	string screenMode = "";
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
-	vSyncStr = ((vSync ? "ON " : "OFF"));
-	vSyncStr += "[V]";
+	vSyncStr = ((vSync ? "ON" : "OFF"));
+	vSyncStr += ((vSync ? "[V] " : "[V]"));
 	fpsRealStr = ofToString(realFps, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -582,13 +582,14 @@ void ofxWindowApp::drawDebug()
 #endif
 
 	str += "FPS " + fpsRealStr;
-	str += " [" + fpsTargetStr + "]";
+	str += "[" + fpsTargetStr + "]";
 	str += strPad + "VSYNC-" + vSyncStr;
 	str += strPad + "SIZE " + screenStr;
 	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
-	str += strPad + (bLock ? "LOCKED ON" : "LOCKED OFF");
-	str += strPad + (bOnTop ? "ON-TOP TRUE" : "ON-TOP FALSE");
+	str += strPad + (bLock ? "LOCKED-ON" : "LOCKED-OFF");
+	str += (bLock ? "[L] " : "[L]");
+	str += strPad + (bOnTop ? "ON-TOP:TRUE" : "ON-TOP:FALSE") + "[T]";
 	str += strPad + "  ";
 	str += strPad + "[MOD ALT] ";//TODO: show mod key. hardcoded
 	str += strPad + (mod_COMMAND ? "CMD" : "   ");
@@ -1086,5 +1087,5 @@ void ofxWindowApp::Changed_Params(ofAbstractParameter& e)
 #else
 		ofLogError("ofxWindowApp") << "Not implemented for current platform. Only TARGET_WIN32 yet!";
 #endif
-		}
 	}
+}
