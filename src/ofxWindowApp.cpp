@@ -112,7 +112,9 @@ void ofxWindowApp::setup()
 	// callbacks to auto call update/draw/keyPressed
 
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
-	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
+
+	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw, OF_EVENT_ORDER_AFTER_APP);
+	//ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
 
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
 	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
@@ -240,6 +242,9 @@ void ofxWindowApp::draw(ofEventArgs& args)
 {
 	//ofLogVerbose("ofxWindowApp")<<(__FUNCTION__);
 
+	//ofDisableDepthTest();
+
+
 	//--
 
 	realFps = ofGetFrameRate();
@@ -276,7 +281,7 @@ void ofxWindowApp::draw(ofEventArgs& args)
 	if (bDebug)
 	{
 		drawDebug();
-		drawPerformance();
+		drawPerformance();//draw both
 	}
 	else
 	{
@@ -555,6 +560,7 @@ void ofxWindowApp::drawDebug()
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	vSyncStr = ((vSync ? "ON " : "OFF"));
+	vSyncStr += "[V]";
 	fpsRealStr = ofToString(realFps, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -568,7 +574,8 @@ void ofxWindowApp::drawDebug()
 	{
 		bMode = true;
 	}
-	screenMode += bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE";
+	screenMode += bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE";
+	screenMode += "[F]";
 
 #ifdef USE_MINI_WINDOW
 	screenMode += bModeMini ? " [MINI]" : " [BIG]";
@@ -596,6 +603,7 @@ void ofxWindowApp::drawDebug()
 #endif
 #ifdef USE_CUSTOM_FONT
 	ofPushStyle();
+
 	ofFill();
 	auto bb = font.getStringBoundingBox(str, xx, yy);
 	bb.setWidth(bb.getWidth() + pad);
@@ -606,6 +614,7 @@ void ofxWindowApp::drawDebug()
 	ofDrawRectangle(bb);
 	ofSetColor(255);
 	font.drawString(str, xx, yy);
+
 	ofPopStyle();
 #endif
 }
@@ -680,6 +689,7 @@ void ofxWindowApp::drawPerformance()
 #endif
 #ifdef USE_CUSTOM_FONT
 		ofPushStyle();
+
 		ofFill();
 		auto bb = font.getStringBoundingBox(str, _xx, _yy);
 		bb.setWidth(bb.getWidth() + pad);
@@ -690,6 +700,7 @@ void ofxWindowApp::drawPerformance()
 		ofDrawRectangle(bb);
 		ofSetColor(255);
 		font.drawString(str, _xx, _yy);
+
 		ofPopStyle();
 #endif
 

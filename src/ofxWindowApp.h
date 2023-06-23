@@ -235,6 +235,11 @@ public:
 	void setShowDebug(bool b = true)
 	{
 		bDebug = b;
+		//bShowPerformanceAlways = b;
+	};
+	//--------------------------------------------------------------
+	void setShowDebugPerformance(bool b = true)
+	{
 		bShowPerformanceAlways = b;
 	};
 	//--------------------------------------------------------------
