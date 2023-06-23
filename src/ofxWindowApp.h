@@ -4,11 +4,10 @@
 
 	TODO:
 
+	+ should have a callback to detect when window is moved. could that be too expensive?
+	+ add fullscreen bool param with listener. to allow expose on gui's
 	+ broken full screen save load?
-	+ each resize window frame, will save the file again.
-		could set a timer to save after 1 second from first change.
 	+ add ofxScreenSetup addon to bundle all other features
-	+ add windowResize subscribed listener to auto refresh
 
  */
 
@@ -80,7 +79,7 @@ private:
 	bool mod_COMMAND = false;
 	bool mod_CONTROL = false;
 	bool mod_ALT = false;
-	bool mod_SHIFT= false;
+	bool mod_SHIFT = false;
 
 	void windowResized(int w, int h);
 	void windowResized(ofResizeEventArgs& e);
@@ -449,7 +448,7 @@ public:
 private:
 
 	bool bAutoSaverTimed = false;
-	int timerSaverMax = 10000;
+	int timerSaverMax = 10000;//every x/1000 seconds
 	uint32_t timerSaver = 0;
 
 private:
@@ -467,11 +466,18 @@ private:
 	ofParameterGroup params{ "Extra" };
 	ofParameter<bool> vSync{ "vSync", false };
 	ofParameter<float> fpsTarget{ "Fps", 60.f, 1, 120 };
-	ofParameter<bool> bDebug{ "ShowInfo", true };
 	ofParameter<bool> bShowPerformanceAlways{ "DebugPerformance", true };
-	ofParameter<bool> bLock{ "LockMode", false };//kind of autoload
-	ofParameter<bool> bOnTop{ "OnTop", false };
+	
+	ofParameter<bool> bLock{ "LockMode", false };
+	//Ignores next window modification. 
+	// Kind of hardcoded position that will maintain on next app load.
+	
 
+public:
+	ofParameter<bool> bOnTop{ "OnTop", false };
+	ofParameter<bool> bDebug{ "WindowInfo", true };
+
+private:
 	bool bDoneStartup = false;
 
 #ifdef USE_MINI_WINDOW

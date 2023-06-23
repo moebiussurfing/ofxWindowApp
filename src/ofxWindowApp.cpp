@@ -91,6 +91,11 @@ void ofxWindowApp::setup()
 {
 	ofLogNotice("ofxWindowApp::setup");
 
+	//TODO:
+	// moving windows do not trig saving, 
+	// so we have a workaround to save periodically
+	setEnableTimerSaver(true);
+
 	// default folders
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
@@ -559,6 +564,7 @@ void ofxWindowApp::drawDebug()
 	string screenMode = "";
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
+	screenStr += "px";
 	vSyncStr = ((vSync ? "ON" : "OFF"));
 	vSyncStr += ((vSync ? "[V] " : "[V]"));
 	fpsRealStr = ofToString(realFps, 0);
