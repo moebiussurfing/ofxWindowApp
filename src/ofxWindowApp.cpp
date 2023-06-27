@@ -42,7 +42,7 @@ void ofxWindowApp::startup()
 	//--
 
 	// load
-	if (bAutoSaveLoad) loadFileSettings();
+	if (bAutoSaveLoad) loadSettings();
 
 	//--
 
@@ -74,7 +74,7 @@ void ofxWindowApp::exit()
 	if (bAutoSaveLoad && !bLock)
 	{
 		refreshGetWindowSettings();
-		saveFileWindow();
+		saveSettings();
 	}
 
 	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
@@ -92,10 +92,12 @@ void ofxWindowApp::setup()
 	ofLogNotice("ofxWindowApp::setup");
 
 	//TODO:
-	// moving windows do not trig saving, 
+#if 0
+	// Moving windows are not trig saving as we would like.., 
 	// so we have a workaround to save periodically
 	setEnableTimerSaver(true);
-
+#endif
+	
 	// default folders
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
@@ -153,7 +155,7 @@ void ofxWindowApp::setup()
 	//--
 
 	// load
-	if (bAutoSaveLoad) loadFileSettings();
+	if (bAutoSaveLoad) loadSettings();
 
 	// default
 	setShowPerformanceAllways(true);
@@ -226,7 +228,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 			bFlagSave = 0;
 			bChangedWindow = true;
 			ofLogNotice("ofxWindowApp::windowResized") << "Just saved after window been resized (timed)";
-			saveFileWindow();
+			saveSettings();
 		}
 	}
 
@@ -238,7 +240,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 	if (bAutoSaverTimed && !bLock)
 		if ((ofGetElapsedTimeMillis() - timerSaver) > timerSaverMax)
 		{
-			saveFileWindow(true);
+			saveSettings(true);
 			timerSaver = ofGetElapsedTimeMillis();
 		}
 }
@@ -328,7 +330,14 @@ void ofxWindowApp::refreshGetWindowSettings()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::saveFileWindow(bool bSlient )
+void ofxWindowApp::saveSettingsAfterRefresh( )
+{
+	refreshGetWindowSettings();
+	saveSettings();
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::saveSettings(bool bSlient )
 {
 	string __path = path_folder + "/" + path_filename;
 	ofLogNotice("ofxWindowApp::saveFileWindow") << __path;
@@ -386,7 +395,7 @@ void ofxWindowApp::saveFileWindow(bool bSlient )
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::loadFileSettings()
+void ofxWindowApp::loadSettings()
 {
 	ofSetFullscreen(false);
 
