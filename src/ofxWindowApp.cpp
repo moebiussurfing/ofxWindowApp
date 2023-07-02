@@ -28,9 +28,8 @@ ofxWindowApp::ofxWindowApp()
 //--------------------------------------------------------------
 ofxWindowApp::~ofxWindowApp()
 {
-	ofLogNotice("ofxWindowApp") << "Destructor";
-
-	exit();
+	//ofLogNotice("ofxWindowApp") << "Destructor";
+	//exit();
 }
 
 //--------------------------------------------------------------
@@ -71,11 +70,12 @@ void ofxWindowApp::exit()
 {
 	ofLogNotice("ofxWindowApp::exit");
 
+#ifdef SURFING_IMGUI__ENABLE_SAVE_ON_EXIT
 	if (bAutoSaveLoad && !bLock)
 	{
-		refreshGetWindowSettings();
-		saveSettings();
+		save();
 	}
+#endif
 
 	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxWindowApp::draw);
@@ -98,7 +98,7 @@ void ofxWindowApp::setup()
 	setEnableTimerSaver(true);
 #endif
 	
-	// default folders
+	// Default folders
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
 
@@ -116,22 +116,18 @@ void ofxWindowApp::setup()
 
 	//--
 
-	// callbacks to auto call update/draw/keyPressed
+	// Callbacks to auto call update/draw/keyPressed
 
 	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
-
 	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw, OF_EVENT_ORDER_AFTER_APP);
-	//ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw);
-
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
 	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
-
 	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
-	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);
+	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);//TODO:
 
 	//--
 
-	// extra settings
+	// Extra settings
 	params.add(vSync);
 	params.add(fpsTarget);
 	params.add(bDebug);
@@ -139,7 +135,7 @@ void ofxWindowApp::setup()
 	params.add(bOnTop);
 	params.add(bLock);
 
-	//// mini settings
+	//// Mini settings
 	//params.add(vSync);
 	//params.add(fpsTarget);
 	//params.add(bDebug);
@@ -154,15 +150,15 @@ void ofxWindowApp::setup()
 
 	//--
 
-	// load
+	// Load
 	if (bAutoSaveLoad) loadSettings();
 
-	// default
+	// Default
 	setShowPerformanceAllways(true);
 
 	//--
 
-	// workarounds
+	// Workarounds
 	windowResized(ofGetWindowSize().x, ofGetWindowSize().y);
 
 #ifdef USE_MINI_WINDOW
@@ -223,7 +219,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 
 	// Marked to save
 	if (bFlagSave) {
-		if (ofGetElapsedTimef() >= timerFlag)
+		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
 		{
 			bFlagSave = 0;
 			bChangedWindow = true;
@@ -234,27 +230,42 @@ void ofxWindowApp::update(ofEventArgs& args)
 
 	//--
 
-	// Autosaver timer
+	// Auto saver timer
 	// is no required to resize the window or to close the app window to save.
 	// then the app can crash an window shape will be stored 1 time each 10 seconds by default.
-	if (bAutoSaverTimed && !bLock)
-		if ((ofGetElapsedTimeMillis() - timerSaver) > timerSaverMax)
+	if (bAutoSaverTimed && !bLock) 
+	{
+		auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
+		if (t > timePeriodToCheckIfSave)
 		{
-			saveSettings(true);
-			timerSaver = ofGetElapsedTimeMillis();
+			bool bModeSaveOnlyIfWindowMoved = 1;
+
+			if (bModeSaveOnlyIfWindowMoved) {
+				bool bHasBeenMoved = 0;
+				static int posx;
+				static int posy;
+				if (posx != ofGetWindowPositionX()) {
+					posx = ofGetWindowPositionX();
+					bHasBeenMoved = 1;
+				}
+				if (posy != ofGetWindowPositionY()) {
+					posy = ofGetWindowPositionY();
+					bHasBeenMoved = 1;
+				}
+				if (bHasBeenMoved) saveSettings(true);
+			}
+			else {
+				saveSettings(true);
+			}
+
+			timeLastAutoSaveCheck = ofGetElapsedTimeMillis();
 		}
+	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::draw(ofEventArgs& args)
 {
-	//ofLogVerbose("ofxWindowApp")<<(__FUNCTION__);
-
-	//ofDisableDepthTest();
-
-
-	//--
-
 	realFps = ofGetFrameRate();
 
 	//// workaround:
@@ -293,15 +304,14 @@ void ofxWindowApp::draw(ofEventArgs& args)
 	}
 	else
 	{
-		if (bShowPerformanceAlways)
-			drawPerformance();
+		if (bShowPerformanceAlways) drawPerformance();
 	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::refreshGetWindowSettings()
 {
-	ofLogVerbose("ofxWindowApp") << (__FUNCTION__);
+	ofLogVerbose("ofxWindowApp") << "refreshGetWindowSettings()";
 
 #ifdef USE_MINI_WINDOW
 	if (!bModeMini)
@@ -330,7 +340,13 @@ void ofxWindowApp::refreshGetWindowSettings()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::saveSettingsAfterRefresh( )
+void ofxWindowApp::save()
+{
+	saveSettingsAfterRefresh();
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::saveSettingsAfterRefresh()
 {
 	refreshGetWindowSettings();
 	saveSettings();
@@ -340,14 +356,15 @@ void ofxWindowApp::saveSettingsAfterRefresh( )
 void ofxWindowApp::saveSettings(bool bSlient )
 {
 	string __path = path_folder + "/" + path_filename;
-	ofLogNotice("ofxWindowApp::saveFileWindow") << __path;
+	ofLogNotice("ofxWindowApp::saveSettings") << __path;
 
-	// force mini to window, not full screen
+	// Force mini to window, not full screen
+
 #ifdef USE_MINI_WINDOW
 	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
 #endif
 
-	// save window settings
+	// Save window settings
 
 	ofJson jApp;
 	ofJson jMini;
@@ -368,16 +385,18 @@ void ofxWindowApp::saveSettings(bool bSlient )
 	jMini["Preset"] = "Mini";
 #endif
 
-	// A. using 2 files
+	// A. Using 2 files
+	
 	//ofSavePrettyJson(path_folder + "/"+path_filename, j);
 	//TODO:
-	// we can't get frame rate and v sync mode from window app.
+	// We can't get frame rate and v sync mode from window app.
 	// should be settled by hand
 	// extra settings could be mixed in one json only for both
 	// TEST:
 	//ofSavePrettyJson(path_folder + "/"+path_filename2, jMini);
 
-	// B. settings in one file
+	// B. Settings in one file
+
 	ofJson data;
 	data.push_back(jApp);
 
@@ -386,10 +405,10 @@ void ofxWindowApp::saveSettings(bool bSlient )
 #endif
 	data.push_back(jExtra);
 
-	// check if we need to create data folder first
+	// Check if we need to create data folder first
 	folderCheckAndCreate(path_folder);
 
-	// save file
+	// Save file
 	if(!bSlient) ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
 }
@@ -406,7 +425,7 @@ void ofxWindowApp::loadSettings()
 	bool _b = file.exists();
 	if (_b)
 	{
-		ofLogNotice("ofxWindowApp::loadFileSettings") << "File found: " << __path;
+		ofLogNotice("ofxWindowApp") << "loadFileSettings(): File found: " << __path;
 
 		//-
 
@@ -758,7 +777,7 @@ void ofxWindowApp::windowResized(int w, int h)
 	bChangedWindow = true;
 
 	bFlagSave = 1;
-	timerFlag = ofGetElapsedTimef() + 0.5f;
+	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
 
 	////TODO: fix
 	//if (bAutoSaveLoad && !bLock)
@@ -855,7 +874,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		{
 			//if (mod_ALT)
 			{
-				setToggleAlwaysOnTop();
+				//setToggleAlwaysOnTop();
 				BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
 				BigWindow.setSize(1920, 1080);
 
