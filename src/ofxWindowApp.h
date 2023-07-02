@@ -221,16 +221,17 @@ private:
 	void applyMode();
 
 public:
+	//--------------------------------------------------------------
 	string getPathFolder() const
 	{
 		return path_folder;
 	}
+	//--------------------------------------------------------------
 	string getPathSettings() const
 	{
 		string p = path_folder + "/" + path_filename;
 		return p;
 	}
-
 	//--------------------------------------------------------------
 	void setPathFolder(string s)
 	{
