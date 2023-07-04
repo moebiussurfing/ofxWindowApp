@@ -3,6 +3,9 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
+	// Set the instance before calling setup()
+	ofxWindowApp::setInstance(&w);
+	w.setup();
 }
 
 //--------------------------------------------------------------

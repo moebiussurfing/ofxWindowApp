@@ -1,8 +1,21 @@
 #include "ofxWindowApp.h"
 
+#if defined(TARGET_WIN32)			
 
-void windowMoved(GLFWwindow* window, int xpos, int ypos)
+ofxWindowApp* ofxWindowApp::instance = nullptr; // Initialize the static pointer
+
+//--------------------------------------------------------------
+void ofxWindowApp::setInstance(ofxWindowApp* app)
 {
+	instance = app; // Set the instance
+}
+
+//--
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
+{
+	// Ignore if not pos changed
 	static int xpos_ = -1;
 	static int ypos_ = -1;
 	bool bChanged = 0;
@@ -16,34 +29,39 @@ void windowMoved(GLFWwindow* window, int xpos, int ypos)
 	}
 	if (!bChanged) return;
 
-	ofLogNotice("ofxWindowApp::windowMoved") << xpos << "," << ypos;
+	//--
 
-	/*
-	window_W = w;
-	window_H = h;
-	window_X = ofGetWindowPositionX();
-	window_Y = ofGetWindowPositionY();
+	if (instance)
+	{
+		//instance->window_X = ofGetWindowPositionX();
+		//instance->window_Y = ofGetWindowPositionY();
+		instance->window_X = xpos;
+		instance->window_Y = ypos;
 
-	refreshGetWindowSettings();
+		instance->refreshGetWindowSettings();
 
-	if (bFlagSave == 1) return;
+		//if (instance->bFlagSave == 1) return;
 
-	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << "," << ofToString(h);
+		ofLogNotice("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
 
-	bChangedWindow = true;
+		instance->bChangedWindowEasyCallback = true;
 
-	bFlagSave = 1;
-	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-	*/
+		instance->bFlagSave = true;
+
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+		instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+#endif
+	}
 }
+#endif
 
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp()
 {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	// default
-	int _h = BAR_HEIGHT;//bar height
+	// Default
+	int _h = BAR_HEIGHT; // bar height
 	BigWindow.setPosition(glm::vec2(0, _h));
 	BigWindow.setSize(1920, 1080 - _h);
 	BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
@@ -58,8 +76,8 @@ ofxWindowApp::ofxWindowApp()
 	setVerticalSync(false);
 	setShowDebug(false);
 
-	// auto call setup
-	setup();
+	// Auto call setup
+	//setup();
 }
 
 //--------------------------------------------------------------
@@ -77,12 +95,12 @@ void ofxWindowApp::startup()
 
 	//--
 
-	// load
+	// Load
 	if (bAutoSaveLoad) loadSettings();
 
 	//--
 
-	//// works but slow
+	//// Works but slow
 	//refreshToggleWindowMode();
 	//refreshToggleWindowMode();
 
@@ -91,12 +109,13 @@ void ofxWindowApp::startup()
 
 	//--
 
-	// workaround
-	//refresh
+	// Workaround
+	// Refresh
 #if defined(TARGET_WIN32)			
 	HWND W = GetActiveWindow();
 	SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 #endif
+
 	bOnTop = bOnTop;
 
 	ofLogNotice("ofxWindowApp::--------------------------------------------------------------");
@@ -129,7 +148,9 @@ void ofxWindowApp::setup()
 	ofLogNotice("ofxWindowApp::setup");
 
 	GLFWwindow* glfwWindow = glfwGetCurrentContext();
+
 	glfwSetWindowPosCallback(glfwWindow, windowMoved);
+	//glfwSetWindowPosCallback(glfwWindow, ofxWindowApp::windowMoved);
 
 	//TODO:
 #if 0
@@ -211,18 +232,30 @@ void ofxWindowApp::setup()
 			ofSetWindowShape(ofGetWidth(), ofGetHeight());
 		}
 	}
+
+	bDoneSetup = true;
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs& args)
 {
-	if ((ofGetFrameNum() > 0) && !bDoneStartup)
-	{
-		// workaround: 
-		startup();
+	if (!bDoneSetup)
+		if (ofGetFrameNum() >= 0)
+		{
+			//ofxWindowApp::setInstance(this);
+			setup();
+		}
+	if (bDoneSetup)
+		if (!bDoneStartup)
+			if (ofGetFrameNum() > 0)
+			{
+				// Workaround
+				startup();
 
-		bDoneStartup = true;
-	}
+				bDoneStartup = true;
+			}
+
+	//--
 
 	//TODO: 
 	// WIP lock mode
@@ -256,19 +289,26 @@ void ofxWindowApp::update(ofEventArgs& args)
 
 	//--
 
-	// Marked to save
-	if (bFlagSave) {
+	// Check if flagged to save
+	if (bFlagSave)
+	{
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
+#endif
 		{
 			bFlagSave = 0;
-			bChangedWindow = true;
-			ofLogNotice("ofxWindowApp::windowResized") << "Just saved after window been resized (timed)";
+
+			bChangedWindowEasyCallback = true;
+
+			ofLogNotice("ofxWindowApp::Changed") << "Just saved after window changed";
+
 			saveSettings();
 		}
-	}
+}
 
 	//--
 
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	// Auto saver timer
 	// is no required to resize the window or to close the app window to save.
 	// then the app can crash an window shape will be stored 1 time each 10 seconds by default.
@@ -278,7 +318,6 @@ void ofxWindowApp::update(ofEventArgs& args)
 		if (t > timePeriodToCheckIfSave)
 		{
 			bool bModeSaveOnlyIfWindowMoved = 1;
-
 			if (bModeSaveOnlyIfWindowMoved) {
 				bool bHasBeenMoved = 0;
 				static int posx;
@@ -300,6 +339,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 			timeLastAutoSaveCheck = ofGetElapsedTimeMillis();
 		}
 	}
+#endif
 }
 
 //--------------------------------------------------------------
@@ -322,7 +362,7 @@ void ofxWindowApp::draw(ofEventArgs& args)
 #ifdef USE_CUSTOM_FONT
 		yy = window_H - fontSize + 5;
 #endif
-	}
+}
 
 	else if (positionLayout == DEBUG_POSITION_TOP)
 	{
@@ -352,9 +392,20 @@ void ofxWindowApp::refreshGetWindowSettings()
 {
 	ofLogVerbose("ofxWindowApp") << "refreshGetWindowSettings()";
 
+#ifndef USE_MINI_WINDOW
+	// Big
+	BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
+	BigWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
+	BigWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
+
+	// ?
+	if (BigWindow.windowMode == ofWindowMode(0)) bigFullScreen = false;
+	else if (BigWindow.windowMode == ofWindowMode(1)) bigFullScreen = true;
+	else if (BigWindow.windowMode == ofWindowMode(2)) bigFullScreen = false;
+#endif
+
 #ifdef USE_MINI_WINDOW
 	if (!bModeMini)
-#endif
 	{
 		// Big
 		BigWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
@@ -366,17 +417,15 @@ void ofxWindowApp::refreshGetWindowSettings()
 		else if (BigWindow.windowMode == ofWindowMode(1)) bigFullScreen = true;
 		else if (BigWindow.windowMode == ofWindowMode(2)) bigFullScreen = false;
 	}
-
-#ifdef USE_MINI_WINDOW
 	else
 	{
 		// Mini
 		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
-	}
+}
 #endif
-	}
+}
 
 //--------------------------------------------------------------
 void ofxWindowApp::save()
@@ -454,7 +503,9 @@ void ofxWindowApp::saveSettings(bool bSlient)
 	if (!bSlient) ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
 
-	bFlagSaved = true;
+	//--
+
+	bFlagDoneSaved = true;
 }
 
 //--------------------------------------------------------------
@@ -504,7 +555,7 @@ void ofxWindowApp::loadSettings()
 
 			//recall both params groups
 			ofDeserialize(jExtra, params);
-	}
+		}
 		else ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 
 		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
@@ -607,7 +658,7 @@ void ofxWindowApp::loadSettings()
 		//else {
 		//	ofx::Serializer::ApplyWindowSettings(jMini);
 		//}
-}
+	}
 	else
 	{
 		ofLogError("ofxWindowApp") << "File NOT found: " << __path;
@@ -697,7 +748,7 @@ void ofxWindowApp::drawDebug()
 
 	ofPopStyle();
 #endif
-	}
+}
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawPerformance()
@@ -814,14 +865,17 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	refreshGetWindowSettings();
 
-	if (bFlagSave == 1) return;
-
-	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << "," << ofToString(h);
-
-	bChangedWindow = true;
+	//if (bFlagSave == 1) return;
 
 	bFlagSave = 1;
+
+	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
+
+	bChangedWindowEasyCallback = true;
+
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+#endif
 
 	////TODO: fix
 	//if (bAutoSaveLoad && !bLock)
@@ -953,7 +1007,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
-		}
+	}
 #endif
 		//--
 
@@ -963,7 +1017,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		//mod_CONTROL = false; // Windows. not working
 		//mod_ALT = false;
 		//mod_SHIFT = false;
-	}
+}
 }
 //--------------------------------------------------------------
 void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
@@ -993,23 +1047,21 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 //--------------------------------------------------------------
 void ofxWindowApp::folderCheckAndCreate(string _path)
 {
-	//ofLogNotice("ofxWindowApp::folderCheckAndCreate");
+	ofLogNotice("ofxWindowApp") << "folderCheckAndCreate(). Path: " << _path;
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
-	// check if target data folder exist
+	// Check if target data folder exist
 	if (!dataDirectory.isDirectory())
 	{
-		ofLogError("__FUNCTION__") << "FOLDER DOES NOT EXIST!";
+		ofLogError("ofxWindowApp") << "folderCheckAndCreate(). FOLDER DOES NOT EXIST!";
 
-		//create folder
+		// Create folder
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 
-		//debug if creation has been succed
-		if (b)
-			ofLogNotice("__FUNCTION__") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
-		else
-			ofLogError("__FUNCTION__") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+		// Debug if creation has been succed
+		if (b) ofLogNotice("ofxWindowApp") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+		else ofLogError("ofxWindowApp") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
 	}
 }
 
@@ -1078,15 +1130,15 @@ void ofxWindowApp::refreshToggleWindowMode()
 //--------------------------------------------------------------
 void ofxWindowApp::applyMode()
 {
-	ofLogVerbose("ofxWindowApp") << (__FUNCTION__);
+	ofLogVerbose("ofxWindowApp") << "applyMode()";
 
-	//apply extra
+	// Apply extra
 	ofSetVerticalSync(vSync);
 	ofSetFrameRate(fpsTarget);
 
-	//-
+	//--
 
-	// mini preset
+	// Mini preset
 
 #ifdef USE_MINI_WINDOW
 	if (bModeMini)
@@ -1096,7 +1148,7 @@ void ofxWindowApp::applyMode()
 		ofSetFullscreen(false);
 	}
 
-	// big preset
+	// Big preset
 	else
 #endif
 	{
@@ -1121,7 +1173,7 @@ void ofxWindowApp::applyMode()
 
 	//-
 
-	//// apply
+	//// Apply
 	//if (bModeMini) {
 	//	ofx::Serializer::ApplyWindowSettings(BigWindow);
 	//}

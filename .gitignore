@@ -555,3 +555,6 @@ example_Basic/Makefile
 example_Basic/openFrameworks-Info.plist
 example_Basic/Project.xcconfig
 Examples/exampleAdvanced/bin/data/ofxWindowApp/ofxWindowApp.json
+Examples/exampleAdvanced/enc_temp_folder/aedd3b55d857551f699f4b14ae52a34/ofxWindowApp.h
+Examples/exampleAdvanced/bin/data/ofxWindowApp/ofxWindowApp.json
+Examples/exampleAdvanced/enc_temp_folder/aedd3b55d857551f699f4b14ae52a34/ofxWindowApp.h

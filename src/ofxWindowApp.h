@@ -5,20 +5,34 @@
 	TODO:
 
 	+ should have a callback to detect when window is moved. could that be too expensive?
-	+ add fullscreen bool param with listener. to allow expose on gui's
+	+ add full screen bool param with listener. to allow expose on gui's
 	+ broken full screen save load?
 	+ add ofxScreenSetup addon to bundle all other features
 
  */
 
+//----
+
  //TODO: Fixing exceptions hen closing ofApp.
  //#define SURFING_IMGUI__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
  //#define SURFING_IMGUI__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
+//#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+
+//----
+
 #include "ofMain.h"
 
-//#include <Windows.h>
+#if defined(TARGET_WIN32)			
 #include <GLFW/glfw3.h>
+#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
+#undefine SURFING_WINDOW_APP__USE_TIMED_SAVER
+#endif
+#else
+#if undefined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
+#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+#endif
+#endif
 
 #include "ofxSerializer.h"
 
@@ -42,14 +56,29 @@
 // both states will be handled in parallel
 
 
+//--
+
 class ofxWindowApp
 {
 public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
-private:
+public:
 	void setup();
+
+public:
+	static void windowMoved(GLFWwindow* window, int xpos, int ypos);
+	//void windowMoved(GLFWwindow* window, int xpos, int ypos);
+
+private:
+	static ofxWindowApp* instance; // Static pointer to hold the instance
+
+public:
+	static void setInstance(ofxWindowApp* app); // Static function to set the instance
+private:
+	bool bDoneSetup = false;
+	
 	void startup();
 	void update(ofEventArgs& args);
 	void draw(ofEventArgs& args);
@@ -104,9 +133,11 @@ private:
 	//}
 
 	bool bFlagSave = 0;
-	float timeWhenToSaveFlag;
+	bool bFlagDoneSaved = 0;
 
-	bool bFlagSaved = 0;
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+	float timeWhenToSaveFlag;
+#endif
 
 	//-
 
@@ -115,7 +146,7 @@ private:
 
 	//----
 
-	// API
+	// API METHODS TO CONFIGURE
 
 public:
 	// Setters
@@ -222,17 +253,16 @@ private:
 	void applyMode();
 
 public:
-	//--------------------------------------------------------------
 	string getPathFolder() const
 	{
 		return path_folder;
 	}
-	//--------------------------------------------------------------
 	string getPathSettings() const
 	{
 		string p = path_folder + "/" + path_filename;
 		return p;
 	}
+
 	//--------------------------------------------------------------
 	void setPathFolder(string s)
 	{
@@ -287,14 +317,13 @@ public:
 	//--------------------------------------------------------------
 	bool isChanged()
 	{
-		if (bChangedWindow)
+		if (bChangedWindowEasyCallback)
 		{
-			bChangedWindow = false;
+			bChangedWindowEasyCallback = false;
 			return true;
 		}
 
-		else
-			return false;
+		else return false;
 	}
 
 	//--
@@ -304,7 +333,7 @@ private:
 	{
 		ofLogVerbose("ofxWindowApp::applyExtra");
 		ofLogVerbose("ofxWindowApp") << "FpsTarget  : " << fpsTarget;
-		ofLogVerbose("ofxWindowApp") << "vSync	  : " << vSync;
+		ofLogVerbose("ofxWindowApp") << "vSync	    : " << vSync;
 		ofLogVerbose("ofxWindowApp") << "Show Debug : " << bDebug.get();
 		ofLogVerbose("ofxWindowApp") << "bLock      : " << bLock.get();
 #ifdef USE_MINI_WINDOW
@@ -461,6 +490,7 @@ public:
 
 	//--
 
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 public:
 	void setEnableTimerSaver(bool b = true)
 	{
@@ -479,16 +509,19 @@ private:
 
 	int timePeriodToCheckIfSave = 10000; //every x/1000 seconds
 	uint32_t timeLastAutoSaveCheck = 0;
+#endif
+
+	//--
 
 private:
-	// this is to folder all files to avoid mixing with other add-ons data
+	// This is to folder all files to avoid mixing with other add-ons data
 	string path_folder;
 	string path_filename;
 
-	bool bAutoSaveLoad = true;//load at startup 
+	bool bAutoSaveLoad = true; // load at startup 
 	//TODO: (disabled->) and saves on exit
 
-	bool bChangedWindow = false;
+	bool bChangedWindowEasyCallback = false;
 	bool bKeys = true; // keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
@@ -564,9 +597,11 @@ public:
 		string s;
 
 		s += "ofxWindowApp";
-		if (bFlagSaved) s += " | SAVED!";
+		if (bFlagDoneSaved) s += "  SAVE";
 		s += "\n\n";
+
 		s += "KEY STROKES\n\n";
+
 		s += "Alt +\n";
 		s += "W : SHOW INFO\n";
 		s += "V : VERTICAL SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
@@ -583,14 +618,17 @@ public:
 		s += "Alt + R : RESET TO FULLHD \n";
 		s += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
 
-		//TODO: WIP lock mode
+		//TODO: WIP: Lock mode
 		s += "Alt + L : LOCK = " + ofToString(bLock ? "TRUE" : "FALSE");
 
 		s += "\n\n";
 
+#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
+		s += "SAVES IF WINDOW IS\n";
+		s += "RESIZED OR MOVED\n";
+#else
 		s += "SAVES IF WINDOW IS\n";
 		s += "RESIZED\n";
-
 		if (bAutoSaverTimed)
 		{
 			s += "MOVED AND TIMER FINISHED\n";
@@ -602,10 +640,11 @@ public:
 			int pct = ofMap(t, 0, timePeriodToCheckIfSave, 0, 100);
 			s += ofToString(pct) + "%";
 		}
-
-		ofColor c1 = bFlagSaved ? 255 : 0;
-		ofColor c2 = bFlagSaved ? 0 : 255;
-		if (bFlagSaved) bFlagSaved = 0;
+#endif
+		// flash
+		ofColor c1 = bFlagDoneSaved ? 255 : 0;
+		ofColor c2 = bFlagDoneSaved ? 0 : 255;
+		if (bFlagDoneSaved) bFlagDoneSaved = 0;
 
 		ofDrawBitmapStringHighlight(s, 50, 50, c1, c2);
 	}
