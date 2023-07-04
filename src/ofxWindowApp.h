@@ -5,34 +5,19 @@
 	TODO:
 
 	+ should have a callback to detect when window is moved. could that be too expensive?
-	+ add full screen bool param with listener. to allow expose on gui's
+	+ add fullscreen bool param with listener. to allow expose on gui's
 	+ broken full screen save load?
 	+ add ofxScreenSetup addon to bundle all other features
 
  */
 
-//----
-
  //TODO: Fixing exceptions hen closing ofApp.
  //#define SURFING_IMGUI__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
  //#define SURFING_IMGUI__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
-//#define SURFING_WINDOW_APP__USE_TIMED_SAVER
-
-//----
-
 #include "ofMain.h"
 
-#if defined(TARGET_WIN32)			
-#include <GLFW/glfw3.h>
-#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-#undefine SURFING_WINDOW_APP__USE_TIMED_SAVER
-#endif
-#else
-#if undefined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER
-#endif
-#endif
+//#include <Windows.h>
 
 #include "ofxSerializer.h"
 
@@ -56,36 +41,13 @@
 // both states will be handled in parallel
 
 
-//--
-
 class ofxWindowApp
 {
 public:
 	ofxWindowApp();
 	~ofxWindowApp();
 
-public:
-	void setup();
-
-public:
-	static void windowMoved(GLFWwindow* window, int xpos, int ypos);
-	//void windowMoved(GLFWwindow* window, int xpos, int ypos);
-
-private:
-	static ofxWindowApp* instance; // Static pointer to hold the instance
-
-public:
-	static void setInstance(ofxWindowApp* app); // Static function to set the instance
-private:
-	bool bDoneSetup = false;
-	
-	void startup();
-	void update(ofEventArgs& args);
-	void draw(ofEventArgs& args);
-	void exit();
-
-	void keyPressed(ofKeyEventArgs& eventArgs);
-	void keyReleased(ofKeyEventArgs& eventArgs);
+	//void dragEvent(ofDragInfo dragInfo) {}
 
 	//--
 
@@ -97,15 +59,25 @@ private:
 	ofWindowSettings MiniWindow;
 #endif
 
+	void exit(); //TODO: test to avoid crashes on exit
+
 #ifdef USE_CUSTOM_FONT
 	ofTrueTypeFont font;
 	int fontSize;
 #endif
 
-	//--
+	//-
 
 private:
-	// Modifiers
+	void setup();
+	void startup();
+	void update(ofEventArgs& args);
+	void draw(ofEventArgs& args);
+
+	void keyPressed(ofKeyEventArgs& eventArgs);
+	void keyReleased(ofKeyEventArgs& eventArgs);
+
+	// modifiers
 	bool mod_COMMAND = false;
 	bool mod_CONTROL = false;
 	bool mod_ALT = false;
@@ -133,11 +105,7 @@ private:
 	//}
 
 	bool bFlagSave = 0;
-	bool bFlagDoneSaved = 0;
-
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
-#endif
 
 	//-
 
@@ -146,7 +114,7 @@ private:
 
 	//----
 
-	// API METHODS TO CONFIGURE
+	// API
 
 public:
 	// Setters
@@ -196,9 +164,9 @@ public:
 	//--
 
 	//--------------------------------------------------------------
-	void setEnableAllowQuitAppUsingEscapeKey(bool b)
+	void setEscapeQuitsApp(bool b)
 	{
-		ofLogNotice("ofxWindowApp::setEnableAllowQuitAppUsingEscapeKey");
+		ofLogNotice("ofxWindowApp::setEscapeQuitsApp");
 		ofSetEscapeQuitsApp(b);
 	}
 
@@ -253,16 +221,17 @@ private:
 	void applyMode();
 
 public:
+	//--------------------------------------------------------------
 	string getPathFolder() const
 	{
 		return path_folder;
 	}
+	//--------------------------------------------------------------
 	string getPathSettings() const
 	{
 		string p = path_folder + "/" + path_filename;
 		return p;
 	}
-
 	//--------------------------------------------------------------
 	void setPathFolder(string s)
 	{
@@ -311,29 +280,30 @@ public:
 
 	void folderCheckAndCreate(string _path);
 
-	//--
+	//-
 
 	// Easy callback only to check from parent scope/ofApp if window shape has changed.
 	//--------------------------------------------------------------
 	bool isChanged()
 	{
-		if (bChangedWindowEasyCallback)
+		if (bChangedWindow)
 		{
-			bChangedWindowEasyCallback = false;
+			bChangedWindow = false;
 			return true;
 		}
 
-		else return false;
+		else
+			return false;
 	}
 
-	//--
+	//-
 
 private:
 	void applyExtra() // fps and vsync only
 	{
 		ofLogVerbose("ofxWindowApp::applyExtra");
 		ofLogVerbose("ofxWindowApp") << "FpsTarget  : " << fpsTarget;
-		ofLogVerbose("ofxWindowApp") << "vSync	    : " << vSync;
+		ofLogVerbose("ofxWindowApp") << "vSync	  : " << vSync;
 		ofLogVerbose("ofxWindowApp") << "Show Debug : " << bDebug.get();
 		ofLogVerbose("ofxWindowApp") << "bLock      : " << bLock.get();
 #ifdef USE_MINI_WINDOW
@@ -381,7 +351,7 @@ public:
 		bKeys = b;
 	}
 
-	//--
+	//-
 
 public:
 	float getFrameRate()
@@ -414,10 +384,10 @@ public:
 		return window_Y;
 	}
 
-	//--
+	//-
 
-#ifdef USE_MINI_WINDOW
-	// Mini/Big mode
+	// mini/big mode
+
 public:
 	//TODO:
 	//void setShapeMiniMode(glm::vec2 pos, glm::vec2 size)
@@ -429,6 +399,7 @@ public:
 	//{
 	//}
 
+#ifdef USE_MINI_WINDOW
 	bool isModeMini()
 	{
 		return bModeMini.get();
@@ -480,17 +451,15 @@ public:
 	}
 #endif
 
-	//--
+	//-
 
-	// Disables saving. So json file will not be overwritten.
 	void setLock(bool b)
 	{
 		bLock = b;
 	}
 
-	//--
+	//-
 
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 public:
 	void setEnableTimerSaver(bool b = true)
 	{
@@ -509,19 +478,16 @@ private:
 
 	int timePeriodToCheckIfSave = 10000; //every x/1000 seconds
 	uint32_t timeLastAutoSaveCheck = 0;
-#endif
-
-	//--
 
 private:
-	// This is to folder all files to avoid mixing with other add-ons data
+	// this is to folder all files to avoid mixing with other add-ons data
 	string path_folder;
 	string path_filename;
 
-	bool bAutoSaveLoad = true; // load at startup 
+	bool bAutoSaveLoad = true;//load at startup 
 	//TODO: (disabled->) and saves on exit
 
-	bool bChangedWindowEasyCallback = false;
+	bool bChangedWindow = false;
 	bool bKeys = true; // keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
@@ -594,64 +560,48 @@ public:
 	//--------------------------------------------------------------
 	void drawInfo()
 	{
-		string s;
-
-		s += "ofxWindowApp";
-		if (bFlagDoneSaved) s += "  SAVE";
-		s += "\n\n";
-
-		s += "KEY STROKES\n\n";
-
-		s += "Alt +\n";
-		s += "W : SHOW INFO\n";
-		s += "V : VERTICAL SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
+		string ss;
+		ss += "ofxWindowApp\n\n";
+		ss += "KEY STROKES\n\n";
+		ss += "Alt +\n";
+		ss += "W : SHOW INFO\n";
+		ss += "V : VERTICAL SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
-		s += "F : SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
+		ss += "F : SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
 
 #ifdef USE_MINI_WINDOW
-		s += "Alt + M: PRESET ";
-		if (bModeMini) s += "*MINI  BIG";
-		else s += " MINI *BIG";
+		ss += "Alt + M: PRESET ";
+		if (bModeMini) ss += "*MINI  BIG";
+		else ss += " MINI *BIG";
 #endif
 
-		s += "\n";
-		s += "Alt + R : RESET TO FULLHD \n";
-		s += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
+		ss += "\n";
+		ss += "Alt + R : RESET TO FULLHD \n";
+		ss += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
+		ss += "Alt + L : LOCK = " + ofToString(bLock ? "TRUE" : "FALSE") /*+ "\n"*/;
+		//TODO: WIP lock mode
+		ss += "\n\n";
 
-		//TODO: WIP: Lock mode
-		s += "Alt + L : LOCK = " + ofToString(bLock ? "TRUE" : "FALSE");
-
-		s += "\n\n";
-
-#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
-		s += "SAVES IF WINDOW IS\n";
-		s += "RESIZED OR MOVED\n";
-#else
-		s += "SAVES IF WINDOW IS\n";
-		s += "RESIZED\n";
-		if (bAutoSaverTimed)
-		{
-			s += "MOVED AND TIMER FINISHED\n";
-			s += "\n";
-			s += "Autosaver Timed: " + ofToString((bAutoSaverTimed ? "ON " : "OFF"));
-			s += "\n";
-			s += ofToString(timePeriodToCheckIfSave / 10.f, 1) + "secs\n";
+		ss += "SAVES IF WINDOW IS\n";
+		ss += "RESIZED\n";
+		if (bAutoSaverTimed) {
+			ss += "MOVED AND TIMER FINISHED\n";
+			ss += "\n";
+			ss += "Autosaver Timed: " + ofToString((bAutoSaverTimed ? "ON " : "OFF"));
+			ss += "\n";
+			ss += ofToString(timePeriodToCheckIfSave / 10.f, 1) + "secs\n";
 			auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
 			int pct = ofMap(t, 0, timePeriodToCheckIfSave, 0, 100);
-			s += ofToString(pct) + "%";
+			ss += ofToString(pct) + "%";
+			if (pct == 100) {
+				ss += "SAVE!";
+			}
 		}
-#endif
-		// flash
-		ofColor c1 = bFlagDoneSaved ? 255 : 0;
-		ofColor c2 = bFlagDoneSaved ? 0 : 255;
-		if (bFlagDoneSaved) bFlagDoneSaved = 0;
 
-		ofDrawBitmapStringHighlight(s, 50, 50, c1, c2);
+		ofDrawBitmapStringHighlight(ss, 50, 50);
 	}
 
 	//--
-
-
 
 	// GPT callback
 	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);//TODO:
