@@ -554,3 +554,4 @@ example_Basic/config.make
 example_Basic/Makefile
 example_Basic/openFrameworks-Info.plist
 example_Basic/Project.xcconfig
+Examples/exampleAdvanced/bin/data/ofxWindowApp/ofxWindowApp.json
