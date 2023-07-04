@@ -2,19 +2,22 @@
 
 #if defined(TARGET_WIN32)			
 
-ofxWindowApp* ofxWindowApp::instance = nullptr; // Initialize the static pointer
-
-//--------------------------------------------------------------
-void ofxWindowApp::setInstance(ofxWindowApp* app)
-{
-	instance = app; // Set the instance
-}
+//ofxWindowApp* ofxWindowApp::instance = nullptr; // Initialize the static pointer
+//
+////--------------------------------------------------------------
+//void ofxWindowApp::setInstance(ofxWindowApp* app)
+//{
+//	instance = app; // Set the instance
+//}
 
 //--
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 {
+	if (!bDoneStartup) return;
+	if (!bDoneSetup) return;
+
 	// Ignore if not pos changed
 	static int xpos_ = -1;
 	static int ypos_ = -1;
@@ -31,25 +34,45 @@ void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 
 	//--
 
-	if (instance)
+//	if (instance)
+//	{
+//		//instance->window_X = ofGetWindowPositionX();
+//		//instance->window_Y = ofGetWindowPositionY();
+//		instance->window_X = xpos;
+//		instance->window_Y = ypos;
+//
+//		instance->refreshGetWindowSettings();
+//
+//		//if (instance->bFlagSave == 1) return;
+//
+//		ofLogNotice("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
+//
+//		instance->bChangedWindowEasyCallback = true;
+//
+//		instance->bFlagSave = true;
+//
+//#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+//		instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+//#endif
+//	}
 	{
-		//instance->window_X = ofGetWindowPositionX();
-		//instance->window_Y = ofGetWindowPositionY();
-		instance->window_X = xpos;
-		instance->window_Y = ypos;
+		//window_X = ofGetWindowPositionX();
+		//window_Y = ofGetWindowPositionY();
+		window_X = xpos;
+		window_Y = ypos;
 
-		instance->refreshGetWindowSettings();
+		refreshGetWindowSettings();
 
-		//if (instance->bFlagSave == 1) return;
+		//if (bFlagSave == 1) return;
 
 		ofLogNotice("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
 
-		instance->bChangedWindowEasyCallback = true;
+		bChangedWindowEasyCallback = true;
 
-		instance->bFlagSave = true;
+		bFlagSave = true;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
-		instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+		timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
 #endif
 	}
 }
@@ -59,6 +82,8 @@ void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 ofxWindowApp::ofxWindowApp()
 {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
+	
+	//--
 
 	// Default
 	int _h = BAR_HEIGHT; // bar height
@@ -76,8 +101,21 @@ ofxWindowApp::ofxWindowApp()
 	setVerticalSync(false);
 	setShowDebug(false);
 
+	//--
+	
 	// Auto call setup
 	//setup();
+
+	//--
+
+	// Callbacks to auto call update/draw/keyPressed
+
+	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
+	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
+	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
+	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
+	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);//TODO:
 }
 
 //--------------------------------------------------------------
@@ -149,8 +187,16 @@ void ofxWindowApp::setup()
 
 	GLFWwindow* glfwWindow = glfwGetCurrentContext();
 
-	glfwSetWindowPosCallback(glfwWindow, windowMoved);
-	//glfwSetWindowPosCallback(glfwWindow, ofxWindowApp::windowMoved);
+	//glfwSetWindowPosCallback(glfwWindow, windowMoved);
+
+	glfwSetWindowPosCallback(glfwWindow, [](GLFWwindow* window, int xpos, int ypos) {
+		ofxWindowApp* app = static_cast<ofxWindowApp*>(glfwGetWindowUserPointer(window));
+		if (app) {
+			app->windowMoved(window, xpos, ypos);
+		}
+		});
+
+	//----
 
 	//TODO:
 #if 0
@@ -174,17 +220,6 @@ void ofxWindowApp::setup()
 	bool b = font.load(_path, fontSize);
 	if (!b) font.load(OF_TTF_MONO, fontSize);
 #endif
-
-	//--
-
-	// Callbacks to auto call update/draw/keyPressed
-
-	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
-	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw, OF_EVENT_ORDER_AFTER_APP);
-	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
-	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
-	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
-	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);//TODO:
 
 	//--
 

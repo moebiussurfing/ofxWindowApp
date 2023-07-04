@@ -68,14 +68,15 @@ public:
 	void setup();
 
 public:
-	static void windowMoved(GLFWwindow* window, int xpos, int ypos);
-	//void windowMoved(GLFWwindow* window, int xpos, int ypos);
+	void windowMoved(GLFWwindow* window, int xpos, int ypos);
 
-private:
-	static ofxWindowApp* instance; // Static pointer to hold the instance
+//public:
+	//static void windowMoved(GLFWwindow* window, int xpos, int ypos);
+//private:
+//	static ofxWindowApp* instance; // Static pointer to hold the instance
+//public:
+//	static void setInstance(ofxWindowApp* app); // Static function to set the instance
 
-public:
-	static void setInstance(ofxWindowApp* app); // Static function to set the instance
 private:
 	bool bDoneSetup = false;
 	
