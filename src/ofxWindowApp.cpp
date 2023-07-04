@@ -222,7 +222,8 @@ void ofxWindowApp::update(ofEventArgs& args)
 		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
 		{
 			bFlagSave = 0;
-			bChangedWindow = true;
+
+			//bChangedWindow = true;
 			ofLogNotice("ofxWindowApp::windowResized") << "Just saved after window been resized (timed)";
 			saveSettings();
 		}
@@ -411,6 +412,8 @@ void ofxWindowApp::saveSettings(bool bSlient )
 	// Save file
 	if(!bSlient) ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
+
+	bChangedWindow = true;
 }
 
 //--------------------------------------------------------------
@@ -770,11 +773,11 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	refreshGetWindowSettings();
 
-	if (bFlagSave == 1) return;
+	//if (bFlagSave == 1) return;
 
 	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << "," << ofToString(h);
 
-	bChangedWindow = true;
+	//bChangedWindow = true;
 
 	bFlagSave = 1;
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;

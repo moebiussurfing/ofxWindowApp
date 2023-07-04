@@ -107,7 +107,7 @@ private:
 	bool bFlagSave = 0;
 	float timeWhenToSaveFlag;
 
-	//-
+	//--
 
 	void drawDebug();
 	void drawPerformance();
@@ -558,7 +558,7 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	void drawInfo()
+	void drawDebugInfo()
 	{
 		string ss;
 		ss += "ofxWindowApp\n\n";

@@ -8,7 +8,10 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	w.drawInfo();
+	if (w.isChanged()) ofClear(ofColor::yellow);
+	else ofClear(64);
+
+	w.drawDebugInfo();
 }
 
 //--------------------------------------------------------------
@@ -18,5 +21,5 @@ void ofApp::windowResized(int w, int h) {
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	//w.save();
+	w.save();
 }
