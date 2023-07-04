@@ -1,12 +1,12 @@
 [
     {
         "position": {
-            "x": 2482.0,
-            "y": 245.0
+            "x": -1448.0,
+            "y": 260.0
         },
         "size": {
-            "height": 768,
-            "width": 1027
+            "height": 618,
+            "width": 1024
         },
         "window_mode": "OF_WINDOW"
     },
@@ -15,7 +15,7 @@
             "DebugPerformance": "1",
             "Fps": "60",
             "LockMode": "0",
-            "OnTop": "0",
+            "OnTop": "1",
             "WindowInfo": "0",
             "vSync": "0"
         }

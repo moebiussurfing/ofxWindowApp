@@ -3,19 +3,18 @@
 //--------------------------------------------------------------
 void ofApp::setup()
 {
-	// Set the instance before calling setup()
-	ofxWindowApp::setInstance(&w);
-	w.setup();
+#ifdef SURFING_WINDOW_APP__USE_STATIC
+	w.setup(&w);
+#endif
 }
 
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	w.drawInfo();
-}
+	if (w.isChanged()) ofClear(ofColor::yellow);
+	else ofClear(64);
 
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h) {
+	w.drawDebugInfo();
 }
 
 //--------------------------------------------------------------

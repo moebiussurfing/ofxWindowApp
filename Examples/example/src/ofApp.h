@@ -9,7 +9,6 @@ public:
 	void setup();
 	void draw();
 	void exit();
-	void windowResized(int w, int h);
 
 	ofxWindowApp w;
 };

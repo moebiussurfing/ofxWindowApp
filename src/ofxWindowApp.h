@@ -17,19 +17,22 @@
  //#define SURFING_IMGUI__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
  //#define SURFING_IMGUI__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
-//#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+
+//#define SURFING_WINDOW_APP__USE_STATIC
+//#define SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 
 //----
 
 #include "ofMain.h"
 
-#if defined(TARGET_WIN32)			
+#if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
 #include <GLFW/glfw3.h>
 #if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-#undefine SURFING_WINDOW_APP__USE_TIMED_SAVER
+#undef SURFING_WINDOW_APP__USE_TIMED_SAVER
 #endif
 #else
-#if undefined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
+#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
 #define SURFING_WINDOW_APP__USE_TIMED_SAVER
 #endif
 #endif
@@ -67,18 +70,24 @@ public:
 public:
 	void setup();
 
+#ifdef SURFING_WINDOW_APP__USE_STATIC
+public:
+	void setup(ofxWindowApp* app) {
+		this->setInstance(app);
+		setup();
+	}
 public:
 	static void windowMoved(GLFWwindow* window, int xpos, int ypos);
-	//void windowMoved(GLFWwindow* window, int xpos, int ypos);
-
 private:
 	static ofxWindowApp* instance; // Static pointer to hold the instance
-
 public:
 	static void setInstance(ofxWindowApp* app); // Static function to set the instance
+#endif
+
 private:
 	bool bDoneSetup = false;
 	
+private:
 	void startup();
 	void update(ofEventArgs& args);
 	void draw(ofEventArgs& args);
@@ -114,24 +123,6 @@ private:
 	void windowResized(int w, int h);
 	void windowResized(ofResizeEventArgs& e);
 
-	//TODO:
-	////TODO: fix
-	//// auto save
-	//void windowIsMoved() {
-	//	if (bAutoSaveLoad)
-	//	{
-	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
-	//		saveFileWindow();
-	//	}
-	//}
-	//void windowIsMoved() {
-	//	if (bAutoSaveLoad)
-	//	{
-	//		ofLogNotice(__FUNCTION__) << "Just saved after window been resized";
-	//		saveFileWindow();
-	//	}
-	//}
-
 	bool bFlagSave = 0;
 	bool bFlagDoneSaved = 0;
 
@@ -139,7 +130,7 @@ private:
 	float timeWhenToSaveFlag;
 #endif
 
-	//-
+	//--
 
 	void drawDebug();
 	void drawPerformance();
@@ -592,7 +583,7 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	void drawInfo()
+	void drawDebugInfo()
 	{
 		string s;
 
@@ -615,7 +606,9 @@ public:
 #endif
 
 		s += "\n";
+#ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 		s += "Alt + R : RESET TO FULLHD \n";
+#endif
 		s += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
 
 		//TODO: WIP: Lock mode
@@ -648,44 +641,4 @@ public:
 
 		ofDrawBitmapStringHighlight(s, 50, 50, c1, c2);
 	}
-
-	//--
-
-
-
-	// GPT callback
-	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);//TODO:
-#if 0
-	void setupMover() {
-		//ofGetWindowPtr()->getTitle();
-		// Register the callback for window movement events
-		HWND hWnd = FindWindowA(NULL, ofGetWindowTitle().c_str());
-		if (hWnd != NULL) {
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-			SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(windowProc));
-		}
-	}
-
-	static LRESULT CALLBACK windowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-		ofApp* app = reinterpret_cast<ofApp*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-
-		switch (message) {
-		case WM_MOVE:
-			int x = LOWORD(lParam);
-			int y = HIWORD(lParam);
-			// Call your custom function here to handle the window movement event
-			app->onWindowMoved(x, y);
-			break;
-			// Handle other messages if necessary
-		}
-
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-
-	void onWindowMoved(int x, int y) {
-		// Handle the window movement event
-		// ...
-	}
-#endif
-
 };

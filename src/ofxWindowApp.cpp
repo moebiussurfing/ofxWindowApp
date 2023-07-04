@@ -1,5 +1,6 @@
 #include "ofxWindowApp.h"
 
+#ifdef SURFING_WINDOW_APP__USE_STATIC
 #if defined(TARGET_WIN32)			
 
 ofxWindowApp* ofxWindowApp::instance = nullptr; // Initialize the static pointer
@@ -40,9 +41,7 @@ void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 
 		instance->refreshGetWindowSettings();
 
-		//if (instance->bFlagSave == 1) return;
-
-		ofLogNotice("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
+		ofLogVerbose("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
 
 		instance->bChangedWindowEasyCallback = true;
 
@@ -53,6 +52,7 @@ void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 #endif
 	}
 }
+#endif
 #endif
 
 //--------------------------------------------------------------
@@ -147,10 +147,16 @@ void ofxWindowApp::setup()
 {
 	ofLogNotice("ofxWindowApp::setup");
 
+	//--
+
+#ifdef SURFING_WINDOW_APP__USE_STATIC
 	GLFWwindow* glfwWindow = glfwGetCurrentContext();
 
 	glfwSetWindowPosCallback(glfwWindow, windowMoved);
 	//glfwSetWindowPosCallback(glfwWindow, ofxWindowApp::windowMoved);
+#endif
+
+	//--
 
 	//TODO:
 #if 0
@@ -184,7 +190,6 @@ void ofxWindowApp::setup()
 	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
 	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
 	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
-	//ofAddListener(ofEvents().windowMoved, this, &ofxWindowApp::windowIsMoved);//TODO:
 
 	//--
 
@@ -242,7 +247,6 @@ void ofxWindowApp::update(ofEventArgs& args)
 	if (!bDoneSetup)
 		if (ofGetFrameNum() >= 0)
 		{
-			//ofxWindowApp::setInstance(this);
 			setup();
 		}
 	if (bDoneSetup)
@@ -304,7 +308,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 
 			saveSettings();
 		}
-}
+	}
 
 	//--
 
@@ -347,12 +351,8 @@ void ofxWindowApp::draw(ofEventArgs& args)
 {
 	realFps = ofGetFrameRate();
 
-	//// workaround:
-	//until windowResize well implemented
-	//window_X = ofGetWindowPositionX();
-	//window_Y = ofGetWindowPositionY();
-	window_W = ofGetWindowSize().x;
-	window_H = ofGetWindowSize().y;
+	//window_W = ofGetWindowSize().x;
+	//window_H = ofGetWindowSize().y;
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM)
 	{
@@ -362,7 +362,7 @@ void ofxWindowApp::draw(ofEventArgs& args)
 #ifdef USE_CUSTOM_FONT
 		yy = window_H - fontSize + 5;
 #endif
-}
+	}
 
 	else if (positionLayout == DEBUG_POSITION_TOP)
 	{
@@ -379,7 +379,7 @@ void ofxWindowApp::draw(ofEventArgs& args)
 	if (bDebug)
 	{
 		drawDebug();
-		drawPerformance();//draw both
+		drawPerformance();//draw both?
 	}
 	else
 	{
@@ -402,9 +402,7 @@ void ofxWindowApp::refreshGetWindowSettings()
 	if (BigWindow.windowMode == ofWindowMode(0)) bigFullScreen = false;
 	else if (BigWindow.windowMode == ofWindowMode(1)) bigFullScreen = true;
 	else if (BigWindow.windowMode == ofWindowMode(2)) bigFullScreen = false;
-#endif
-
-#ifdef USE_MINI_WINDOW
+#else
 	if (!bModeMini)
 	{
 		// Big
@@ -423,7 +421,7 @@ void ofxWindowApp::refreshGetWindowSettings()
 		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
-}
+	}
 #endif
 }
 
@@ -502,6 +500,11 @@ void ofxWindowApp::saveSettings(bool bSlient)
 	// Save file
 	if (!bSlient) ofLogNotice("ofxWindowApp") << data.dump(4);
 	ofSavePrettyJson(__path, data);
+
+	//--
+
+	window_W = ofGetWindowSize().x;
+	window_H = ofGetWindowSize().y;
 
 	//--
 
@@ -865,11 +868,9 @@ void ofxWindowApp::windowResized(int w, int h)
 
 	refreshGetWindowSettings();
 
-	//if (bFlagSave == 1) return;
-
 	bFlagSave = 1;
 
-	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
+	ofLogVerbose("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
 
 	bChangedWindowEasyCallback = true;
 
@@ -963,29 +964,25 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 
 		else if (key == 'L') // toggle lock
 		{
-			//if (mod_ALT)
-			{
-				bLock = !bLock;
-			}
+			bLock = !bLock;
 		}
+#ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 		else if (key == 'R') // reset to full HD
 		{
-			//if (mod_ALT)
-			{
-				//setToggleAlwaysOnTop();
-				BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
-				BigWindow.setSize(1920, 1080);
+			//setToggleAlwaysOnTop();
+			//BigWindow.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
+			BigWindow.setPosition(glm::vec2(0, 0));
+			BigWindow.setSize(1920, 1080);
 
-				ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
-				ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
-			}
+			ofSetWindowPosition(BigWindow.getPosition().x, BigWindow.getPosition().y);
+			ofSetWindowShape(BigWindow.getWidth(), BigWindow.getHeight());
+
+			refreshGetWindowSettings();
 		}
+#endif
 
 		else if (key == OF_KEY_BACKSPACE) {
-			//if (mod_CONTROL)
-			{
-				doReset();
-			}
+			doReset();
 		}
 
 		else if (key == 'L')
@@ -995,10 +992,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 
 		else if (key == 'T')
 		{
-			//if (mod_ALT)
-			{
-				setToggleAlwaysOnTop();
-			}
+			setToggleAlwaysOnTop();
 		}
 
 #ifdef USE_MINI_WINDOW
@@ -1007,7 +1001,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
-	}
+		}
 #endif
 		//--
 
@@ -1017,7 +1011,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		//mod_CONTROL = false; // Windows. not working
 		//mod_ALT = false;
 		//mod_SHIFT = false;
-}
+	}
 }
 //--------------------------------------------------------------
 void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
@@ -1193,6 +1187,11 @@ void ofxWindowApp::applyMode()
 //--------------------------------------------------------------
 void ofxWindowApp::Changed_Params(ofAbstractParameter& e)
 {
+	//if (!bDoneSetup) return;
+	//if (!bDoneStartup) return;
+
+	//--
+
 	string name = e.getName();
 	ofLogNotice("ofxWindowApp::Changed") << " " << name << " : " << e;
 
