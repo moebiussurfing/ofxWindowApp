@@ -11,7 +11,7 @@
 
  */
 
-//----
+ //----
 
 #define SURFING_WINDOW_APP__USE_STATIC 
 // -> Main directive. Uncomment to allow WIN_32 platform for windowMove callback.
@@ -43,15 +43,15 @@
 
 #include "ofxSerializer.h"
 
-#define USE_ofxWindowApp
-#ifdef USE_ofxWindowApp
+#define USING_ofxWindowApp
+#ifdef USING_ofxWindowApp
 #include "ofxWindowApp.h"
 #endif
 
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18
 // to avoid that window border it's outside screen monitor
 
-#define BAR_HEIGHT 25
+#define OFX_WINDOW_APP_BAR_HEIGHT 25
 // probably fits on Win32 only.
 
 #define USE_CUSTOM_FONT
@@ -62,8 +62,7 @@
 // Mini window mode can be switched to normal/big mode.
 // both states will be handled in parallel
 
-
-//--
+//----
 
 class ofxWindowApp
 {
@@ -90,7 +89,7 @@ public:
 
 private:
 	bool bDoneSetup = false;
-	
+
 private:
 	void startup();
 	void update(ofEventArgs& args);
@@ -136,8 +135,8 @@ private:
 
 	//--
 
-	void drawDebug();
-	void drawPerformance();
+	void drawHelpInfo();
+	void drawPerformanceWidget();
 
 	//----
 
@@ -167,7 +166,7 @@ public:
 		if (b)
 		{
 			ofSetFullscreen(true);
-			bigFullScreen = true;
+			bIsFullScreen = true;
 		}
 		else
 		{
@@ -181,7 +180,7 @@ public:
 
 			ofSetWindowPosition(window_X, window_Y);
 
-			bigFullScreen = false;
+			bIsFullScreen = false;
 		}
 
 		// Update
@@ -234,7 +233,7 @@ public:
 	//--
 
 private:
-	void refreshGetWindowSettings();
+	void doRefreshGetWindowSettings();
 	void saveSettings(bool bSlient = false);
 
 public:
@@ -245,7 +244,7 @@ private:
 	void loadSettings();
 
 private:
-	void applyMode();
+	void doApplyWindowMode();
 
 public:
 	string getPathFolder() const
@@ -324,13 +323,13 @@ public:
 	//--
 
 private:
-	void applyExtra() // fps and vsync only
+	void doApplyExtraSettings() // fps and vsync only
 	{
-		ofLogVerbose("ofxWindowApp::applyExtra");
-		ofLogVerbose("ofxWindowApp") << "FpsTarget  : " << fpsTarget;
-		ofLogVerbose("ofxWindowApp") << "vSync	    : " << vSync;
-		ofLogVerbose("ofxWindowApp") << "Show Debug : " << bDebug.get();
-		ofLogVerbose("ofxWindowApp") << "bLock      : " << bLock.get();
+		ofLogVerbose("ofxWindowApp::doApplyExtraSettings");
+		ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
+		ofLogVerbose("ofxWindowApp") << "vSync: " << vSync;
+		//ofLogVerbose("ofxWindowApp") << "Show Debug: " << bDebug.get();
+		//ofLogVerbose("ofxWindowApp") << "bDisableAutoSave: " << bDisableAutoSave.get();
 #ifdef USE_MINI_WINDOW
 		ofLogVerbose("ofxWindowApp") << "bModeMini  : " << bModeMini.get();
 #endif
@@ -435,7 +434,7 @@ public:
 	void toggleModeWindowBigMini()
 	{
 		if (bAutoSaveLoad) {
-			refreshGetWindowSettings();
+			doRefreshGetWindowSettings();
 		}
 
 		bModeMini = !bModeMini;
@@ -443,9 +442,9 @@ public:
 		// big preset
 		if (!bModeMini)
 		{
-			ofSetFullscreen(bigFullScreen);
+			ofSetFullscreen(bIsFullScreen);
 
-			if (bigFullScreen) {
+			if (bIsFullScreen) {
 				ofSetWindowPosition(0, 0);
 				ofSetWindowShape(ofGetWidth(), ofGetHeight());
 			}
@@ -461,17 +460,17 @@ public:
 			ofSetFullscreen(false);
 		}
 
-		applyMode();
+		doApplyWindowMode();
 	}
 	void enableMiniMode(bool b)
 	{
 		if (bAutoSaveLoad) {
-			refreshGetWindowSettings();
+			doRefreshGetWindowSettings();
 		}
 
 		bModeMini = b;
 
-		applyMode();
+		doApplyWindowMode();
 	}
 #endif
 
@@ -480,7 +479,7 @@ public:
 	// Disables saving. So json file will not be overwritten.
 	void setLock(bool b)
 	{
-		bLock = b;
+		bDisableAutoSave = b;
 	}
 
 	//--
@@ -522,14 +521,15 @@ private:
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
 	ofParameterGroup params{ "Extra" };
+	ofParameterGroup paramsWindow{ "Window" };
+	ofParameterGroup paramsSession{ "Session" };
 	ofParameter<bool> vSync{"vSync", false};
 	ofParameter<float> fpsTarget{"Fps", 60.f, 1, 120};
 	ofParameter<bool> bShowPerformanceAlways{"DebugPerformance", true};
 
-	ofParameter<bool> bLock{"LockMode", false};
-	//Ignores next window modification. 
+	ofParameter<bool> bDisableAutoSave{"DisableAutosave", false};
+	// Ignores next window modification. 
 	// Kind of hardcoded position that will maintain on next app load.
-
 
 public:
 	ofParameter<bool> bOnTop{ "OnTop", false };
@@ -542,8 +542,7 @@ private:
 	ofParameter<bool> bModeMini{ "miniPreset", false };
 #endif
 
-	//string windowBigMode; // full screen or window mode
-
+private:
 	void Changed_Params(ofAbstractParameter& e);
 
 	float realFps;
@@ -558,16 +557,17 @@ private:
 	int yy = 0;
 #endif
 
-	//TODO: add full screen/window bool param
-	bool bigFullScreen = false;
+	//TODO: Add full screen/window bool param
+	bool bIsFullScreen = false;
+	bool bIsFullScreenInSettings = false;
 
-	void refreshToggleWindowMode();
+	void doRefreshToggleWindowMode();
 
 public:
 	//--------------------------------------------------------------
 	void doReset()
 	{
-		bigFullScreen = false;
+		bIsFullScreen = false;
 		vSync = false;
 		fpsTarget = 60;
 
@@ -575,51 +575,43 @@ public:
 		bModeMini = false;
 #endif
 
-		BigWindow.setPosition(glm::vec2(0, BAR_HEIGHT));
-		BigWindow.setSize(1920, 1080 - BAR_HEIGHT);
+		BigWindow.setPosition(glm::vec2(0, OFX_WINDOW_APP_BAR_HEIGHT));
+		BigWindow.setSize(1920, 1080 - OFX_WINDOW_APP_BAR_HEIGHT);
 
 #ifdef USE_MINI_WINDOW
 		MiniWindow.setPosition(glm::vec2(20, 20));
 		MiniWindow.setSize(200, 200);
 #endif
 
-		applyMode();
+		doApplyWindowMode();
 	}
 
 	//--------------------------------------------------------------
 	void drawDebugInfo()
 	{
 		string s;
-
 		s += "ofxWindowApp";
 		if (bFlagDoneSaved) s += "  SAVE";
 		s += "\n\n";
-
 		s += "KEY STROKES\n\n";
-
 		s += "Alt +\n";
 		s += "W : SHOW INFO\n";
 		s += "V : VERTICAL SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
-		s += "F : SCREEN " + ofToString(bMode ? "FULL-SCREEN_MODE" : "WINDOW_MODE") + "\n";
-
+		s += "F : SCREEN " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
 #ifdef USE_MINI_WINDOW
 		s += "Alt + M: PRESET ";
 		if (bModeMini) s += "*MINI  BIG";
 		else s += " MINI *BIG";
 #endif
-
 		s += "\n";
 #ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 		s += "Alt + R : RESET TO FULLHD \n";
 #endif
 		s += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
-
 		//TODO: WIP: Lock mode
-		s += "Alt + L : LOCK = " + ofToString(bLock ? "TRUE" : "FALSE");
-
+		s += "Alt + L : LOCK = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
 		s += "\n\n";
-
 #ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		s += "SAVES IF WINDOW IS\n";
 		s += "RESIZED OR MOVED\n";
@@ -638,11 +630,12 @@ public:
 			s += ofToString(pct) + "%";
 		}
 #endif
-		// flash
+
+		// Flash when saving
 		ofColor c1 = bFlagDoneSaved ? 255 : 0;
 		ofColor c2 = bFlagDoneSaved ? 0 : 255;
 		if (bFlagDoneSaved) bFlagDoneSaved = 0;
 
 		ofDrawBitmapStringHighlight(s, 50, 50, c1, c2);
-	}
-};
+		}
+	};

@@ -20,5 +20,7 @@ void ofApp::draw()
 //--------------------------------------------------------------
 void ofApp::exit()
 {
-	//w.save();
+#ifndef SURFING_WINDOW_APP__USE_STATIC
+	w.save();
+#endif
 }

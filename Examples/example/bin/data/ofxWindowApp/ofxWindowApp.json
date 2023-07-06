@@ -1,23 +1,27 @@
 [
     {
         "position": {
-            "x": -1583.0,
-            "y": 243.0
+            "x": 1922.0,
+            "y": 25.0
         },
         "size": {
-            "height": 718,
-            "width": 1024
+            "height": 1053,
+            "width": 1916
         },
         "window_mode": "OF_WINDOW"
     },
     {
         "Extra": {
-            "DebugPerformance": "1",
-            "Fps": "60",
-            "LockMode": "0",
-            "OnTop": "1",
-            "WindowInfo": "0",
-            "vSync": "0"
+            "Session": {
+                "DebugPerformance": "1",
+                "DisableAutosave": "0",
+                "OnTop": "0",
+                "WindowInfo": "0"
+            },
+            "Window": {
+                "Fps": "60",
+                "vSync": "0"
+            }
         }
     }
 ]
