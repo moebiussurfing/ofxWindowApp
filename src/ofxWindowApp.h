@@ -13,13 +13,17 @@
 
 //----
 
+#define SURFING_WINDOW_APP__USE_STATIC 
+// -> Main directive. Uncomment to allow WIN_32 platform for windowMove callback.
+
+//--
+
  //TODO: Fixing exceptions hen closing ofApp.
  //#define SURFING_IMGUI__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
  //#define SURFING_IMGUI__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
 #define SURFING_WINDOW_APP__USE_TIMED_SAVER
 
-//#define SURFING_WINDOW_APP__USE_STATIC
 //#define SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 
 //----
