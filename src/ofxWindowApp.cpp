@@ -110,7 +110,6 @@ void ofxWindowApp::startup()
 	//doRefreshToggleWindowMode();
 	//doRefreshToggleWindowMode();
 
-<<<<<<< HEAD
 	//// Fix workaround
 	//ofToggleFullscreen();
 	//ofToggleFullscreen();
@@ -122,11 +121,6 @@ void ofxWindowApp::startup()
 		ofSetWindowPosition(0, 0);
 		ofSetWindowShape(ofGetWidth(), ofGetHeight());
 	}
-=======
-	//workaround fixes
-	ofToggleFullscreen();
-	ofToggleFullscreen();
->>>>>>> 4e6a459a3b51eec550061b0d67ad86325c9eb75d
 
 	//--
 
@@ -138,7 +132,6 @@ void ofxWindowApp::startup()
 		HWND W = GetActiveWindow();
 		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 #endif
-<<<<<<< HEAD
 		// Retrig
 		bOnTop = bOnTop;
 	}
@@ -146,10 +139,6 @@ void ofxWindowApp::startup()
 	//--
 
 	bDoneStartup = true;
-=======
-	//trig
-	bOnTop = bOnTop;
->>>>>>> 4e6a459a3b51eec550061b0d67ad86325c9eb75d
 
 	ofLogNotice("ofxWindowApp::--------------------------------------------------------------");
 }
