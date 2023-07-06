@@ -102,8 +102,8 @@ private:
 	//--
 
 private:
-	ofWindowSettings WindowPRE;
-	ofWindowSettings BigWindow;
+	//ofWindowSettings windowSettingsPRE;
+	ofWindowSettings windowSettings;
 
 #ifdef USE_MINI_WINDOW
 	ofWindowSettings MiniWindow;
@@ -126,7 +126,7 @@ private:
 	void windowResized(int w, int h);
 	void windowResized(ofResizeEventArgs& e);
 
-	bool bFlagSave = 0;
+	bool bFlagToSave = 0;
 	bool bFlagDoneSaved = 0;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
@@ -200,18 +200,18 @@ public:
 	void setToggleAlwaysOnTop()
 	{
 		ofLogNotice("ofxWindowApp::setToggleAlwaysOnTop");
-		setAlwaysOnTop(!isOnTop);
+		setAlwaysOnTop(!isWindowOnTop);
 	}
 
 	//--------------------------------------------------------------
 	void setAlwaysOnTop(bool b)
 	{
 		ofLogNotice("ofxWindowApp::setAlwaysOnTop") << b;
-		bOnTop = b;
+		bWindowOnTop = b;
 	}
 
 private:
-	bool isOnTop = false;
+	bool isWindowOnTop = false;
 
 	//--
 
@@ -278,7 +278,7 @@ public:
 	//--------------------------------------------------------------
 	void setShowDebug(bool b = true)
 	{
-		bDebug = b;
+		bShowWindowInfo = b;
 		//bShowPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
@@ -289,12 +289,12 @@ public:
 	//--------------------------------------------------------------
 	bool getShowDebug()
 	{
-		return bDebug;
+		return bShowWindowInfo;
 	}
 	//--------------------------------------------------------------
 	void toggleShowDebug()
 	{
-		bDebug = !bDebug;
+		bShowWindowInfo = !bShowWindowInfo;
 	}
 
 	//--------------------------------------------------------------
@@ -311,9 +311,9 @@ public:
 	//--------------------------------------------------------------
 	bool isChanged()
 	{
-		if (bChangedWindowEasyCallback)
+		if (bDoneSavedEasyCallback)
 		{
-			bChangedWindowEasyCallback = false;
+			bDoneSavedEasyCallback = false;
 			return true;
 		}
 
@@ -502,12 +502,12 @@ private:
 	bool bAutoSaveLoad = true; // load at startup 
 	//TODO: (disabled->) and saves on exit
 
-	bool bChangedWindowEasyCallback = false;
+	bool bDoneSavedEasyCallback = false;
 	bool bKeys = true; // keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
-	ofParameterGroup params{ "Extra" };
+	ofParameterGroup paramsExtra{ "Extra" };
 	ofParameterGroup paramsWindow{ "Window" };
 	ofParameterGroup paramsSession{ "Session" };
 	ofParameter<bool> vSync{"vSync", false};
@@ -519,8 +519,8 @@ private:
 	// Kind of hardcoded position that will maintain on next app load.
 
 public:
-	ofParameter<bool> bOnTop{ "OnTop", false };
-	ofParameter<bool> bDebug{"WindowInfo", true};
+	ofParameter<bool> bWindowOnTop{ "WindowOnTop", false };
+	ofParameter<bool> bShowWindowInfo{"ShowWindowInfo", true};
 
 private:
 	bool bDoneStartup = false;
@@ -530,7 +530,7 @@ private:
 #endif
 
 private:
-	void Changed_Params(ofAbstractParameter& e);
+	void Changed_ParamsExtra(ofAbstractParameter& e);
 
 	float fpsReal;
 
@@ -565,8 +565,8 @@ public:
 		bModeMini = false;
 #endif
 
-		BigWindow.setPosition(glm::vec2(0, OFX_WINDOW_APP_BAR_HEIGHT));
-		BigWindow.setSize(1920, 1080 - OFX_WINDOW_APP_BAR_HEIGHT);
+		windowSettings.setPosition(glm::vec2(0, OFX_WINDOW_APP_BAR_HEIGHT));
+		windowSettings.setSize(1920, 1080 - OFX_WINDOW_APP_BAR_HEIGHT);
 
 #ifdef USE_MINI_WINDOW
 		MiniWindow.setPosition(glm::vec2(20, 20));
@@ -584,11 +584,11 @@ public:
 		if (bFlagDoneSaved) s += "  SAVE";
 		s += "\n\n";
 		s += "KEY STROKES\n\n";
-		s += "Alt +\n";
+		s += "Alt +\n\n";
 		s += "W : SHOW INFO\n";
-		s += "V : VERTICAL SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
+		s += "V : V_SYNC=" + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
-		s += "F : SCREEN " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
+		s += "F : SCREEN=" + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
 #ifdef USE_MINI_WINDOW
 		s += "Alt + M: PRESET ";
 		if (bModeMini) s += "*MINI  BIG";
@@ -598,9 +598,9 @@ public:
 #ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 		s += "Alt + R : RESET TO FULLHD \n";
 #endif
-		s += "Alt + T : ON TOP = " + ofToString(bOnTop ? "TRUE" : "FALSE") + "\n";
+		s += "T : ON_TOP=" + ofToString(bWindowOnTop ? "TRUE" : "FALSE") + "\n";
 		//TODO: WIP: Lock mode
-		s += "Alt + L : LOCK = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
+		s += "L : NO_SAVE=" + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
 		s += "\n\n";
 #ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		s += "SAVES IF WINDOW IS\n";
