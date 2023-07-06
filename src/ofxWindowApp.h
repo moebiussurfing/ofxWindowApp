@@ -14,7 +14,7 @@
  //----
 
 #define SURFING_WINDOW_APP__USE_STATIC 
-// -> Main directive. Uncomment to allow WIN_32 platform for windowMove callback.
+// -> Main directive. Uncomment to allow WIN32 platform for windowMove callback.
 
 //--
 
@@ -323,21 +323,8 @@ public:
 	//--
 
 private:
-	void doApplyExtraSettings() // fps and vsync only
-	{
-		ofLogVerbose("ofxWindowApp::doApplyExtraSettings");
-		ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
-		ofLogVerbose("ofxWindowApp") << "vSync: " << vSync;
-		//ofLogVerbose("ofxWindowApp") << "Show Debug: " << bDebug.get();
-		//ofLogVerbose("ofxWindowApp") << "bDisableAutoSave: " << bDisableAutoSave.get();
-#ifdef USE_MINI_WINDOW
-		ofLogVerbose("ofxWindowApp") << "bModeMini  : " << bModeMini.get();
-#endif
-
-		ofSetFrameRate(fpsTarget);
-		ofSetVerticalSync(vSync);
-	}
-
+	void doApplyExtraSettings(); // fps and vsync only
+	
 public:
 	// Layout modes
 	enum DEBUG_Position
@@ -545,7 +532,7 @@ private:
 private:
 	void Changed_Params(ofAbstractParameter& e);
 
-	float realFps;
+	float fpsReal;
 
 #ifndef USE_CUSTOM_FONT
 	int xx = 10;
@@ -560,6 +547,9 @@ private:
 	//TODO: Add full screen/window bool param
 	bool bIsFullScreen = false;
 	bool bIsFullScreenInSettings = false;
+
+	glm::vec2 posSettings = glm::vec2(0);
+	glm::vec2 sizeSettings = glm::vec2(0);
 
 	void doRefreshToggleWindowMode();
 
@@ -637,5 +627,5 @@ public:
 		if (bFlagDoneSaved) bFlagDoneSaved = 0;
 
 		ofDrawBitmapStringHighlight(s, 50, 50, c1, c2);
-		}
-	};
+	}
+};

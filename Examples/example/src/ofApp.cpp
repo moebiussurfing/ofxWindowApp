@@ -5,6 +5,7 @@ void ofApp::setup()
 {
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 	w.setup(&w);
+	//w.setEnableKeys(false);
 #endif
 }
 
