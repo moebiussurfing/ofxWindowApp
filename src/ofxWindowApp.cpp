@@ -104,6 +104,7 @@ void ofxWindowApp::startup()
 	//refreshToggleWindowMode();
 	//refreshToggleWindowMode();
 
+	//workaround fixes
 	ofToggleFullscreen();
 	ofToggleFullscreen();
 
@@ -115,7 +116,7 @@ void ofxWindowApp::startup()
 	HWND W = GetActiveWindow();
 	SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 #endif
-
+	//trig
 	bOnTop = bOnTop;
 
 	ofLogNotice("ofxWindowApp::--------------------------------------------------------------");
