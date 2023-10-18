@@ -1,21 +1,19 @@
 #include "ofxWindowApp.h"
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
-#if defined(TARGET_WIN32)			
+	#if defined(TARGET_WIN32)
 
-ofxWindowApp* ofxWindowApp::instance = nullptr; // Initialize the static pointer
+ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointer
 
 //--------------------------------------------------------------
-void ofxWindowApp::setInstance(ofxWindowApp* app)
-{
+void ofxWindowApp::setInstance(ofxWindowApp * app) {
 	instance = app; // Set the instance
 }
 
 //--
 
 //--------------------------------------------------------------
-void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
-{
+void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	// Ignore if not pos changed
 	static int xpos_ = -1;
 	static int ypos_ = -1;
@@ -32,8 +30,7 @@ void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 
 	//--
 
-	if (instance)
-	{
+	if (instance) {
 		if (!instance->bDoneSetup) return;
 		if (!instance->bDoneStartup) return;
 
@@ -48,24 +45,23 @@ void ofxWindowApp::windowMoved(GLFWwindow* window, int xpos, int ypos)
 
 		instance->bFlagToSave = true;
 
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+		#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-#endif
+		#endif
 	}
 }
-#endif
+	#endif
 #endif
 
 //--------------------------------------------------------------
-ofxWindowApp::ofxWindowApp()
-{
+ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
 	// Default
-	int _h = OFX_WINDOW_APP_BAR_HEIGHT;//bar height
-	windowSettings.setPosition(glm::vec2(0, _h));//force
-	windowSettings.setSize(1920, 1080 - _h);//force
-	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();//from main.cpp 
+	int _h = OFX_WINDOW_APP_BAR_HEIGHT; //bar height
+	windowSettings.setPosition(glm::vec2(0, _h)); //force
+	windowSettings.setSize(1920, 1080 - _h); //force
+	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode(); //from main.cpp
 
 #ifdef USE_MINI_WINDOW
 	MiniWindow.setPosition(glm::vec2(20, 20));
@@ -84,8 +80,7 @@ ofxWindowApp::ofxWindowApp()
 }
 
 //--------------------------------------------------------------
-ofxWindowApp::~ofxWindowApp()
-{
+ofxWindowApp::~ofxWindowApp() {
 	ofLogNotice("ofxWindowApp") << "Destructor";
 
 	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
@@ -100,8 +95,7 @@ ofxWindowApp::~ofxWindowApp()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::startup()
-{
+void ofxWindowApp::startup() {
 	if (bDoneStartup) return;
 
 	ofLogNotice("ofxWindowApp::startup()") << " at frame num: " << ofGetFrameNum();
@@ -114,8 +108,7 @@ void ofxWindowApp::startup()
 	//--
 
 	// Fix workaround
-	if (bIsFullScreenInSettings)
-	{
+	if (bIsFullScreenInSettings) {
 		ofSetFullscreen(true);
 
 		//TODO: full screen on different monitors make troubles to re load..
@@ -126,11 +119,10 @@ void ofxWindowApp::startup()
 	//--
 
 	// On top
-	if (!bIsFullScreenInSettings)
-	{
+	if (!bIsFullScreenInSettings) {
 		// Workaround
 		// Refresh
-#if defined(TARGET_WIN32)			
+#if defined(TARGET_WIN32)
 		HWND W = GetActiveWindow();
 		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 #endif
@@ -144,21 +136,18 @@ void ofxWindowApp::startup()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::exit()
-{
+void ofxWindowApp::exit() {
 	ofLogNotice("ofxWindowApp::exit()");
 
 #ifdef SURFING_IMGUI__ENABLE_SAVE_ON_EXIT
-	if (bAutoSaveLoad && !bDisableAutoSave)
-	{
+	if (bAutoSaveLoad && !bDisableAutoSave) {
 		save();
 	}
 #endif
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::setup()
-{
+void ofxWindowApp::setup() {
 	if (bDoneSetup) return;
 
 	ofLogNotice("ofxWindowApp::setup()");
@@ -166,7 +155,7 @@ void ofxWindowApp::setup()
 	//--
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
-	GLFWwindow* glfwWindow = glfwGetCurrentContext();
+	GLFWwindow * glfwWindow = glfwGetCurrentContext();
 	glfwSetWindowPosCallback(glfwWindow, windowMoved);
 #endif
 
@@ -228,10 +217,8 @@ void ofxWindowApp::setup()
 	setShowPerformanceAllways(true);
 
 #ifdef USE_MINI_WINDOW
-	if (!bModeMini)
-	{
-		if (bIsFullScreen)
-		{
+	if (!bModeMini) {
+		if (bIsFullScreen) {
 			ofSetFullscreen(bIsFullScreen);
 			ofSetWindowPosition(0, 0);
 			ofSetWindowShape(ofGetWidth(), ofGetHeight());
@@ -245,20 +232,17 @@ void ofxWindowApp::setup()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::update(ofEventArgs& args)
-{
+void ofxWindowApp::update(ofEventArgs & args) {
 	// Auto call setup on first frame.
 	if (!bDoneSetup) {
-		if (ofGetFrameNum() >= 0)
-		{
+		if (ofGetFrameNum() >= 0) {
 			setup();
 		}
 	}
 	// Auto call startup but after setup is done.
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
-			if (ofGetFrameNum() > 0)
-			{
+			if (ofGetFrameNum() > 0) {
 				// Workaround
 				startup();
 			}
@@ -268,8 +252,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 	//--
 
 	// Check if flagged to save
-	if (bFlagToSave)
-	{
+	if (bFlagToSave) {
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
 #endif
@@ -290,11 +273,9 @@ void ofxWindowApp::update(ofEventArgs& args)
 	// Auto saver timer
 	// is no required to resize the window or to close the app window to save.
 	// then the app can crash an window shape will be stored 1 time each 10 seconds by default.
-	if (bAutoSaverTimed && !bDisableAutoSave)
-	{
+	if (bAutoSaverTimed && !bDisableAutoSave) {
 		auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
-		if (t > timePeriodToCheckIfSave)
-		{
+		if (t > timePeriodToCheckIfSave) {
 			bool bModeSaveOnlyIfWindowMoved = 1;
 			if (bModeSaveOnlyIfWindowMoved) {
 				bool bHasBeenMoved = 0;
@@ -309,8 +290,7 @@ void ofxWindowApp::update(ofEventArgs& args)
 					bHasBeenMoved = 1;
 				}
 				if (bHasBeenMoved) saveSettings(true);
-			}
-			else {
+			} else {
 				saveSettings(true);
 			}
 
@@ -321,12 +301,10 @@ void ofxWindowApp::update(ofEventArgs& args)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::draw(ofEventArgs& args)
-{
+void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
 
-	if (positionLayout == DEBUG_POSITION_BOTTOM)
-	{
+	if (positionLayout == DEBUG_POSITION_BOTTOM) {
 #ifndef USE_CUSTOM_FONT
 		yy = window_H - 10; // little air
 #endif
@@ -335,8 +313,7 @@ void ofxWindowApp::draw(ofEventArgs& args)
 #endif
 	}
 
-	else if (positionLayout == DEBUG_POSITION_TOP)
-	{
+	else if (positionLayout == DEBUG_POSITION_TOP) {
 #ifndef USE_CUSTOM_FONT
 		yy = 15;
 #endif
@@ -347,20 +324,16 @@ void ofxWindowApp::draw(ofEventArgs& args)
 
 	//--
 
-	if (bShowWindowInfo)
-	{
+	if (bShowWindowInfo) {
 		drawHelpInfo();
 		drawPerformanceWidget();
-	}
-	else
-	{
+	} else {
 		if (bShowPerformanceAlways) drawPerformanceWidget();
 	}
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doRefreshGetWindowSettings()
-{
+void ofxWindowApp::doRefreshGetWindowSettings() {
 	ofLogVerbose("ofxWindowApp") << "doRefreshGetWindowSettings()";
 
 #ifndef USE_MINI_WINDOW
@@ -369,47 +342,52 @@ void ofxWindowApp::doRefreshGetWindowSettings()
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 
-	if (windowSettings.windowMode == ofWindowMode(0)) bIsFullScreen = false;
-	else if (windowSettings.windowMode == ofWindowMode(1)) bIsFullScreen = true;
-	else if (windowSettings.windowMode == ofWindowMode(2)) bIsFullScreen = false;
+	if (windowSettings.windowMode == ofWindowMode(0))
+		bIsFullScreen = false;
+	else if (windowSettings.windowMode == ofWindowMode(1))
+		bIsFullScreen = true;
+	else if (windowSettings.windowMode == ofWindowMode(2))
+		bIsFullScreen = false;
 #else
-	if (!bModeMini)
-	{
+	if (!bModeMini) {
 		// Big
 		windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 		windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 
 		// ?
-		if (windowSettings.windowMode == ofWindowMode(0)) bIsFullScreen = false;
-		else if (windowSettings.windowMode == ofWindowMode(1)) bIsFullScreen = true;
-		else if (windowSettings.windowMode == ofWindowMode(2)) bIsFullScreen = false;
-	}
-	else
-	{
+		if (windowSettings.windowMode == ofWindowMode(0))
+			bIsFullScreen = false;
+		else if (windowSettings.windowMode == ofWindowMode(1))
+			bIsFullScreen = true;
+		else if (windowSettings.windowMode == ofWindowMode(2))
+			bIsFullScreen = false;
+	} else {
 		// Mini
 		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
-		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();//ignored
+		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode(); //ignored
 	}
 #endif
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::save()
-{
+void ofxWindowApp::save() {
 	saveSettingsAfterRefresh();
 }
 //--------------------------------------------------------------
-void ofxWindowApp::saveSettingsAfterRefresh()
-{
+void ofxWindowApp::saveSettingsAfterRefresh() {
 	doRefreshGetWindowSettings();
 	saveSettings();
 }
 //--------------------------------------------------------------
-void ofxWindowApp::saveSettings(bool bSlient)
-{
-	string path = path_folder + "/" + path_filename;
+void ofxWindowApp::saveSettings(bool bSlient) {
+	string path;
+	if (path_folder == "" && path_filename == "")
+		path = "ofxWindowApp.json";
+	else
+		path = path_folder + "/" + path_filename;
+
 	ofLogNotice("ofxWindowApp::saveSettings") << path;
 
 	// Force mini to window, not full screen
@@ -484,8 +462,7 @@ void ofxWindowApp::saveSettings(bool bSlient)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::loadSettings()
-{
+void ofxWindowApp::loadSettings() {
 	ofSetFullscreen(false);
 
 	string path = path_folder + "/" + path_filename;
@@ -493,8 +470,7 @@ void ofxWindowApp::loadSettings()
 	//TODO: Check if file exist
 	ofFile file(path);
 	bool bFileExist = file.exists();
-	if (bFileExist)
-	{
+	if (bFileExist) {
 		ofLogNotice("ofxWindowApp") << "loadFileSettings(): File found: " << path;
 
 		//--
@@ -528,16 +504,15 @@ void ofxWindowApp::loadSettings()
 		ofJson jMini;
 		ofJson jExtra;
 
-		if (data.size() >= 3)
-		{
-			jBig = data[0];//TODO: ugly workaround
-			jMini = data[1];//TODO: should add a tag mini or extra to mark the file section
+		if (data.size() >= 3) {
+			jBig = data[0]; //TODO: ugly workaround
+			jMini = data[1]; //TODO: should add a tag mini or extra to mark the file section
 			jExtra = data[2];
 
 			// recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
-		}
-		else ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
+		} else
+			ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 
 		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
 		ofLogVerbose("ofxWindowApp") << "jMini : " << jMini;
@@ -549,8 +524,7 @@ void ofxWindowApp::loadSettings()
 #ifndef USE_MINI_WINDOW
 		ofJson jExtra;
 
-		if (data.size() >= 2)
-		{
+		if (data.size() >= 2) {
 			jBig = data[0]; //TODO: Ugly workaround
 			jExtra = data[1];
 
@@ -559,9 +533,7 @@ void ofxWindowApp::loadSettings()
 
 			ofLogNotice("ofxWindowApp") << "Settings: " << jBig.dump(4);
 			ofLogNotice("ofxWindowApp") << "Extras: " << ofToString(paramsExtra);
-		}
-		else
-		{
+		} else {
 			ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
@@ -588,11 +560,14 @@ void ofxWindowApp::loadSettings()
 
 		MiniWindow.setPosition(glm::vec2(jx, jy));
 		MiniWindow.setSize(jw, jh);
-		MiniWindow.windowMode = ofWindowMode(0);// ? always windowed
+		MiniWindow.windowMode = ofWindowMode(0); // ? always windowed
 
-		if (jm == "OF_WINDOW") MiniWindow.windowMode = ofWindowMode(0);
-		else if (jm == "OF_FULLSCREEN") MiniWindow.windowMode = ofWindowMode(1);
-		else if (jm == "OF_GAME_MODE") MiniWindow.windowMode = ofWindowMode(2);
+		if (jm == "OF_WINDOW")
+			MiniWindow.windowMode = ofWindowMode(0);
+		else if (jm == "OF_FULLSCREEN")
+			MiniWindow.windowMode = ofWindowMode(1);
+		else if (jm == "OF_GAME_MODE")
+			MiniWindow.windowMode = ofWindowMode(2);
 #endif
 
 		//--
@@ -615,8 +590,7 @@ void ofxWindowApp::loadSettings()
 
 		// TODO:
 		// Workaround
-		if (jy < SIZE_SECURE_GAP_INISDE_SCREEN)
-		{
+		if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
 			jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
 		}
 
@@ -625,20 +599,25 @@ void ofxWindowApp::loadSettings()
 		//OF_FULLSCREEN = 1
 		//OF_GAME_MODE = 2
 
-		if (jm == "OF_WINDOW") windowSettings.windowMode = ofWindowMode(0);
-		else if (jm == "OF_FULLSCREEN") windowSettings.windowMode = ofWindowMode(1);
-		else if (jm == "OF_GAME_MODE") windowSettings.windowMode = ofWindowMode(2);
+		if (jm == "OF_WINDOW")
+			windowSettings.windowMode = ofWindowMode(0);
+		else if (jm == "OF_FULLSCREEN")
+			windowSettings.windowMode = ofWindowMode(1);
+		else if (jm == "OF_GAME_MODE")
+			windowSettings.windowMode = ofWindowMode(2);
 
-		if (jm == "OF_WINDOW") bIsFullScreen = false;
-		else if (jm == "OF_FULLSCREEN") bIsFullScreen = true;
-		else if (jm == "OF_GAME_MODE") bIsFullScreen = false;
+		if (jm == "OF_WINDOW")
+			bIsFullScreen = false;
+		else if (jm == "OF_FULLSCREEN")
+			bIsFullScreen = true;
+		else if (jm == "OF_GAME_MODE")
+			bIsFullScreen = false;
 		bIsFullScreenInSettings = bIsFullScreen;
 
-		if (!bIsFullScreen) {//window
+		if (!bIsFullScreen) { //window
 			windowSettings.setPosition(glm::vec2(jx, jy));
 			windowSettings.setSize(jw, jh);
-		}
-		else {//full screen
+		} else { //full screen
 			//windowSettings.setPosition(glm::vec2(0, 0));
 			//windowSettings.setPosition(glm::vec2(jx, jy));
 			//windowSettings.setSize(jw, jh);
@@ -651,9 +630,7 @@ void ofxWindowApp::loadSettings()
 		ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
 		ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
 		ofLogNotice("ofxWindowApp") << "Done load settings.";
-	}
-	else
-	{
+	} else {
 		ofLogError("ofxWindowApp") << "File NOT found: " << path;
 	}
 
@@ -665,8 +642,7 @@ void ofxWindowApp::loadSettings()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawHelpInfo()
-{
+void ofxWindowApp::drawHelpInfo() {
 	// Debug overlay screen modes
 
 	string vSyncStr;
@@ -690,8 +666,7 @@ void ofxWindowApp::drawHelpInfo()
 	if (ofGetWindowMode() == OF_WINDOW) // Go full screen
 	{
 		bModeFullScreen = false;
-	}
-	else if (ofGetWindowMode() == OF_FULLSCREEN) // Go window mode
+	} else if (ofGetWindowMode() == OF_FULLSCREEN) // Go window mode
 	{
 		bModeFullScreen = true;
 	}
@@ -712,7 +687,7 @@ void ofxWindowApp::drawHelpInfo()
 	str += (bDisableAutoSave ? "[L] " : "[L]");
 	str += strPad + (bWindowOnTop ? "ON_TOP:TRUE" : "ON_TOP:FALSE") + "[T]";
 	str += strPad + "  ";
-	str += strPad + "[MOD ALT] ";//TODO: show mod key. hardcoded
+	str += strPad + "[MOD ALT] "; //TODO: show mod key. hardcoded
 	str += strPad + (mod_COMMAND ? "CMD" : "   ");
 	str += strPad + (mod_ALT ? "ALT" : "   ");
 	str += strPad + (mod_CONTROL ? "CTRL" : "    ");
@@ -740,12 +715,11 @@ void ofxWindowApp::drawHelpInfo()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawPerformanceWidget()
-{
+void ofxWindowApp::drawPerformanceWidget() {
 	// monitor fps performance alert
 
-	bool bPreShow;//starts draw black
-	bool bAlert;//draws red
+	bool bPreShow; //starts draw black
+	bool bAlert; //draws red
 	float fpsThreshold;
 
 	//// A. Thresholds by factor fps between target and real fps
@@ -755,9 +729,9 @@ void ofxWindowApp::drawPerformanceWidget()
 
 	// B. Thresholds by absolute fps difference between desired target and real fps
 	// monitor fps performance
-	fpsThreshold = 10.f;//num frames below this trigs alert red state
+	fpsThreshold = 10.f; //num frames below this trigs alert red state
 	bPreShow = (fpsReal < fpsTarget - 5); //below 5 fps starts showing bar
-	bAlert = (fpsReal < (fpsTarget - fpsThreshold));//B. by absolute fps diff
+	bAlert = (fpsReal < (fpsTarget - fpsThreshold)); //B. by absolute fps diff
 
 	//-
 
@@ -766,14 +740,14 @@ void ofxWindowApp::drawPerformanceWidget()
 	if (bPreShow) // to draw only under pre threshold
 	{
 		float fx, fy, fw, fh, fwMax, fPad;
-		fwMax = 100.f;//max width
+		fwMax = 100.f; //max width
 
 #ifndef USE_CUSTOM_FONT
 		fh = 10.f;
-		fPad = 5.f;//pad to border
+		fPad = 5.f; //pad to border
 #endif
 #ifdef USE_CUSTOM_FONT
-		fPad = 4.f;//pad to border
+		fPad = 4.f; //pad to border
 		//fh = fontSize + pad - 4;
 #endif
 
@@ -782,11 +756,11 @@ void ofxWindowApp::drawPerformanceWidget()
 
 #ifndef USE_CUSTOM_FONT
 		//fy = yy - fh - 50.0f;//little air
-		fy = yy - fh + 1.0f;//to the border
+		fy = yy - fh + 1.0f; //to the border
 #endif
 
 		fw = ofMap(fpsReal, 0.0f * fpsTarget, fpsTarget, 0, fwMax, true);
-		int fa = 150;//alpha
+		int fa = 150; //alpha
 		int iDiff = (int)fpsTarget - fpsReal;
 		string diff;
 		diff += "-";
@@ -805,7 +779,7 @@ void ofxWindowApp::drawPerformanceWidget()
 		string str = diff;
 #ifndef USE_CUSTOM_FONT
 		//ofDrawBitmapStringHighlight(str, xx, yy);
-		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255));//text fps diff
+		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255)); //text fps diff
 #endif
 #ifdef USE_CUSTOM_FONT
 		ofPushStyle();
@@ -845,8 +819,7 @@ void ofxWindowApp::drawPerformanceWidget()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::windowResized(int w, int h)
-{
+void ofxWindowApp::windowResized(int w, int h) {
 	window_W = w;
 	window_H = h;
 	window_X = ofGetWindowPositionX();
@@ -866,8 +839,7 @@ void ofxWindowApp::windowResized(int w, int h)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::windowResized(ofResizeEventArgs& resize)
-{
+void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
 	static int w = -1;
 	static int h = -1;
 	bool bChanged = 0;
@@ -883,11 +855,9 @@ void ofxWindowApp::windowResized(ofResizeEventArgs& resize)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
-{
-	if (bKeys)
-	{
-		const int& key = eventArgs.key;
+void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
+	if (bKeys) {
+		const int & key = eventArgs.key;
 
 		// modifier
 
@@ -897,8 +867,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		//mod_ALT = key == OF_KEY_ALT;
 		//mod_SHIFT = key == OF_KEY_SHIFT;
 
-		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND);//macOS
-		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL);//Windows. not working
+		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); //macOS
+		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); //Windows. not working
 		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
@@ -914,17 +884,15 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		if (0) ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
 
 		// disable draw debug
-		//if (mod_CONTROL && key == 'w' || 
+		//if (mod_CONTROL && key == 'w' ||
 		//mod_CONTROL && key == 'w' ||
-		if (key == 'W')
-		{
+		if (key == 'W') {
 			bShowWindowInfo = !bShowWindowInfo;
 			ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowWindowInfo ? "ON" : "OFF");
 		}
 
 		// Switch window mode
-		else if (key == 'F')
-		{
+		else if (key == 'F') {
 			//TODO; fix monitor jump when full screen.
 			// try settings.windowMode = OF_GAME_MODE;
 			//auto m = ofGetWindowMode();
@@ -932,8 +900,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			//ofSetupScreen()
 
 			doRefreshToggleWindowMode();
-		}
-		else if (key == 'V') // switch v-sync mode
+		} else if (key == 'V') // switch v-sync mode
 		{
 			vSync = !vSync;
 			ofSetVerticalSync(vSync);
@@ -963,23 +930,21 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 			doReset();
 		}
 
-		else if (key == 'L')
-		{
+		else if (key == 'L') {
 			bDisableAutoSave = !bDisableAutoSave;
 		}
 
-		else if (key == 'T')
-		{
+		else if (key == 'T') {
 			setToggleAlwaysOnTop();
 		}
 
 #ifdef USE_MINI_WINDOW
-		else if (key == 'M')//switch window mode big/mini
-			//else if (key == 'M')//switch window mode big/mini
-			//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
+		else if (key == 'M') //switch window mode big/mini
+		//else if (key == 'M')//switch window mode big/mini
+		//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
 		{
 			toggleModeWindowBigMini();
-	}
+		}
 #endif
 		//--
 
@@ -989,14 +954,12 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs& eventArgs)
 		//mod_CONTROL = false; // Windows. not working
 		//mod_ALT = false;
 		//mod_SHIFT = false;
-}
+	}
 }
 //--------------------------------------------------------------
-void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
-{
-	if (bKeys)
-	{
-		const int& key = eventArgs.key;
+void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
+	if (bKeys) {
+		const int & key = eventArgs.key;
 
 		//// modifier
 		//if (eventArgs.hasModifier(OF_KEY_COMMAND)) mod_COMMAND = false; // macOS
@@ -1013,37 +976,36 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs& eventArgs)
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::folderCheckAndCreate(string _path)
-{
+void ofxWindowApp::folderCheckAndCreate(string _path) {
 	ofLogNotice("ofxWindowApp") << "folderCheckAndCreate(). Path: " << _path;
+	if (_path == "") return;
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
 
 	// Check if target data folder exist
-	if (!dataDirectory.isDirectory())
-	{
+	if (!dataDirectory.isDirectory()) {
 		ofLogError("ofxWindowApp") << "folderCheckAndCreate(). FOLDER DOES NOT EXIST!";
 
 		// Create folder
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 
 		// Debug if creation has been succed
-		if (b) ofLogNotice("ofxWindowApp") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
-		else ofLogError("ofxWindowApp") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+		if (b)
+			ofLogNotice("ofxWindowApp") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+		else
+			ofLogError("ofxWindowApp") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
 	}
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doRefreshToggleWindowMode()
-{
+void ofxWindowApp::doRefreshToggleWindowMode() {
 	// Toggle Mode
 
 	if (ofGetWindowMode() == OF_WINDOW) // go full screen
 	{
 		ofSetFullscreen(true);
 		bIsFullScreen = true;
-	}
-	else if (ofGetWindowMode() == OF_FULLSCREEN) // go window mode
+	} else if (ofGetWindowMode() == OF_FULLSCREEN) // go window mode
 	{
 		ofSetFullscreen(false);
 
@@ -1054,7 +1016,7 @@ void ofxWindowApp::doRefreshToggleWindowMode()
 		// workaround
 		// it's window mode..
 		// kick a little down to avoid hidden window title barF
-		window_Y = MAX(ofGetWindowPositionY(), windowBar_h);//avoid negative out of screen. minimal h is 25
+		window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
 		window_X = ofGetWindowPositionX();
 		ofSetWindowPosition(window_X, window_Y);
 
@@ -1069,8 +1031,7 @@ void ofxWindowApp::doRefreshToggleWindowMode()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doApplyExtraSettings()
-{
+void ofxWindowApp::doApplyExtraSettings() {
 	ofLogVerbose("ofxWindowApp") << "doApplyExtraSettings()";
 
 	ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
@@ -1088,8 +1049,7 @@ void ofxWindowApp::doApplyExtraSettings()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doApplyWindowMode()
-{
+void ofxWindowApp::doApplyWindowMode() {
 	ofLogVerbose("ofxWindowApp") << "doApplyWindowMode()";
 
 	//// Apply extra
@@ -1099,12 +1059,11 @@ void ofxWindowApp::doApplyWindowMode()
 	//--
 
 #ifndef USE_MINI_WINDOW
-	if (bIsFullScreen) {//fullscreen
+	if (bIsFullScreen) { //fullscreen
 		////ofSetWindowPosition(0, 0);
 		//ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 		//ofSetWindowShape(ofGetWidth(), ofGetHeight());
-	}
-	else {//window
+	} else { //window
 		ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 		ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 	}
@@ -1116,23 +1075,20 @@ void ofxWindowApp::doApplyWindowMode()
 
 #ifdef USE_MINI_WINDOW
 	// Mini preset
-	if (bModeMini)
-	{
+	if (bModeMini) {
 		ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
 		ofSetWindowShape(MiniWindow.getWidth(), MiniWindow.getHeight());
 		ofSetFullscreen(false);
 	}
 
 	// Big preset
-	else
-	{
+	else {
 		//ofSetFullscreen(bIsFullScreen);
 
 		if (bIsFullScreen) {
 			ofSetWindowPosition(0, 0);
 			ofSetWindowShape(ofGetWidth(), ofGetHeight());
-		}
-		else {
+		} else {
 			ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 			ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 		}
@@ -1166,8 +1122,7 @@ void ofxWindowApp::doApplyWindowMode()
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter& e)
-{
+void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 	if (!bDoneSetup) return;
 	if (!bDoneStartup) return;
 
@@ -1176,18 +1131,15 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter& e)
 	string name = e.getName();
 	ofLogNotice("ofxWindowApp::Changed") << " " << name << " : " << e;
 
-	if (name == bWindowOnTop.getName())
-	{
+	if (name == bWindowOnTop.getName()) {
 #if defined(TARGET_WIN32)
-		if (bWindowOnTop.get())
-		{
+		if (bWindowOnTop.get()) {
 			// Make app always on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 			ofLogNotice("ofxWindowApp") << "Set on top Enabled";
 
-		}
-		else {
+		} else {
 			// Disable make app always on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
@@ -1200,14 +1152,12 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter& e)
 		return;
 	}
 
-	if (name == vSync.getName())
-	{
+	if (name == vSync.getName()) {
 		bFlagToSave = 1;
 		return;
 	}
 
-	if (name == fpsTarget.getName())
-	{
+	if (name == fpsTarget.getName()) {
 		bFlagToSave = 1;
 		return;
 	}
