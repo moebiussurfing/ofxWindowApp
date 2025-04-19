@@ -15,8 +15,7 @@
 **openFrameworks** addon to **auto store** and **recall** the basic app **window state/settings**:
 
 
-> [!CAUTION]
-> I have noticed many problems when reloading the window size and position settings. This seems to be due to errors in `GLFW` or `OF` related to the size of the bar of the window. These problems also appear when using many screens with different resolutions and repositioning. Usually main monitor works fine and other ones could differ between sessions...
+> [!CAUTION] > I have noticed many problems when reloading the window size and position settings when applying settings to the window application. This seems to be due to errors in `GLFW` or `OF` related to the size of the window bar. These problems also occur when using multiple monitors with different resolutions and repositioning. Usually the main monitor works fine, and other monitors may differ between sessions...
 
 
 ## FEATURES
