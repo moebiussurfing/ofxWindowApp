@@ -44,7 +44,6 @@ V: vSync state (On/Off).
 T: Stay-on-top (Window only). 
 
 BACKSAPCE: Reset.  
-
 ```
 
 ## WHY?
@@ -55,9 +54,9 @@ _Not only for the final user but also for the coder. Usually when you start a cl
 
 _Using this add-on you can forget about this "annoying behaviour", as the **App Window will be opened in the same position** and with the **same size and settings**._  
 
-## POWERED BY
+### POWERED BY
 
-**ofxSerialize** from **@bakercp** (Thanks!)  
+**ofxSerializer** from **@bakercp** (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
 Included into `OFX_ADDON/libs`.  
