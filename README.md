@@ -34,8 +34,8 @@
 
 ```
 ALT +  
-( Uppercased, caps enabled or using SHIFT )  
 
+( Uppercased, caps enabled or using SHIFT )  
 W: Show debug info.  
 D: Show debug key commands.  
 F: Full screen / Windowed.  
@@ -43,6 +43,7 @@ V: vSync state (On/Off).
 L: Lock mode.  
 T: Always on top (Window only). 
 R: Reset Full HD size on the main monitor.  
+
 BACKSAPCE: Reset.  
 
 ```
@@ -121,10 +122,10 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will look like this:
 
 ### TODO
 
-* Join with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
+* Merge with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## TESTED SYSTEMS
-- **Windows10-11** / **VS2022** / **OF ~0.11** **OF 0.12+**
+- **Windows10/11** / **VS2022** / **OF ~0.11** /  **OF 0.12+**
 - **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11**
 
 ## AUTHOR
