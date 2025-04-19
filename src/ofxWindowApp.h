@@ -14,7 +14,7 @@
  //----
 
 #define SURFING_WINDOW_APP__USE_STATIC 
-// -> Main directive. Uncomment to allow WIN32 platform for windowMove callback.
+// -> Main directive. Uncomment/enable to allow WIN32 platform for windowMove callback.
 
 //--
 
