@@ -14,17 +14,17 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-	// Ignore if not pos changed
+	// Ignore if pos not changed
 	static int xpos_ = -1;
 	static int ypos_ = -1;
 	bool bChanged = 0;
 	if (xpos != xpos_) {
 		xpos_ = xpos;
-		bChanged = 1;
+		bChanged = true;
 	}
 	if (ypos != ypos_) {
 		ypos_ = ypos;
-		bChanged = 1;
+		bChanged = true;
 	}
 	if (!bChanged) return;
 
@@ -60,14 +60,10 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	// Default force
-	int w = 1280;
-	int h = w * (9.f / 16.f);
-	windowSettings.setSize(w, h);
-	windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); //left top
-	//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); //centered fails
+	doReset();
 
-	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode(); //from main.cpp
+	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
+	//from main.cpp
 
 	// Default
 	vSync = false;
@@ -118,17 +114,19 @@ void ofxWindowApp::startup() {
 
 	//--
 
+#ifdef SURFING_USE_STAYONTOP
 	// On top
 	if (!bIsFullScreenInSettings) {
 		// Workaround
 		// Refresh
-#if defined(TARGET_WIN32)
+	#if defined(TARGET_WIN32)
 		HWND W = GetActiveWindow();
 		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-#endif
+	#endif
 		// Re trig
-		bWindowOnTop = bWindowOnTop;
+		bWindowStayOnTop = bWindowStayOnTop;
 	}
+#endif
 
 	//--
 
@@ -175,7 +173,7 @@ void ofxWindowApp::setup() {
 	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-	if (!b) b = font.load(OF_TTF_MONO, fontSize);
+	if (!b) b = font.load(OF_TTF_SANS, fontSize);
 #endif
 
 	//--
@@ -195,7 +193,11 @@ void ofxWindowApp::setup() {
 
 	paramsSession.add(bShowWindowInfo);
 	paramsSession.add(bShowPerformanceAlways);
-	paramsSession.add(bWindowOnTop);
+
+#ifdef SURFING_USE_STAYONTOP
+	paramsSession.add(bWindowStayOnTop);
+#endif
+
 	paramsSession.add(bDisableAutoSave);
 
 	paramsExtra.add(paramsWindow);
@@ -238,11 +240,11 @@ void ofxWindowApp::update(ofEventArgs & args) {
 		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
 #endif
 		{
-			bFlagToSave = 0;
+			bFlagToSave = false;
 
 			bDoneSavedEasyCallback = true;
 
-			ofLogNotice("ofxWindowApp::Changed") << "Just saved after window changed";
+			ofLogNotice("ofxWindowApp::Changed") << "Just saved after window changed (update/bFlagToSave)";
 
 			saveSettings();
 		}
@@ -361,7 +363,6 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	// Save window settings
 
 	ofJson jApp;
-	ofJson jMini;
 	ofJson jExtra;
 
 	to_json(jApp, windowSettings);
@@ -385,11 +386,6 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	//--
 
-	//window_W = ofGetWindowSize().x;
-	//window_H = ofGetWindowSize().y;
-
-	//--
-
 	bFlagDoneSaved = true;
 }
 
@@ -399,7 +395,6 @@ void ofxWindowApp::loadSettings() {
 
 	string path = path_folder + "/" + path_filename;
 
-	//TODO: Check if file exist
 	ofFile file(path);
 	bool bFileExist = file.exists();
 	if (bFileExist) {
@@ -459,11 +454,13 @@ void ofxWindowApp::loadSettings() {
 		ofLogVerbose("ofxWindowApp") << "jh: " << jh;
 		ofLogVerbose("ofxWindowApp") << "jm: " << jm;
 
-		// TODO:
-		// Workaround
-		if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
-			jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
-		}
+		//// TODO:
+		//// Workaround to avoid negative values
+		//// required to fix glfw o OF bugs..
+		//if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
+		//	jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
+		//	//jy = (int)OFX_WINDOW_APP_BAR_HEIGHT;
+		//}
 
 		// Screen modes
 		//OF_WINDOW = 0
@@ -488,11 +485,6 @@ void ofxWindowApp::loadSettings() {
 		if (!bIsFullScreen) { //window
 			windowSettings.setPosition(glm::vec2(jx, jy));
 			windowSettings.setSize(jw, jh);
-		} else { //full screen
-			//windowSettings.setPosition(glm::vec2(0, 0));
-			//windowSettings.setPosition(glm::vec2(jx, jy));
-			//windowSettings.setSize(jw, jh);
-			//windowSettings.setSize(ofGetWidth(), ofGetHeight);
 		}
 
 		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
@@ -552,7 +544,11 @@ void ofxWindowApp::drawHelpInfo() {
 	str += strPad + screenMode;
 	str += strPad + (bDisableAutoSave ? "NO_SAVE-ON" : "NO_SAVE-OFF");
 	str += (bDisableAutoSave ? "[L] " : "[L]");
-	str += strPad + (bWindowOnTop ? "ON_TOP:TRUE" : "ON_TOP:FALSE") + "[T]";
+
+#ifdef SURFING_USE_STAYONTOP
+	str += strPad + (bWindowStayOnTop ? "ON_TOP:TRUE" : "ON_TOP:FALSE") + "[T]";
+#endif
+
 	str += strPad + "  ";
 	str += strPad + "[MOD ALT] "; //TODO: show mod key. hardcoded
 	str += strPad + (mod_COMMAND ? "CMD" : "   ");
@@ -694,7 +690,7 @@ void ofxWindowApp::windowResized(int w, int h) {
 
 	doRefreshGetWindowSettings();
 
-	bFlagToSave = 1;
+	bFlagToSave = true;
 
 	ofLogVerbose("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
 
@@ -778,45 +774,21 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 			bDisableAutoSave = !bDisableAutoSave;
 		}
 
-		//#ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
-		//		else if (key == 'R') // reset to full HD
-		//		{
-		//			//setToggleAlwaysOnTop();
-		//			//windowSettings.setPosition(glm::vec2(0, SIZE_SECURE_GAP_INISDE_SCREEN));
-		//			windowSettings.setPosition(glm::vec2(0, 0));
-		//			windowSettings.setSize(1920, 1080);
-		//
-		//			ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
-		//			ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
-		//
-		//			doRefreshGetWindowSettings();
-		//		}
-		//#endif
-
-		else if (key == OF_KEY_BACKSPACE) {
-			doReset();
-		}
-
 		else if (key == 'L') {
 			bDisableAutoSave = !bDisableAutoSave;
 		}
 
 		else if (key == 'T') {
-			setToggleAlwaysOnTop();
+			setToggleStayOnTop();
 		}
 
 		else if (key == 'D') {
 			bShowDebugKeysInfo = !bShowDebugKeysInfo;
 		}
 
-		//--
-
-		////TODO:
-		////Release modifiers
-		//mod_COMMAND = false; // macOS
-		//mod_CONTROL = false; // Windows. not working
-		//mod_ALT = false;
-		//mod_SHIFT = false;
+		else if (key == OF_KEY_BACKSPACE) {
+			doReset();
+		}
 	}
 }
 //--------------------------------------------------------------
@@ -883,9 +855,6 @@ void ofxWindowApp::doRefreshToggleWindowMode() {
 		window_X = ofGetWindowPositionX();
 		ofSetWindowPosition(window_X, window_Y);
 
-		////window_W = ofGetWindowWidth();
-		////window_H = ofGetWindowHeight();
-
 		bIsFullScreen = false;
 	}
 
@@ -900,9 +869,6 @@ void ofxWindowApp::doApplyExtraSettings() {
 	ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
 	ofLogVerbose("ofxWindowApp") << "vSync: " << vSync;
 
-	//ofLogVerbose("ofxWindowApp") << "Show Debug: " << bShowWindowInfo.get();
-	//ofLogVerbose("ofxWindowApp") << "bDisableAutoSave: " << bDisableAutoSave.get();
-
 	ofSetFrameRate(int(fpsTarget.get()));
 	ofSetVerticalSync(vSync.get());
 }
@@ -911,23 +877,13 @@ void ofxWindowApp::doApplyExtraSettings() {
 void ofxWindowApp::doApplyWindowMode() {
 	ofLogVerbose("ofxWindowApp") << "doApplyWindowMode()";
 
-	//// Apply extra
-	//ofSetVerticalSync(vSync);
-	//ofSetFrameRate(fpsTarget);
-
-	//--
-
-	if (bIsFullScreen) { //fullscreen
-		////ofSetWindowPosition(0, 0);
-		//ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
-		//ofSetWindowShape(ofGetWidth(), ofGetHeight());
-	} else { //window
+	//window mode
+	if (!bIsFullScreen) {
 		ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 		ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 	}
 
-	//--
-
+	// full screen
 	if (bIsFullScreenInSettings) ofSetFullscreen(true);
 }
 
@@ -941,9 +897,10 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 	string name = e.getName();
 	ofLogNotice("ofxWindowApp::Changed") << " " << name << " : " << e;
 
-	if (name == bWindowOnTop.getName()) {
-#if defined(TARGET_WIN32)
-		if (bWindowOnTop.get()) {
+#ifdef SURFING_USE_STAYONTOP
+	if (name == bWindowStayOnTop.getName()) {
+	#if defined(TARGET_WIN32)
+		if (bWindowStayOnTop.get()) {
 			// Make app always on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
@@ -955,20 +912,21 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 			ofLogNotice("ofxWindowApp") << "Set on top Disabled";
 		}
-		isWindowOnTop = bWindowOnTop;
-#else
+		bIsWindowStayOnTop = bWindowStayOnTop;
+	#else
 		ofLogError("ofxWindowApp") << "Not implemented for current platform. Only TARGET_WIN32 yet!";
-#endif
+	#endif
 		return;
 	}
+#endif
 
 	if (name == vSync.getName()) {
-		bFlagToSave = 1;
+		bFlagToSave = true;
 		return;
 	}
 
 	if (name == fpsTarget.getName()) {
-		bFlagToSave = 1;
+		bFlagToSave = true;
 		return;
 	}
 }

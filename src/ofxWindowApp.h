@@ -2,7 +2,6 @@
 
 /*
 	TODO:
-	+ should have a callback to detect when window is moved. could that be too expensive?
 	+ add full screen bool param with listener. to allow expose on gui's
 	+ broken full screen save load?
 	+ add ofxScreenSetup addon to bundle all other features
@@ -21,8 +20,6 @@
 //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
 #define SURFING_WINDOW_APP__USE_TIMED_SAVER //would be force disabled on Windows platform in static mode.
-
-//#define SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 
 //----
 
@@ -55,6 +52,8 @@
 #define USE_CUSTOM_FONT
 
 #define USING__OFX_WINDOW_APP
+
+//#define SURFING_USE_STAYONTOP
 
 //--------
 
@@ -93,18 +92,18 @@ private:
 	void startup();
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
-
-	//public://TODO
 	void exit();
 
 private:
 	void keyPressed(ofKeyEventArgs & eventArgs);
 	void keyReleased(ofKeyEventArgs & eventArgs);
 
+	void windowResized(int w, int h);
+	void windowResized(ofResizeEventArgs & e);
+
 	//--
 
 private:
-	//ofWindowSettings windowSettingsPRE;
 	ofWindowSettings windowSettings;
 
 #ifdef USE_CUSTOM_FONT
@@ -120,9 +119,6 @@ private:
 	bool mod_CONTROL = false;
 	bool mod_ALT = false;
 	bool mod_SHIFT = false;
-
-	void windowResized(int w, int h);
-	void windowResized(ofResizeEventArgs & e);
 
 	bool bFlagToSave = 0;
 	bool bFlagDoneSaved = 0;
@@ -187,24 +183,27 @@ public:
 		ofSetEscapeQuitsApp(b);
 	}
 
+#ifdef SURFING_USE_STAYONTOP
 	//--------------------------------------------------------------
-	void setToggleAlwaysOnTop() {
-		ofLogNotice("ofxWindowApp::setToggleAlwaysOnTop");
-		setAlwaysOnTop(!isWindowOnTop);
+	void setToggleStayOnTop() {
+		ofLogNotice("ofxWindowApp::setToggleStayOnTop");
+		setStayOnTop(!bIsWindowStayOnTop);
 	}
 
 	//--------------------------------------------------------------
-	void setAlwaysOnTop(bool b) {
-		ofLogNotice("ofxWindowApp::setAlwaysOnTop") << b;
-		bWindowOnTop = b;
+	void setStayOnTop(bool b) {
+		ofLogNotice("ofxWindowApp::setStayOnTop") << b;
+		bWindowStayOnTop = b;
 	}
 
 private:
-	bool isWindowOnTop = false;
+	bool bIsWindowStayOnTop = false;
+#endif
 
 	//--
 
 public:
+	//TODO
 	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
 	//--------------------------------------------------------------
 	void setConsoleVisible(bool show) {
@@ -233,6 +232,8 @@ private:
 private:
 	void doApplyWindowMode();
 
+	//--
+
 public:
 	string getPathFolder() const {
 		return path_folder;
@@ -247,10 +248,14 @@ public:
 		path_folder = s;
 	}
 
+	void folderCheckAndCreate(string _path);
+
 	//--------------------------------------------------------------
 	void setPathFilename(string s) {
 		path_filename = s;
 	}
+
+	//--
 
 	//--------------------------------------------------------------
 	void setAutoSaveLoad(bool b) {
@@ -279,8 +284,6 @@ public:
 	void setShowPerformanceAlways(bool b = true) {
 		bShowPerformanceAlways = b;
 	}
-
-	void folderCheckAndCreate(string _path);
 
 	//--
 
@@ -414,7 +417,11 @@ private:
 	// Kind of hardcoded position that will maintain on next app load.
 
 public:
-	ofParameter<bool> bWindowOnTop { "WindowOnTop", false };
+
+#ifdef SURFING_USE_STAYONTOP
+	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
+#endif
+
 	ofParameter<bool> bShowWindowInfo { "ShowWindowInfo", true };
 	bool bShowDebugKeysInfo = false;
 
@@ -430,8 +437,8 @@ private:
 	int xx = 10;
 	int yy = 0;
 #endif
-	int pad = 8;
 #ifdef USE_CUSTOM_FONT
+	int pad = 8;
 	int xx = pad / 2;
 	int yy = 0;
 #endif
@@ -448,12 +455,17 @@ private:
 public:
 	//--------------------------------------------------------------
 	void doReset() {
-		bIsFullScreen = false;
-		vSync = false;
-		fpsTarget = 60;
+		//bIsFullScreen = false;
+		//vSync = false;
+		//fpsTarget = 60;
 
-		windowSettings.setPosition(glm::vec2(0, OFX_WINDOW_APP_BAR_HEIGHT));
-		windowSettings.setSize(1920, 1080 - OFX_WINDOW_APP_BAR_HEIGHT);
+		// Default force
+		int w = 1280;
+		int h = w * (9.f / 16.f);
+		windowSettings.setSize(w, h);
+
+		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); //left top
+		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); //centered fails
 
 		doApplyWindowMode();
 	}
@@ -461,7 +473,7 @@ public:
 	//--------------------------------------------------------------
 	void drawDebugKeysInfo() {
 		//window tittle
-		string tp = "Pos:"+ ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
+		string tp = "Pos:" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
 		string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
 		ofSetWindowTitle(tp + "       " + ts);
 
@@ -477,13 +489,17 @@ public:
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
 		s += "F : SCREEN = " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
 		s += "\n";
-#ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
-		s += "Alt + R : RESET TO FULLHD \n";
+
+#ifdef SURFING_USE_STAYONTOP
+#if defined(TARGET_WIN32)
+		s += "T : ON_TOP = " + ofToString(bWindowStayOnTop ? "TRUE" : "FALSE") + "\n";
 #endif
-		s += "T : ON_TOP = " + ofToString(bWindowOnTop ? "TRUE" : "FALSE") + "\n";
-		//TODO: WIP: Lock mode
-		s += "L : NO_SAVE = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
-		s += "\n\n";
+#endif
+
+		////TODO: WIP: Lock mode
+		//s += "L : NO_SAVE = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
+		//s += "\n\n";
+
 #ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		s += "SAVES IF WINDOW IS\n";
 		s += "RESIZED OR MOVED";

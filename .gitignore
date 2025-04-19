@@ -556,3 +556,4 @@ MigrationBackup/
 */config.make
 */enc_temp_folder/*
 ofxWindowApp.json
+Examples/2_example_Dev/config.make

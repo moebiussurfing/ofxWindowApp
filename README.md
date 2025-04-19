@@ -10,10 +10,13 @@
 ![screenshot](readme_images/screenshot2.JPG?raw=true "MoebiusSurfing")
 
 
-
 ## OVERVIEW
 
 **openFrameworks** addon to **auto store** and **recall** the basic app **window state/settings**:
+
+
+> [!CAUTION]
+> I have noticed many problems when reloading the window size and position settings. this seems to be due to errors in `GLFW` or `OF` related to the size of the top edge of the window. These problems also appear when using many screens with different resolutions and repositioning.
 
 
 ## FEATURES
@@ -21,28 +24,24 @@
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
 * Window **Mode** (window/full screen).
-* App target **FPS** settings, real current **framerate**, and **vSync** state. 
-* "**Alert**" with a **performance** red bar when **low FPS drops** under the expected target frame rate.
-* Easy change the app settings just by editing the **JSON** file**, not the app code.
-* **Lock mode** to avoid future changes after modifying the window. (WIP)
-* Reset the command to restore **1080p Full HD** settings.
-* Custom TTF font.
-* On top mode, easy console window disabler. (WIN 32 only)
+* App target **FPS** settings (vs real current **framerate**), and **vSync** state. 
+* "**Alert**" with a **performance** red bar when **low FPS drops** too much under the expected target frame rate.
+* Easy change the app settings just by editing the **JSON file**, instead of the app code.
+* Optional custom TTF font for debug display.
+* `Stay on top` mode, easy console window disabler. (**WIN32** only)
 
 
 ## KEY COMMANDS
 
 ```
-ALT +  
+`ALT` +  
 
-( Uppercased, caps enabled or using SHIFT )  
+(Uppercased, caps enabled or using `SHIFT`)  
 W: Show debug info.  
 D: Show debug key commands.  
 F: Full screen / Windowed.  
 V: vSync state (On/Off).  
-L: Lock mode.  
-T: Always on top (Window only). 
-R: Reset Full HD size on the main monitor.  
+T: Stay-on-top (Window only). 
 
 BACKSAPCE: Reset.  
 
@@ -54,14 +53,15 @@ It can be useful to **auto-maintain** window settings between your **app session
 
 _Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times..._  
 
-_Using this add-on you can forget about this "annoying behaviour", as the **App Window will be open in the same place** and with the **same size and settings**._  
+_Using this add-on you can forget about this "annoying behaviour", as the **App Window will be opened in the same position** and with the **same size and settings**._  
 
 ## POWERED BY
 
 **ofxSerialize** from **@bakercp** (Thanks!)  
 https://github.com/bakercp/ofxSerializer  
 Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
-Included into `OFX_ADDON/libs`. You don't need to add with **PROJECT GENERATOR**!
+Included into `OFX_ADDON/libs`.  
+You don't need to add `ofxSerializer` with the **PROJECT GENERATOR**!
 
 ## USAGE
 
@@ -74,14 +74,17 @@ Included into `OFX_ADDON/libs`. You don't need to add with **PROJECT GENERATOR**
 #### ofApp.cpp
 Nothing more is required on ```update()``` or ```draw()```!  
 Some settings can be configured using key commands.  
-```.c++ 
+```.cpp 
 ofApp::setup()
 {
     w.setup(&w);
 
-    // Default: FPS is 60 fps, vSync = off
-    //w.setFrameRate(30);
-    //w.setVerticalSync(false);
+    // Init customized:
+    // Default FPS is 60 fps
+    // Default vSync is disabled
+    w.setFrameRate(120);
+    w.setVerticalSync(true);
+    // Can be forced to overwrite JSON settings too.
 }
 ```
 
@@ -125,8 +128,8 @@ The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will look like this:
 * Merge with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## TESTED SYSTEMS
-- **Windows10/11** / **VS2022** / **OF ~0.11** /  **OF 0.12+**
-- **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11**
+- **Windows10/11** / **VS 2022** / **OF ~0.11** /  **OF 0.12+**
+- **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11** /  **OF 0.12+**
 
 ## AUTHOR
 Addon by **@moebiusSurfing**  
