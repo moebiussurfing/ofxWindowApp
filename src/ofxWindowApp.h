@@ -586,12 +586,12 @@ public:
 		s += "ofxWindowApp";
 		if (bFlagDoneSaved) s += "  SAVE";
 		s += "\n\n";
-		s += "KEY STROKES\n\n";
+		s += "KEYS\n\n";
 		s += "Alt +\n\n";
 		s += "W : SHOW INFO\n";
-		s += "V : V_SYNC=" + ofToString(vSync ? "ON " : "OFF") + "\n";
+		s += "V : V_SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
-		s += "F : SCREEN=" + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
+		s += "F : SCREEN = " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
 #ifdef USE_MINI_WINDOW
 		s += "Alt + M: PRESET ";
 		if (bModeMini) s += "*MINI  BIG";
@@ -601,9 +601,9 @@ public:
 #ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 		s += "Alt + R : RESET TO FULLHD \n";
 #endif
-		s += "T : ON_TOP=" + ofToString(bWindowOnTop ? "TRUE" : "FALSE") + "\n";
+		s += "T : ON_TOP = " + ofToString(bWindowOnTop ? "TRUE" : "FALSE") + "\n";
 		//TODO: WIP: Lock mode
-		s += "L : NO_SAVE=" + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
+		s += "L : NO_SAVE = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
 		s += "\n\n";
 #ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		s += "SAVES IF WINDOW IS\n";
@@ -629,6 +629,8 @@ public:
 		ofColor c2 = bFlagDoneSaved ? 0 : 255;
 		if (bFlagDoneSaved) bFlagDoneSaved = 0;
 
-		ofDrawBitmapStringHighlight(s, 50, 50, c1, c2);
+		int x = 7;
+		int y = 18;
+		ofDrawBitmapStringHighlight(s, x, y, c1, c2);
 	}
 };

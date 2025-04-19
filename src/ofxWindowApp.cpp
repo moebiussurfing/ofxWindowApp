@@ -50,6 +50,7 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 		#endif
 	}
 }
+
 	#endif
 #endif
 
@@ -171,11 +172,11 @@ void ofxWindowApp::setup() {
 #ifdef USE_CUSTOM_FONT
 	// Font
 	fontSize = 10;
-	string _path = "assets/fonts/"; // assets folder
-	string _f = "JetBrainsMono-Bold.ttf";
-	_path += _f;
-	bool b = font.load(_path, fontSize);
-	if (!b) font.load(OF_TTF_MONO, fontSize);
+	string _path = "assets/fonts/"; // assets fonts folder
+	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
+	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
+	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
+	if (!b) b = font.load(OF_TTF_MONO, fontSize);
 #endif
 
 	//--
