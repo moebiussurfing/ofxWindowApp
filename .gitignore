@@ -551,6 +551,7 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+##-----------------------------------
 
 */config.make
 */enc_temp_folder/*

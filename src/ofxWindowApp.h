@@ -1,14 +1,12 @@
 #pragma once
 
 /*
-
 	TODO:
 
 	+ should have a callback to detect when window is moved. could that be too expensive?
 	+ add full screen bool param with listener. to allow expose on gui's
 	+ broken full screen save load?
 	+ add ofxScreenSetup addon to bundle all other features
-
  */
 
 //----
