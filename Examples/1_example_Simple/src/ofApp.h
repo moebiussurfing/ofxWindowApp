@@ -7,7 +7,8 @@
 class ofApp : public ofBaseApp {
 public:
 	void setup();
-	void draw();
 
 	ofxWindowApp w;
 };
+
+// Press Alt + D (uppercased!) to toggle debug info and key commands

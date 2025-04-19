@@ -54,6 +54,8 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	#endif
 #endif
 
+//----
+
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
@@ -330,6 +332,10 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		drawPerformanceWidget();
 	} else {
 		if (bShowPerformanceAlways) drawPerformanceWidget();
+	}
+
+	if (bShowDebugKeys) {
+		drawDebugInfo();
 	}
 }
 
@@ -937,6 +943,10 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 		else if (key == 'T') {
 			setToggleAlwaysOnTop();
+		}
+
+		else if (key == 'D') {
+			bShowDebugKeys = !bShowDebugKeys;
 		}
 
 #ifdef USE_MINI_WINDOW

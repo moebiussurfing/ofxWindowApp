@@ -5,9 +5,3 @@ void ofApp::setup()
 {
 	w.setup(&w);
 }
-
-//--------------------------------------------------------------
-void ofApp::draw()
-{
-	w.drawDebugInfo();
-}

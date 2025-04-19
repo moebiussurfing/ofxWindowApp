@@ -11,16 +11,16 @@
 
  */
 
- //----
+//----
 
-#define SURFING_WINDOW_APP__USE_STATIC 
+#define SURFING_WINDOW_APP__USE_STATIC
 // -> Main directive. Uncomment/enable to allow WIN32 platform for windowMove callback.
 
 //--
 
- //TODO: Fixing exceptions hen closing ofApp.
- //#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
- //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
+//TODO: Fixing exceptions hen closing ofApp.
+//#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
+//#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
 #define SURFING_WINDOW_APP__USE_TIMED_SAVER
 
@@ -31,21 +31,21 @@
 #include "ofMain.h"
 
 #if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
-#include <GLFW/glfw3.h>
-#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-#undef SURFING_WINDOW_APP__USE_TIMED_SAVER
-#endif
+	#include <GLFW/glfw3.h>
+	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
+		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER
+	#endif
 #else
-#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER
-#endif
+	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
+		#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+	#endif
 #endif
 
 #include "ofxSerializer.h"
 
 #define USING_ofxWindowApp
 #ifdef USING_ofxWindowApp
-#include "ofxWindowApp.h"
+	#include "ofxWindowApp.h"
 #endif
 
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18
@@ -64,8 +64,7 @@
 
 //----
 
-class ofxWindowApp
-{
+class ofxWindowApp {
 public:
 	ofxWindowApp();
 	~ofxWindowApp();
@@ -75,16 +74,18 @@ public:
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 public:
-	void setup(ofxWindowApp* app) {
+	void setup(ofxWindowApp * app) {
 		this->setInstance(app);
 		setup();
 	}
+
 public:
-	static void windowMoved(GLFWwindow* window, int xpos, int ypos);
+	static void windowMoved(GLFWwindow * window, int xpos, int ypos);
+
 private:
-	static ofxWindowApp* instance; // Static pointer to hold the instance
+	static ofxWindowApp * instance; // Static pointer to hold the instance
 public:
-	static void setInstance(ofxWindowApp* app); // Static function to set the instance
+	static void setInstance(ofxWindowApp * app); // Static function to set the instance
 #endif
 
 private:
@@ -92,15 +93,15 @@ private:
 
 private:
 	void startup();
-	void update(ofEventArgs& args);
-	void draw(ofEventArgs& args);
+	void update(ofEventArgs & args);
+	void draw(ofEventArgs & args);
 
-//public://TODO
+	//public://TODO
 	void exit();
 
 private:
-	void keyPressed(ofKeyEventArgs& eventArgs);
-	void keyReleased(ofKeyEventArgs& eventArgs);
+	void keyPressed(ofKeyEventArgs & eventArgs);
+	void keyReleased(ofKeyEventArgs & eventArgs);
 
 	//--
 
@@ -127,7 +128,7 @@ private:
 	bool mod_SHIFT = false;
 
 	void windowResized(int w, int h);
-	void windowResized(ofResizeEventArgs& e);
+	void windowResized(ofResizeEventArgs & e);
 
 	bool bFlagToSave = 0;
 	bool bFlagDoneSaved = 0;
@@ -150,29 +151,23 @@ public:
 	// required when used for first time into your project and no JSON file settings created yet.
 	// Default will be 60 fps if not defined!
 	//--------------------------------------------------------------
-	void setFrameRate(float f)
-	{
+	void setFrameRate(float f) {
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
 	}
 
 	//--------------------------------------------------------------
-	void setVerticalSync(bool b)
-	{
+	void setVerticalSync(bool b) {
 		vSync = b;
 		ofSetVerticalSync(vSync);
 	}
 
 	//--------------------------------------------------------------
-	void setFullScreen(bool b)
-	{
-		if (b)
-		{
+	void setFullScreen(bool b) {
+		if (b) {
 			ofSetFullscreen(true);
 			bIsFullScreen = true;
-		}
-		else
-		{
+		} else {
 			ofSetFullscreen(false);
 
 			float windowBar_h = 25;
@@ -193,22 +188,19 @@ public:
 	//--
 
 	//--------------------------------------------------------------
-	void setEnableAllowQuitAppUsingEscapeKey(bool b)
-	{
+	void setEnableAllowQuitAppUsingEscapeKey(bool b) {
 		ofLogNotice("ofxWindowApp::setEnableAllowQuitAppUsingEscapeKey");
 		ofSetEscapeQuitsApp(b);
 	}
 
 	//--------------------------------------------------------------
-	void setToggleAlwaysOnTop()
-	{
+	void setToggleAlwaysOnTop() {
 		ofLogNotice("ofxWindowApp::setToggleAlwaysOnTop");
 		setAlwaysOnTop(!isWindowOnTop);
 	}
 
 	//--------------------------------------------------------------
-	void setAlwaysOnTop(bool b)
-	{
+	void setAlwaysOnTop(bool b) {
 		ofLogNotice("ofxWindowApp::setAlwaysOnTop") << b;
 		bWindowOnTop = b;
 	}
@@ -221,15 +213,13 @@ private:
 public:
 	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
 	//--------------------------------------------------------------
-	void setConsoleVisible(bool show)
-	{
+	void setConsoleVisible(bool show) {
 #if defined(TARGET_WIN32)
 		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
 #endif
 	}
 	//--------------------------------------------------------------
-	bool getConsoleVisible()
-	{
+	bool getConsoleVisible() {
 		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
 	}
 
@@ -240,7 +230,7 @@ private:
 	void saveSettings(bool bSlient = false);
 
 public:
-	void save();//alias and public
+	void save(); //alias and public
 
 private:
 	void saveSettingsAfterRefresh();
@@ -250,59 +240,49 @@ private:
 	void doApplyWindowMode();
 
 public:
-	string getPathFolder() const
-	{
+	string getPathFolder() const {
 		return path_folder;
 	}
-	string getPathSettings() const
-	{
+	string getPathSettings() const {
 		string p = path_folder + "/" + path_filename;
 		return p;
 	}
 
 	//--------------------------------------------------------------
-	void setPathFolder(string s)
-	{
+	void setPathFolder(string s) {
 		path_folder = s;
 	}
 
 	//--------------------------------------------------------------
-	void setPathFilename(string s)
-	{
+	void setPathFilename(string s) {
 		path_filename = s;
 	}
 
 	//--------------------------------------------------------------
-	void setAutoSaveLoad(bool b)
-	{
+	void setAutoSaveLoad(bool b) {
 		bAutoSaveLoad = b;
 	}
 
 	//--------------------------------------------------------------
-	void setShowDebug(bool b = true)
-	{
+	void setShowDebug(bool b = true) {
 		bShowWindowInfo = b;
 		//bShowPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
-	void setShowDebugPerformance(bool b = true)
-	{
+	void setShowDebugPerformance(bool b = true) {
 		bShowPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
-	bool getShowDebug()
-	{
+	bool getShowDebug() {
 		return bShowWindowInfo;
 	}
 	//--------------------------------------------------------------
-	void toggleShowDebug()
-	{
+	void toggleShowDebug() {
 		bShowWindowInfo = !bShowWindowInfo;
 	}
 
 	//--------------------------------------------------------------
-	void setShowPerformanceAllways(bool b = true)
-	{
+	void setShowPerformanceAllways(bool b = true) {
 		bShowPerformanceAlways = b;
 	}
 
@@ -312,26 +292,24 @@ public:
 
 	// Easy callback only to check from parent scope/ofApp if window shape has changed.
 	//--------------------------------------------------------------
-	bool isChanged()
-	{
-		if (bDoneSavedEasyCallback)
-		{
+	bool isChanged() {
+		if (bDoneSavedEasyCallback) {
 			bDoneSavedEasyCallback = false;
 			return true;
 		}
 
-		else return false;
+		else
+			return false;
 	}
 
 	//--
 
 private:
 	void doApplyExtraSettings(); // fps and vsync only
-	
+
 public:
 	// Layout modes
-	enum DEBUG_Position
-	{
+	enum DEBUG_Position {
 		DEBUG_POSITION_TOP = 0,
 		DEBUG_POSITION_BOTTOM
 	};
@@ -340,61 +318,50 @@ private:
 	int positionLayout = DEBUG_POSITION_BOTTOM;
 
 public:
-	void setPositionDebugInfo(int POS)
-	{
+	void setPositionDebugInfo(int POS) {
 		positionLayout = POS;
 	}
 
-	void setPositionDebugInfo(DEBUG_Position POS = DEBUG_POSITION_BOTTOM)
-	{
+	void setPositionDebugInfo(DEBUG_Position POS = DEBUG_POSITION_BOTTOM) {
 		positionLayout = POS;
 	}
 
-	int getDEBUG_Position()
-	{
+	int getDEBUG_Position() {
 		return positionLayout;
 	}
 
-	void togglePositionDebugInfo()
-	{
+	void togglePositionDebugInfo() {
 		setPositionDebugInfo((positionLayout == 1) ? 0 : 1);
 	}
 
-	void setEnableKeys(bool b)
-	{
+	void setEnableKeys(bool b) {
 		bKeys = b;
 	}
 
 	//--
 
 public:
-	float getFrameRate()
-	{
+	float getFrameRate() {
 		return fpsTarget.get();
 	}
 
-	bool getVerticalSync()
-	{
+	bool getVerticalSync() {
 		return vSync.get();
 	}
 
-	float getWindowWidth()
-	{
+	float getWindowWidth() {
 		return window_W;
 	}
 
-	float getWindowHeight()
-	{
+	float getWindowHeight() {
 		return window_H;
 	}
 
-	float getWindowPositionX()
-	{
+	float getWindowPositionX() {
 		return window_X;
 	}
 
-	float getWindowPositionY()
-	{
+	float getWindowPositionY() {
 		return window_Y;
 	}
 
@@ -413,16 +380,13 @@ public:
 	//{
 	//}
 
-	bool isModeMini()
-	{
+	bool isModeMini() {
 		return bModeMini.get();
 	}
-	bool isModeBig()
-	{
+	bool isModeBig() {
 		return (!bModeMini.get());
 	}
-	void toggleModeWindowBigMini()
-	{
+	void toggleModeWindowBigMini() {
 		if (bAutoSaveLoad) {
 			doRefreshGetWindowSettings();
 		}
@@ -430,8 +394,7 @@ public:
 		bModeMini = !bModeMini;
 
 		// big preset
-		if (!bModeMini)
-		{
+		if (!bModeMini) {
 			ofSetFullscreen(bIsFullScreen);
 
 			if (bIsFullScreen) {
@@ -443,8 +406,7 @@ public:
 			//else if (windowBigMode == "OF_FULLSCREEN") ofSetFullscreen(true);
 		}
 		//mini preset
-		else
-		{
+		else {
 			//if (ofGetWindowMode() == OF_FULLSCREEN)
 
 			ofSetFullscreen(false);
@@ -452,8 +414,7 @@ public:
 
 		doApplyWindowMode();
 	}
-	void enableMiniMode(bool b)
-	{
+	void enableMiniMode(bool b) {
 		if (bAutoSaveLoad) {
 			doRefreshGetWindowSettings();
 		}
@@ -467,8 +428,7 @@ public:
 	//--
 
 	// Disables saving. So json file will not be overwritten.
-	void setLock(bool b)
-	{
+	void setLock(bool b) {
 		bDisableAutoSave = b;
 	}
 
@@ -476,13 +436,11 @@ public:
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 public:
-	void setEnableTimerSaver(bool b = true)
-	{
+	void setEnableTimerSaver(bool b = true) {
 		bAutoSaverTimed = b;
 	}
 
-	void setTimerSaver(int t)
-	{
+	void setTimerSaver(int t) {
 		timePeriodToCheckIfSave = t;
 	}
 
@@ -502,7 +460,7 @@ private:
 	string path_folder;
 	string path_filename;
 
-	bool bAutoSaveLoad = true; // load at startup 
+	bool bAutoSaveLoad = true; // load at startup
 	//TODO: (disabled->) and saves on exit
 
 	bool bDoneSavedEasyCallback = false;
@@ -510,30 +468,31 @@ private:
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
-	ofParameterGroup paramsExtra{ "Extra" };
-	ofParameterGroup paramsWindow{ "Window" };
-	ofParameterGroup paramsSession{ "Session" };
-	ofParameter<bool> vSync{"vSync", false};
-	ofParameter<float> fpsTarget{"Fps", 60.f, 1, 120};
-	ofParameter<bool> bShowPerformanceAlways{"DebugPerformance", true};
+	ofParameterGroup paramsExtra { "Extra" };
+	ofParameterGroup paramsWindow { "Window" };
+	ofParameterGroup paramsSession { "Session" };
+	ofParameter<bool> vSync { "vSync", false };
+	ofParameter<float> fpsTarget { "Fps", 60.f, 1, 120 };
+	ofParameter<bool> bShowPerformanceAlways { "DebugPerformance", true };
 
-	ofParameter<bool> bDisableAutoSave{"DisableAutosave", false};
-	// Ignores next window modification. 
+	ofParameter<bool> bDisableAutoSave { "DisableAutosave", false };
+	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
 
 public:
-	ofParameter<bool> bWindowOnTop{ "WindowOnTop", false };
-	ofParameter<bool> bShowWindowInfo{"ShowWindowInfo", true};
+	ofParameter<bool> bWindowOnTop { "WindowOnTop", false };
+	ofParameter<bool> bShowWindowInfo { "ShowWindowInfo", true };
+	bool bShowDebugKeys = false;
 
 private:
 	bool bDoneStartup = false;
 
 #ifdef USE_MINI_WINDOW
-	ofParameter<bool> bModeMini{ "miniPreset", false };
+	ofParameter<bool> bModeMini { "miniPreset", false };
 #endif
 
 private:
-	void Changed_ParamsExtra(ofAbstractParameter& e);
+	void Changed_ParamsExtra(ofAbstractParameter & e);
 
 	float fpsReal;
 
@@ -558,8 +517,7 @@ private:
 
 public:
 	//--------------------------------------------------------------
-	void doReset()
-	{
+	void doReset() {
 		bIsFullScreen = false;
 		vSync = false;
 		fpsTarget = 60;
@@ -580,22 +538,24 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	void drawDebugInfo()
-	{
+	void drawDebugInfo() {
 		string s;
 		s += "ofxWindowApp";
 		if (bFlagDoneSaved) s += "  SAVE";
-		s += "\n\n";
-		s += "KEYS\n\n";
-		s += "Alt +\n\n";
+		s += "\n";
+		s += "DEBUG KEYS\n\n";
+		s += "    ";
+		s += "Press Alt +\n\n";
 		s += "W : SHOW INFO\n";
 		s += "V : V_SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
 		s += "F : SCREEN = " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
 #ifdef USE_MINI_WINDOW
 		s += "Alt + M: PRESET ";
-		if (bModeMini) s += "*MINI  BIG";
-		else s += " MINI *BIG";
+		if (bModeMini)
+			s += "*MINI  BIG";
+		else
+			s += " MINI *BIG";
 #endif
 		s += "\n";
 #ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
@@ -607,12 +567,11 @@ public:
 		s += "\n\n";
 #ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		s += "SAVES IF WINDOW IS\n";
-		s += "RESIZED OR MOVED\n";
+		s += "RESIZED OR MOVED";
 #else
 		s += "SAVES IF WINDOW IS\n";
 		s += "RESIZED\n";
-		if (bAutoSaverTimed)
-		{
+		if (bAutoSaverTimed) {
 			s += "MOVED AND TIMER FINISHED\n";
 			s += "\n";
 			s += "Autosaver Timed: " + ofToString((bAutoSaverTimed ? "ON " : "OFF"));
@@ -629,8 +588,26 @@ public:
 		ofColor c2 = bFlagDoneSaved ? 0 : 255;
 		if (bFlagDoneSaved) bFlagDoneSaved = 0;
 
-		int x = 7;
-		int y = 18;
+#ifndef USE_CUSTOM_FONT
+		int x = 5 - 1;
+		int y = 16 - 1;
 		ofDrawBitmapStringHighlight(s, x, y, c1, c2);
+#endif
+#ifdef USE_CUSTOM_FONT
+		ofPushStyle();
+		ofFill();
+		int x = 5 - 1;
+		int y = 16 - 1;
+		auto bb = font.getStringBoundingBox(s, x, y);
+		bb.setWidth(bb.getWidth() + pad);
+		bb.setHeight(bb.getHeight() + pad);
+		bb.translateX(-pad / 2);
+		bb.translateY(-pad / 2);
+		ofSetColor(0);
+		ofDrawRectangle(bb);
+		ofSetColor(255);
+		font.drawString(s, x, y);
+		ofPopStyle();
+#endif
 	}
 };
