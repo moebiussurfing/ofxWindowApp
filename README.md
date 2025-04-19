@@ -34,9 +34,9 @@
 ## KEY COMMANDS
 
 ```
-`ALT` +  
+ALT +  
 
-(Uppercased, caps enabled or using `SHIFT`)  
+(Uppercased, caps enabled or using SHIFT)  
 W: Show debug info.  
 D: Show debug key commands.  
 F: Full screen / Windowed.  
@@ -79,9 +79,11 @@ ofApp::setup()
 {
     w.setup(&w);
 
-    // Init customized:
+    // First time opening app:
     // Default FPS is 60 fps
     // Default vSync is disabled
+
+    // Optional customized init:
     w.setFrameRate(120);
     w.setVerticalSync(true);
     // Can be forced to overwrite JSON settings too.
