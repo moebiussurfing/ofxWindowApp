@@ -43,17 +43,15 @@
 	#include "ofxWindowApp.h"
 #endif
 
-#define SIZE_SECURE_GAP_INISDE_SCREEN 18
-// to avoid that window border it's outside screen monitor
+#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
 
-#define OFX_WINDOW_APP_BAR_HEIGHT 45
-// probably fits on Win32 only.
+#define OFX_WINDOW_APP_BAR_HEIGHT 45 // probably fits on Win32 only.
 
 #define USE_CUSTOM_FONT
 
 #define USING__OFX_WINDOW_APP
 
-//#define SURFING_USE_STAYONTOP
+#define SURFING_USE_STAYONTOP
 
 //--------
 
@@ -290,8 +288,8 @@ public:
 	// Easy callback only to check from parent scope/ofApp if window shape has changed.
 	//--------------------------------------------------------------
 	bool isChanged() {
-		if (bDoneSavedEasyCallback) {
-			bDoneSavedEasyCallback = false;
+		if (bFlagDoneSavedEasyCallback) {
+			bFlagDoneSavedEasyCallback = false;
 			return true;
 		}
 
@@ -400,7 +398,7 @@ private:
 	bool bAutoSaveLoad = true; // load at startup
 	//TODO: (disabled->) and saves on exit
 
-	bool bDoneSavedEasyCallback = false;
+	bool bFlagDoneSavedEasyCallback = false;
 	bool bKeys = true; // keys enabled by default
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;

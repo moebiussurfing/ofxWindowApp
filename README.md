@@ -16,7 +16,7 @@
 
 
 > [!CAUTION]
-> I have noticed many problems when reloading the window size and position settings. this seems to be due to errors in `GLFW` or `OF` related to the size of the top edge of the window. These problems also appear when using many screens with different resolutions and repositioning.
+> I have noticed many problems when reloading the window size and position settings. This seems to be due to errors in `GLFW` or `OF` related to the size of the bar of the window. These problems also appear when using many screens with different resolutions and repositioning. Usually main monitor works fine and other ones could differ between sessions...
 
 
 ## FEATURES
@@ -92,7 +92,7 @@ The add-on will **auto-load** the settings when your **app starts** and **auto s
 
 **Nothing more it's required!**  
 
-The **JSON file** (bin/data/ofxWindowApp/ofxWindowApp.json) will look like this:  
+The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like this:  
 ```.json
 [
     {

@@ -41,7 +41,7 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 
 		ofLogVerbose("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
 
-		instance->bDoneSavedEasyCallback = true;
+		instance->bFlagDoneSavedEasyCallback = true;
 
 		instance->bFlagToSave = true;
 
@@ -234,6 +234,15 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 	//--
 
+	////TODO
+	//// Force ignore saving at startup
+	//auto fm = ofGetFrameNum();
+	//if (fm < 120) {
+	//	if (bFlagToSave) {
+	//		bFlagToSave = false;
+	//	}
+	//}
+
 	// Check if flagged to save
 	if (bFlagToSave) {
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
@@ -242,7 +251,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 		{
 			bFlagToSave = false;
 
-			bDoneSavedEasyCallback = true;
+			bFlagDoneSavedEasyCallback = true;
 
 			ofLogNotice("ofxWindowApp::Changed") << "Just saved after window changed (update/bFlagToSave)";
 
@@ -694,7 +703,7 @@ void ofxWindowApp::windowResized(int w, int h) {
 
 	ofLogVerbose("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
 
-	bDoneSavedEasyCallback = true;
+	bFlagDoneSavedEasyCallback = true;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
@@ -778,9 +787,11 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 			bDisableAutoSave = !bDisableAutoSave;
 		}
 
+#ifdef SURFING_USE_STAYONTOP
 		else if (key == 'T') {
 			setToggleStayOnTop();
 		}
+#endif
 
 		else if (key == 'D') {
 			bShowDebugKeysInfo = !bShowDebugKeysInfo;
