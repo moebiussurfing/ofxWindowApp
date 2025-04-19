@@ -9,7 +9,8 @@
 #define OF_SERIALIZER_H
 
 
-#include "json.hpp"
+//#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 
 // -----------------------------------------------------------------------------
