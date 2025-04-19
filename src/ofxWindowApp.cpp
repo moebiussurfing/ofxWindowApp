@@ -139,7 +139,7 @@ void ofxWindowApp::startup() {
 void ofxWindowApp::exit() {
 	ofLogNotice("ofxWindowApp::exit()");
 
-#ifdef SURFING_IMGUI__ENABLE_SAVE_ON_EXIT
+#ifdef SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT
 	if (bAutoSaveLoad && !bDisableAutoSave) {
 		save();
 	}

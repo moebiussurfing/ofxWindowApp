@@ -19,8 +19,8 @@
 //--
 
  //TODO: Fixing exceptions hen closing ofApp.
- //#define SURFING_IMGUI__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
- //#define SURFING_IMGUI__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
+ //#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
+ //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
 #define SURFING_WINDOW_APP__USE_TIMED_SAVER
 
@@ -94,8 +94,11 @@ private:
 	void startup();
 	void update(ofEventArgs& args);
 	void draw(ofEventArgs& args);
+
+//public://TODO
 	void exit();
 
+private:
 	void keyPressed(ofKeyEventArgs& eventArgs);
 	void keyReleased(ofKeyEventArgs& eventArgs);
 
