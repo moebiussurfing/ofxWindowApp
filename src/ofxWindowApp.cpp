@@ -60,20 +60,17 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	// Default
-	int _h = OFX_WINDOW_APP_BAR_HEIGHT; //bar height
-	windowSettings.setPosition(glm::vec2(0, _h)); //force
-	windowSettings.setSize(1920, 1080 - _h); //force
+	// Default force
+	int w = 1280;
+	int h = w * (9.f / 16.f);
+	windowSettings.setSize(w, h);
+	windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); //left top
+	//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); //centered fails
+
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode(); //from main.cpp
 
-#ifdef USE_MINI_WINDOW
-	MiniWindow.setPosition(glm::vec2(20, 20));
-	MiniWindow.setSize(200, 200);
-	MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode();
-#endif
-
 	// Default
-	vSync = true;
+	vSync = false;
 	fpsTarget = 60;
 	bShowWindowInfo = false;
 
@@ -204,30 +201,10 @@ void ofxWindowApp::setup() {
 	paramsExtra.add(paramsWindow);
 	paramsExtra.add(paramsSession);
 
-	// Mini settings
-#ifdef USE_MINI_WINDOW
-	//paramsExtra.add(vSync);
-	//paramsExtra.add(fpsTarget);
-	//paramsExtra.add(bShowWindowInfo);
-	//paramsExtra.add(bShowPerformanceAlways);
-	//paramsExtra.add(bModeMini);
-	paramsExtra.add(bModeMini);
-#endif
-
 	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
 
 	// Default
-	setShowPerformanceAllways(true);
-
-#ifdef USE_MINI_WINDOW
-	if (!bModeMini) {
-		if (bIsFullScreen) {
-			ofSetFullscreen(bIsFullScreen);
-			ofSetWindowPosition(0, 0);
-			ofSetWindowShape(ofGetWidth(), ofGetHeight());
-		}
-	}
-#endif
+	setShowPerformanceAlways(true);
 
 	//--
 
@@ -242,6 +219,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 			setup();
 		}
 	}
+
 	// Auto call startup but after setup is done.
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
@@ -343,39 +321,18 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 void ofxWindowApp::doRefreshGetWindowSettings() {
 	ofLogVerbose("ofxWindowApp") << "doRefreshGetWindowSettings()";
 
-#ifndef USE_MINI_WINDOW
 	// Big
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 
+	// ?
 	if (windowSettings.windowMode == ofWindowMode(0))
 		bIsFullScreen = false;
 	else if (windowSettings.windowMode == ofWindowMode(1))
 		bIsFullScreen = true;
 	else if (windowSettings.windowMode == ofWindowMode(2))
 		bIsFullScreen = false;
-#else
-	if (!bModeMini) {
-		// Big
-		windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
-		windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
-		windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
-
-		// ?
-		if (windowSettings.windowMode == ofWindowMode(0))
-			bIsFullScreen = false;
-		else if (windowSettings.windowMode == ofWindowMode(1))
-			bIsFullScreen = true;
-		else if (windowSettings.windowMode == ofWindowMode(2))
-			bIsFullScreen = false;
-	} else {
-		// Mini
-		MiniWindow.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
-		MiniWindow.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
-		MiniWindow.windowMode = ofGetCurrentWindow()->getWindowMode(); //ignored
-	}
-#endif
 }
 
 //--------------------------------------------------------------
@@ -399,10 +356,6 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	// Force mini to window, not full screen
 
-#ifdef USE_MINI_WINDOW
-	MiniWindow.windowMode = ofWindowMode(OF_WINDOW);
-#endif
-
 	//--
 
 	// Save window settings
@@ -413,42 +366,14 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	to_json(jApp, windowSettings);
 
-#ifdef USE_MINI_WINDOW
-	to_json(jMini, MiniWindow);
-#endif
-
 	ofSerialize(jExtra, paramsExtra);
 
-#ifdef USE_MINI_WINDOW
-	//jApp["Preset"] = "Big";
-	jMini["Preset"] = "Mini";
-#endif
-
 	//--
 
-	// A. Using 2 files
-
-#ifdef USE_MINI_WINDOW
-	//ofSavePrettyJson(path_folder + "/"+path_filename, j);
-	//TODO:
-	// We can't get frame rate and v sync mode from window app.
-	// should be settled by hand
-	// extra settings could be mixed in one json only for both
-	// TEST:
-	//ofSavePrettyJson(path_folder + "/"+path_filename2, jMini);
-#endif
-
-	//--
-
-	// B. Settings in one file
+	// Settings in one file
 
 	ofJson data;
 	data.push_back(jApp);
-
-#ifdef USE_MINI_WINDOW
-	data.push_back(jMini);
-#endif
-
 	data.push_back(jExtra);
 
 	// Check if we need to create data folder first
@@ -483,23 +408,7 @@ void ofxWindowApp::loadSettings() {
 		//--
 
 		// Load settings
-
-#ifdef USE_MINI_WINDOW
-		// A. using 2 files
-
-		//ofJson j = ofLoadJson(path_folder + "/" + path_filename);
-		//ofx::Serializer::ApplyWindowSettings(j);
-		//// Extra settings could be mixed in one json only for both
-		//// TEST:
-		//ofJson jMini;
-		//jMini = ofLoadJson(path_folder + "/"+path_filename2);
-		//ofLogVerbose("ofxWindowApp")<<(__FUNCTION__) << "json: " << jMini;
-		//ofDeserialize(jMini, paramsExtra);
-#endif
-
-		//--
-
-		// B. Settings in one file
+		// Settings in one file
 
 		ofJson data;
 		data = ofLoadJson(path);
@@ -507,28 +416,8 @@ void ofxWindowApp::loadSettings() {
 
 		ofJson jBig;
 
-#ifdef USE_MINI_WINDOW
-		ofJson jMini;
-		ofJson jExtra;
-
-		if (data.size() >= 3) {
-			jBig = data[0]; //TODO: ugly workaround
-			jMini = data[1]; //TODO: should add a tag mini or extra to mark the file section
-			jExtra = data[2];
-
-			// recall both paramsExtra groups
-			ofDeserialize(jExtra, paramsExtra);
-		} else
-			ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
-
-		ofLogVerbose("ofxWindowApp") << "jBig  : " << jBig;
-		ofLogVerbose("ofxWindowApp") << "jMini : " << jMini;
-		ofLogVerbose("ofxWindowApp") << "jExtra: " << jExtra;
-#endif
-
 		//--
 
-#ifndef USE_MINI_WINDOW
 		ofJson jExtra;
 
 		if (data.size() >= 2) {
@@ -546,36 +435,11 @@ void ofxWindowApp::loadSettings() {
 
 		ofLogVerbose("ofxWindowApp") << "Window: " << jBig;
 		ofLogVerbose("ofxWindowApp") << "Extras: " << jExtra;
-#endif
 
 		//--
 
 		int jx, jy, jw, jh;
 		string jm;
-
-#ifdef USE_MINI_WINDOW
-		// Mini
-		jx = jMini["position"]["x"];
-		jy = jMini["position"]["y"];
-		jw = jMini["size"]["width"];
-		jh = jMini["size"]["height"];
-
-		ofLogVerbose("ofxWindowApp") << "jx: " << jx;
-		ofLogVerbose("ofxWindowApp") << "jy: " << jy;
-		ofLogVerbose("ofxWindowApp") << "jw: " << jw;
-		ofLogVerbose("ofxWindowApp") << "jh: " << jh;
-
-		MiniWindow.setPosition(glm::vec2(jx, jy));
-		MiniWindow.setSize(jw, jh);
-		MiniWindow.windowMode = ofWindowMode(0); // ? always windowed
-
-		if (jm == "OF_WINDOW")
-			MiniWindow.windowMode = ofWindowMode(0);
-		else if (jm == "OF_FULLSCREEN")
-			MiniWindow.windowMode = ofWindowMode(1);
-		else if (jm == "OF_GAME_MODE")
-			MiniWindow.windowMode = ofWindowMode(2);
-#endif
 
 		//--
 
@@ -679,10 +543,6 @@ void ofxWindowApp::drawHelpInfo() {
 	}
 	screenMode += bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE";
 	screenMode += "[F]";
-
-#ifdef USE_MINI_WINDOW
-	screenMode += bModeMini ? " [MINI]" : " [BIG]";
-#endif
 
 	str += "FPS " + fpsRealStr;
 	str += "[" + fpsTargetStr + "]";
@@ -949,14 +809,6 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 			bShowDebugKeys = !bShowDebugKeys;
 		}
 
-#ifdef USE_MINI_WINDOW
-		else if (key == 'M') //switch window mode big/mini
-		//else if (key == 'M')//switch window mode big/mini
-		//else if (key == 'M' && mod_CONTROL)//switch window mode big/mini
-		{
-			toggleModeWindowBigMini();
-		}
-#endif
 		//--
 
 		////TODO:
@@ -1051,10 +903,6 @@ void ofxWindowApp::doApplyExtraSettings() {
 	//ofLogVerbose("ofxWindowApp") << "Show Debug: " << bShowWindowInfo.get();
 	//ofLogVerbose("ofxWindowApp") << "bDisableAutoSave: " << bDisableAutoSave.get();
 
-#ifdef USE_MINI_WINDOW
-	ofLogVerbose("ofxWindowApp") << "bModeMini  : " << bModeMini.get();
-#endif
-
 	ofSetFrameRate(int(fpsTarget.get()));
 	ofSetVerticalSync(vSync.get());
 }
@@ -1069,7 +917,6 @@ void ofxWindowApp::doApplyWindowMode() {
 
 	//--
 
-#ifndef USE_MINI_WINDOW
 	if (bIsFullScreen) { //fullscreen
 		////ofSetWindowPosition(0, 0);
 		//ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
@@ -1082,54 +929,6 @@ void ofxWindowApp::doApplyWindowMode() {
 	//--
 
 	if (bIsFullScreenInSettings) ofSetFullscreen(true);
-#endif
-
-#ifdef USE_MINI_WINDOW
-	// Mini preset
-	if (bModeMini) {
-		ofSetWindowPosition(MiniWindow.getPosition().x, MiniWindow.getPosition().y);
-		ofSetWindowShape(MiniWindow.getWidth(), MiniWindow.getHeight());
-		ofSetFullscreen(false);
-	}
-
-	// Big preset
-	else {
-		//ofSetFullscreen(bIsFullScreen);
-
-		if (bIsFullScreen) {
-			ofSetWindowPosition(0, 0);
-			ofSetWindowShape(ofGetWidth(), ofGetHeight());
-		} else {
-			ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
-			ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
-		}
-
-		//ofSetFullscreen(false);
-		ofSetFullscreen(bIsFullScreen);
-
-		////TODO:
-		//if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN)) ofSetFullscreen(true);
-		//if (windowBigMode == ("OF_FULLSCREEN")) ofSetFullscreen(true);
-	}
-
-	//--
-
-	//// Apply
-	//if (bModeMini) {
-	//	ofx::Serializer::ApplyWindowSettings(windowSettings);
-	//}
-	//else {
-	//	ofx::Serializer::ApplyWindowSettings(MiniWindow);
-	//}
-
-	//--
-
-	//if (!bModeMini) {
-	//	ofSetFullscreen(false);
-	//	ofSetFullscreen(bIsFullScreen);
-	//	if (bIsFullScreen) ofSetWindowPosition(0, 0);
-	//}
-#endif
 }
 
 //--------------------------------------------------------------

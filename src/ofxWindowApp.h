@@ -2,7 +2,6 @@
 
 /*
 	TODO:
-
 	+ should have a callback to detect when window is moved. could that be too expensive?
 	+ add full screen bool param with listener. to allow expose on gui's
 	+ broken full screen save load?
@@ -12,15 +11,16 @@
 //----
 
 #define SURFING_WINDOW_APP__USE_STATIC
-// -> Main directive. Uncomment (enable) to allow WIN32 platform for probably better windowMove callback.
+// -> Main directive.
+// Uncomment (enable) to allow WIN32 platform for probably better windowMove callback.
 
-//--
+//----
 
 //TODO: Fixing exceptions hen closing ofApp.
 //#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
 //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+#define SURFING_WINDOW_APP__USE_TIMED_SAVER//would be force disabled on Windows platform in static mode.
 
 //#define SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 
@@ -31,7 +31,7 @@
 #if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
 	#include <GLFW/glfw3.h>
 	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER
+		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER//force disable
 	#endif
 #else
 	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
@@ -49,18 +49,14 @@
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18
 // to avoid that window border it's outside screen monitor
 
-#define OFX_WINDOW_APP_BAR_HEIGHT 25
+#define OFX_WINDOW_APP_BAR_HEIGHT 45
 // probably fits on Win32 only.
 
 #define USE_CUSTOM_FONT
 
 #define USING__OFX_WINDOW_APP
 
-//#define USE_MINI_WINDOW
-// Mini window mode can be switched to normal/big mode.
-// both states will be handled in parallel
-
-//----
+//--------
 
 class ofxWindowApp {
 public:
@@ -69,6 +65,8 @@ public:
 
 public:
 	void setup();
+
+	//--
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 public:
@@ -85,6 +83,8 @@ private:
 public:
 	static void setInstance(ofxWindowApp * app); // Static function to set the instance
 #endif
+
+	//--
 
 private:
 	bool bDoneSetup = false;
@@ -106,10 +106,6 @@ private:
 private:
 	//ofWindowSettings windowSettingsPRE;
 	ofWindowSettings windowSettings;
-
-#ifdef USE_MINI_WINDOW
-	ofWindowSettings MiniWindow;
-#endif
 
 #ifdef USE_CUSTOM_FONT
 	ofTrueTypeFont font;
@@ -280,7 +276,7 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	void setShowPerformanceAllways(bool b = true) {
+	void setShowPerformanceAlways(bool b = true) {
 		bShowPerformanceAlways = b;
 	}
 
@@ -365,66 +361,6 @@ public:
 
 	//--
 
-#ifdef USE_MINI_WINDOW
-	// Mini/Big mode
-public:
-	//TODO:
-	//void setShapeMiniMode(glm::vec2 pos, glm::vec2 size)
-	//{
-	//	position_Mini = pos;
-	//	size_Mini = size;
-	//}
-	//void setMiniMode()
-	//{
-	//}
-
-	bool isModeMini() {
-		return bModeMini.get();
-	}
-	bool isModeBig() {
-		return (!bModeMini.get());
-	}
-	void toggleModeWindowBigMini() {
-		if (bAutoSaveLoad) {
-			doRefreshGetWindowSettings();
-		}
-
-		bModeMini = !bModeMini;
-
-		// big preset
-		if (!bModeMini) {
-			ofSetFullscreen(bIsFullScreen);
-
-			if (bIsFullScreen) {
-				ofSetWindowPosition(0, 0);
-				ofSetWindowShape(ofGetWidth(), ofGetHeight());
-			}
-
-			//if (windowBigMode == "OF_WINDOW") ofSetFullscreen(false);
-			//else if (windowBigMode == "OF_FULLSCREEN") ofSetFullscreen(true);
-		}
-		//mini preset
-		else {
-			//if (ofGetWindowMode() == OF_FULLSCREEN)
-
-			ofSetFullscreen(false);
-		}
-
-		doApplyWindowMode();
-	}
-	void enableMiniMode(bool b) {
-		if (bAutoSaveLoad) {
-			doRefreshGetWindowSettings();
-		}
-
-		bModeMini = b;
-
-		doApplyWindowMode();
-	}
-#endif
-
-	//--
-
 	// Disables saving. So json file will not be overwritten.
 	void setLock(bool b) {
 		bDisableAutoSave = b;
@@ -485,10 +421,6 @@ public:
 private:
 	bool bDoneStartup = false;
 
-#ifdef USE_MINI_WINDOW
-	ofParameter<bool> bModeMini { "miniPreset", false };
-#endif
-
 private:
 	void Changed_ParamsExtra(ofAbstractParameter & e);
 
@@ -520,17 +452,8 @@ public:
 		vSync = false;
 		fpsTarget = 60;
 
-#ifdef USE_MINI_WINDOW
-		bModeMini = false;
-#endif
-
 		windowSettings.setPosition(glm::vec2(0, OFX_WINDOW_APP_BAR_HEIGHT));
 		windowSettings.setSize(1920, 1080 - OFX_WINDOW_APP_BAR_HEIGHT);
-
-#ifdef USE_MINI_WINDOW
-		MiniWindow.setPosition(glm::vec2(20, 20));
-		MiniWindow.setSize(200, 200);
-#endif
 
 		doApplyWindowMode();
 	}
@@ -548,13 +471,6 @@ public:
 		s += "V : V_SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
 		s += "F : SCREEN = " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
-#ifdef USE_MINI_WINDOW
-		s += "Alt + M: PRESET ";
-		if (bModeMini)
-			s += "*MINI  BIG";
-		else
-			s += " MINI *BIG";
-#endif
 		s += "\n";
 #ifdef SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 		s += "Alt + R : RESET TO FULLHD \n";
