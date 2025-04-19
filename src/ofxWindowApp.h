@@ -20,7 +20,7 @@
 //#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
 //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER//would be force disabled on Windows platform in static mode.
+#define SURFING_WINDOW_APP__USE_TIMED_SAVER //would be force disabled on Windows platform in static mode.
 
 //#define SURFING_WINDOW_APP__USE_FULLHD_COMMAND
 
@@ -31,7 +31,7 @@
 #if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
 	#include <GLFW/glfw3.h>
 	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER//force disable
+		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER //force disable
 	#endif
 #else
 	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
@@ -416,7 +416,7 @@ private:
 public:
 	ofParameter<bool> bWindowOnTop { "WindowOnTop", false };
 	ofParameter<bool> bShowWindowInfo { "ShowWindowInfo", true };
-	bool bShowDebugKeys = false;
+	bool bShowDebugKeysInfo = false;
 
 private:
 	bool bDoneStartup = false;
@@ -459,7 +459,12 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	void drawDebugInfo() {
+	void drawDebugKeysInfo() {
+		//window tittle
+		string tp = "Pos:"+ ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
+		string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
+		ofSetWindowTitle(tp + "       " + ts);
+
 		string s;
 		s += "ofxWindowApp";
 		if (bFlagDoneSaved) s += "  SAVE";

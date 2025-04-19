@@ -312,8 +312,8 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		if (bShowPerformanceAlways) drawPerformanceWidget();
 	}
 
-	if (bShowDebugKeys) {
-		drawDebugInfo();
+	if (bShowDebugKeysInfo) {
+		drawDebugKeysInfo();
 	}
 }
 
@@ -806,7 +806,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 		}
 
 		else if (key == 'D') {
-			bShowDebugKeys = !bShowDebugKeys;
+			bShowDebugKeysInfo = !bShowDebugKeysInfo;
 		}
 
 		//--
