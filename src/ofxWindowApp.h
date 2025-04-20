@@ -36,7 +36,7 @@
 	#endif
 #endif
 
-#include "ofxSerializer.h"
+#include "ofxSerializerOfWindowSettings.h"
 
 #define USING_ofxWindowApp
 #ifdef USING_ofxWindowApp

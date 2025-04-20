@@ -41,8 +41,6 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 
 		ofLogVerbose("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
 
-		instance->bFlagDoneSavedEasyCallback = true;
-
 		instance->bFlagToSave = true;
 
 		#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
@@ -378,7 +376,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofJson jApp;
 	ofJson jExtra;
 
-	to_json(jApp, windowSettings);
+	ofxSerializerOfWindowSettings::to_json(jApp, windowSettings);
 
 	ofSerialize(jExtra, paramsExtra);
 
@@ -706,8 +704,6 @@ void ofxWindowApp::windowResized(int w, int h) {
 	bFlagToSave = true;
 
 	ofLogVerbose("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
-
-	bFlagDoneSavedEasyCallback = true;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
