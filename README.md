@@ -129,7 +129,7 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 * Merge with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
 
 ## TESTED SYSTEMS
-- **Windows10/11** / **VS 2022** / **OF ~0.11** /  **OF 0.12+**
+- **Windows 10/11** / **VS 2022** / **OF ~0.11** /  **OF 0.12+**
 - **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11** /  **OF 0.12+**
 
 ## AUTHOR

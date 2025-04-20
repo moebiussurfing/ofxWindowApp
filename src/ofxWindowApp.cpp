@@ -152,6 +152,10 @@ void ofxWindowApp::setup() {
 
 	//--
 
+	checkMonitors();
+
+	//--
+
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 	GLFWwindow * glfwWindow = glfwGetCurrentContext();
 	glfwSetWindowPosCallback(glfwWindow, windowMoved);
@@ -160,7 +164,7 @@ void ofxWindowApp::setup() {
 	//--
 
 	// Default folders:
-	// data/ofxWindowApp/ofxWindowApp.json
+	// bin/data/ofxWindowApp/ofxWindowApp.json
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
 
@@ -317,14 +321,15 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 	//--
 
 	if (bShowWindowInfo) {
-		drawHelpInfo();
-		drawPerformanceWidget();
+		drawDebugHelpInfo();
+		drawDebugPerformanceWidget();
 	} else {
-		if (bShowPerformanceAlways) drawPerformanceWidget();
+		if (bShowPerformanceAlways) drawDebugPerformanceWidget();
 	}
 
 	if (bShowDebugKeysInfo) {
 		drawDebugKeysInfo();
+		drawDebugSystemMonitors();
 	}
 }
 
@@ -337,12 +342,11 @@ void ofxWindowApp::doRefreshGetWindowSettings() {
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 
-	// ?
-	if (windowSettings.windowMode == ofWindowMode(0))
+	if (windowSettings.windowMode == ofWindowMode(OF_WINDOW))
 		bIsFullScreen = false;
-	else if (windowSettings.windowMode == ofWindowMode(1))
+	else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
 		bIsFullScreen = true;
-	else if (windowSettings.windowMode == ofWindowMode(2))
+	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE))
 		bIsFullScreen = false;
 }
 
@@ -514,7 +518,7 @@ void ofxWindowApp::loadSettings() {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawHelpInfo() {
+void ofxWindowApp::drawDebugHelpInfo() {
 	// Debug overlay screen modes
 
 	string vSyncStr;
@@ -587,7 +591,7 @@ void ofxWindowApp::drawHelpInfo() {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawPerformanceWidget() {
+void ofxWindowApp::drawDebugPerformanceWidget() {
 	// monitor fps performance alert
 
 	bool bPreShow; //starts draw black
@@ -940,4 +944,80 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 		bFlagToSave = true;
 		return;
 	}
+}
+
+//----
+
+//--------------------------------------------------------------
+void ofxWindowApp::checkMonitors() {
+	int numberOfMonitors = 0;
+	GLFWmonitor ** monitors = glfwGetMonitors(&numberOfMonitors);
+	monitorRects.clear();
+	for (int iC = 0; iC < numberOfMonitors; iC++) {
+		int xM;
+		int yM;
+		glfwGetMonitorPos(monitors[iC], &xM, &yM);
+		const GLFWvidmode * desktopMode = glfwGetVideoMode(monitors[iC]);
+		ofRectangle monitorRect(xM, yM, desktopMode->width, desktopMode->height);
+		monitorRects.push_back(monitorRect);
+	}
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::drawDebugSystemMonitors() {
+	auto pos = glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY());
+	ofPushMatrix();
+	ofPushStyle();
+	ofTranslate(ofGetWidth() * 0.2f, ofGetHeight() * 0.5f);
+	ofScale(0.1f);
+	int i = 0;
+	for (auto & monitorRect : monitorRects) {
+		// check if pos is inside the ofRectangle
+		if (monitorRect.inside(pos)) {
+			ofSetColor(255, 0, 0);
+		} else {
+			ofSetColor(255);
+		}
+		ofNoFill();
+		ofDrawRectangle(monitorRect);
+
+		ofPushMatrix();
+		ofFill();
+		ofTranslate(monitorRect.getX(), monitorRect.getY());
+		ofTranslate(0, -30);
+		string s = "";
+		s += "#" + ofToString(i);
+		s += " " + ofToString(monitorRect.getX());
+		s += "," + ofToString(monitorRect.getY());
+		s += " " + ofToString(monitorRect.width);
+		s += "x" + ofToString(monitorRect.height);
+		ofDrawBitmapString(s, 0, 0);
+		ofPopMatrix();
+
+		// center num
+		ofPushMatrix();
+		ofTranslate(monitorRect.getCenter().x, monitorRect.getCenter().y);
+		s = ofToString(i);
+		ofDrawBitmapString(s, 0, 0);
+		ofPopMatrix();
+
+		i++;
+	}
+
+	// app window
+	ofNoFill();
+	ofSetColor(0, 255, 0);
+	ofRectangle rw = ofRectangle(pos.x, pos.y, ofGetWindowWidth(), ofGetWindowHeight());
+	ofDrawRectangle(rw);
+	string s = "";
+	s += " " + ofToString(rw.getX());
+	s += "," + ofToString(rw.getY());
+	s += " " + ofToString(rw.width);
+	s += "x" + ofToString(rw.height);
+	ofTranslate(rw.getX(), rw.getY());
+	ofTranslate(0, -30);
+	ofDrawBitmapString(s, 0, 0);
+
+	ofPopStyle();
+	ofPopMatrix();
 }

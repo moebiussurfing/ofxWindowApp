@@ -127,8 +127,8 @@ private:
 
 	//--
 
-	void drawHelpInfo();
-	void drawPerformanceWidget();
+	void drawDebugHelpInfo();
+	void drawDebugPerformanceWidget();
 
 	//----
 
@@ -470,7 +470,7 @@ public:
 
 	//--------------------------------------------------------------
 	void drawDebugKeysInfo() {
-		//window tittle
+		//window title
 		string tp = "Pos:" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
 		string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
 		ofSetWindowTitle(tp + "       " + ts);
@@ -480,19 +480,21 @@ public:
 		if (bFlagDoneSaved) s += "  SAVE";
 		s += "\n";
 		s += "DEBUG KEYS\n\n";
-		s += "    ";
-		s += "Press Alt +\n\n";
+		//s += "    ";
+		s += "> Press Alt +\n\n";
+		s += "D : SHOW DEBUG KEYS\n";
+		s += "    & MONITORS\n";
 		s += "W : SHOW INFO\n";
 		s += "V : V_SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
 		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
 		s += "F : SCREEN = " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
-		s += "\n";
 
 #ifdef SURFING_USE_STAYONTOP
 #if defined(TARGET_WIN32)
 		s += "T : ON_TOP = " + ofToString(bWindowStayOnTop ? "TRUE" : "FALSE") + "\n";
 #endif
 #endif
+		s += "\n";
 
 		////TODO: WIP: Lock mode
 		//s += "L : NO_SAVE = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
@@ -543,4 +545,12 @@ public:
 		ofPopStyle();
 #endif
 	}
+
+	//--------------------------------------------------------------
+
+	// debug system monitors
+private:
+	void checkMonitors();
+	void drawDebugSystemMonitors();
+	vector<ofRectangle> monitorRects;
 };
