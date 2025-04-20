@@ -16,7 +16,7 @@
 
 
 > [!CAUTION] 
-> I have noticed many problems when reloading the window size and position settings when applying settings to the window application. This seems to be due to errors in `GLFW` or `OF` related to the size of the window bar. These problems also occur when using multiple monitors with different resolutions and repositioning. Usually the main monitor works fine, and other monitors may differ between sessions...
+> I have noticed many problems when reloading the window size and position settings when applying settings to the window application. This problem occur when using multiple monitors with different resolutions. Usually using the app in the main monitor works fine, but on other monitors settings may differ between sessions. This seems to be due to errors in `GLFW` or `OF` related maybe to the size of the window bar...
 
 
 ## FEATURES
