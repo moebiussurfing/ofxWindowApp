@@ -24,7 +24,8 @@
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
 * Window **Mode** (window/full screen).
-* App target **FPS** settings (vs real current **framerate**), and **vSync** state. 
+* Window App target **FPS** settings (vs real current **framerate**).
+* Window App **vSync** state. 
 * "**Alert**" with a **performance** red bar when **low FPS drops** too much under the expected target frame rate.
 * Easy change the app settings just by editing the **JSON file**, instead of the app code.
 * Optional custom TTF font for debug display.
@@ -53,14 +54,6 @@ It can be useful to **auto-maintain** window settings between your **app session
 _Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times..._  
 
 _Using this add-on you can forget about this "annoying behaviour", as the **App Window will be opened in the same position** and with the **same size and settings**._  
-
-### POWERED BY
-
-**ofxSerializer** from **@bakercp** (Thanks!)  
-https://github.com/bakercp/ofxSerializer  
-Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
-Included into `OFX_ADDON/libs`.  
-You don't need to add `ofxSerializer` with the **PROJECT GENERATOR**!
 
 ## USAGE
 
@@ -123,6 +116,14 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
     }
 ]
 ```
+
+#### DEPENDENCIES
+
+**ofxSerializer** from **@bakercp** (Thanks!)  
+https://github.com/bakercp/ofxSerializer  
+Now it's included into ```\ofxWindowApp\libs\ofxSerializer``` to simplify.  
+Included into `OFX_ADDON/libs`.  
+You don't need to add `ofxSerializer` with the **PROJECT GENERATOR**!
 
 ### TODO
 
