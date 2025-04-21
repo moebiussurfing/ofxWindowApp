@@ -413,13 +413,14 @@ private:
 	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
 
-public:
-
 #ifdef SURFING_USE_STAY_ON_TOP
+public:
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
 #endif
 
+private:
 	ofParameter<bool> bShowDebugInfo { "ShowDebugInfo", true };
+public:
 	bool bShowDebug = false;
 
 private:
@@ -478,4 +479,20 @@ private:
 	void checkMonitors();
 	void drawDebugSystemMonitors();
 	vector<ofRectangle> monitorRects;
+
+	void logSettings() {
+		ofLogNotice("ofxWindowApp") << "----------------------logSettings()";
+		ofLogNotice("ofxWindowApp") << "> ofGetWindow:";
+		ofLogNotice("ofxWindowApp") << "Window Position: "
+			<< ofToString(ofGetWindowPositionX()) << ","
+			<< ofToString(ofGetWindowPositionY());
+		ofLogNotice("ofxWindowApp") << "Window Width: " << ofToString(ofGetWindowWidth());
+		ofLogNotice("ofxWindowApp") << "Window Height: " << ofToString(ofGetWindowHeight());
+		ofLogNotice("ofxWindowApp") << "> windowSettings:";
+		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
+		ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
+		ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
+		ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
+		ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
+	}
 };

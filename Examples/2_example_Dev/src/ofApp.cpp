@@ -6,10 +6,10 @@ void ofApp::setup()
 	w.setup(&w);
 
 	// custom
-	//w.setEnableKeys(false);
+	//w.setFrameRate(120);
 
 	// force debug
-	w.bShowDebugKeysInfo = true;
+	w.bShowDebug = true;
 }
 
 //--------------------------------------------------------------

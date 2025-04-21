@@ -908,11 +908,6 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 	if (bKeys) {
 		const int & key = eventArgs.key;
 
-		//// modifier
-		//if (eventArgs.hasModifier(OF_KEY_COMMAND)) mod_COMMAND = false; // macOS
-		//if (eventArgs.hasModifier(OF_KEY_CONTROL)) mod_CONTROL = false; // Windows. not working
-		//if (eventArgs.hasModifier(OF_KEY_ALT)) mod_ALT = false;
-		//if (eventArgs.hasModifier(OF_KEY_SHIFT)) mod_SHIFT = false;
 
 		// Release modifiers
 		mod_COMMAND = key == OF_KEY_COMMAND; // macOS
