@@ -6,6 +6,7 @@
 	- fps plot graph
 	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features
 	- add unlock full fps / fps=0 toggle
+	- add fullscreen/window and other bool ofParams to expose to a control ui
  */
 
 //----
@@ -46,7 +47,7 @@
 //--
 
 #include "ofxSerializer_ofxWindowApp.h" //for windows size/pos serialization
-#include "ofxSurfingHelpersLite_ofxWindowApp.h"//for some windows sizes keycommands presets
+#include "ofxSurfingHelpersLite_ofxWindowApp.h" //for some windows sizes keycommands presets
 
 //--------
 
@@ -149,28 +150,25 @@ public:
 		ofSetVerticalSync(vSync);
 	}
 
-	//--------------------------------------------------------------
-	void setFullScreen(bool b) {
-		if (b) {
-			ofSetFullscreen(true);
-			bIsFullScreen = true;
-		} else {
-			ofSetFullscreen(false);
+	////--------------------------------------------------------------
+	//void setFullScreen(bool b) {
+	//	if (b) {
+	//		ofSetFullscreen(true);
+	//		bIsFullScreen = true;
+	//	} else {
+	//		ofSetFullscreen(false);
+	//		bIsFullScreen = false;
 
-			float windowBar_h = 25;
+	//		//float windowBar_h = 25;
+	//		//window_Y = MAX(ofGetWindowPositionY(), windowBar_h);
+	//		//// avoid negative out of screen. minimal h is 25
+	//		//window_X = ofGetWindowPositionX();
+	//		//ofSetWindowPosition(window_X, window_Y);
+	//	}
 
-			window_Y = MAX(ofGetWindowPositionY(), windowBar_h);
-			// avoid negative out of screen. minimal h is 25
-			window_X = ofGetWindowPositionX();
-
-			ofSetWindowPosition(window_X, window_Y);
-
-			bIsFullScreen = false;
-		}
-
-		// Update
-		windowResized(ofGetWidth(), ofGetHeight());
-	}
+	//	// Update
+	//	windowResized(ofGetWidth(), ofGetHeight());
+	//}
 
 	//--
 
@@ -218,7 +216,7 @@ public:
 	//--
 
 private:
-	void doRefreshGetWindowSettings();
+	void doGetWindowSettings();
 	void saveSettings(bool bSlient = false);
 
 public:
@@ -234,53 +232,53 @@ private:
 	//--
 
 public:
-	string getPathFolder() const {
-		return path_folder;
-	}
-	string getPathSettings() const {
-		string p = path_folder + "/" + path_filename;
-		return p;
-	}
+	//string getPathFolder() const {
+	//	return path_folder;
+	//}
+	//string getPathSettings() const {
+	//	string p = path_folder + "/" + path_filename;
+	//	return p;
+	//}
 
-	//--------------------------------------------------------------
-	void setPathFolder(string s) {
-		path_folder = s;
-	}
+	////--------------------------------------------------------------
+	//void setPathFolder(string s) {
+	//	path_folder = s;
+	//}
 
 	void folderCheckAndCreate(string _path);
 
-	//--------------------------------------------------------------
-	void setPathFilename(string s) {
-		path_filename = s;
-	}
+	////--------------------------------------------------------------
+	//void setPathFilename(string s) {
+	//	path_filename = s;
+	//}
 
 	//--
 
-	//--------------------------------------------------------------
-	void setAutoSaveLoad(bool b) {
-		bAutoSaveLoad = b;
-	}
+	////--------------------------------------------------------------
+	//void setAutoSaveLoad(bool b) {
+	//	bAutoSaveLoad = b;
+	//}
+
+	////--------------------------------------------------------------
+	//void setShowDebug(bool b = true) {
+	//	bShowDebugInfo = b;
+	//	//bShowDebugPerformanceAlways = b;
+	//}
+	////--------------------------------------------------------------
+	//void setShowDebugPerformance(bool b = true) {
+	//	bShowDebugPerformanceAlways = b;
+	//}
+	////--------------------------------------------------------------
+	//bool getShowDebug() {
+	//	return bShowDebugInfo;
+	//}
+	////--------------------------------------------------------------
+	//void toggleShowDebug() {
+	//	bShowDebugInfo = !bShowDebugInfo;
+	//}
 
 	//--------------------------------------------------------------
-	void setShowDebug(bool b = true) {
-		bShowDebugInfo = b;
-		//bShowDebugPerformanceAlways = b;
-	}
-	//--------------------------------------------------------------
-	void setShowDebugPerformance(bool b = true) {
-		bShowDebugPerformanceAlways = b;
-	}
-	//--------------------------------------------------------------
-	bool getShowDebug() {
-		return bShowDebugInfo;
-	}
-	//--------------------------------------------------------------
-	void toggleShowDebug() {
-		bShowDebugInfo = !bShowDebugInfo;
-	}
-
-	//--------------------------------------------------------------
-	void setShowPerformanceAlways(bool b = true) {//will display alert drop fps info ven when debug display disabled
+	void setShowPerformanceAlways(bool b = true) { //will display alert drop fps info ven when debug display disabled
 		bShowDebugPerformanceAlways = b;
 	}
 
@@ -289,8 +287,8 @@ public:
 	// Easy callback only to check from parent scope/ofApp if window shape has changed.
 	//--------------------------------------------------------------
 	bool isChanged() {
-		if (bFlagDoneSavedEasyCallback) {
-			bFlagDoneSavedEasyCallback = false;
+		if (bFlagIsChanged) {
+			bFlagIsChanged = false;
 			return true;
 		}
 
@@ -336,34 +334,19 @@ public:
 
 	//--
 
-public:
-	float getFrameRate() {
-		return fpsTarget.get();
-	}
-
-	bool getVerticalSync() {
-		return vSync.get();
-	}
-
-	float getWindowWidth() {
-		return window_W;
-	}
-
-	float getWindowHeight() {
-		return window_H;
-	}
-
-	float getWindowPositionX() {
-		return window_X;
-	}
-
-	float getWindowPositionY() {
-		return window_Y;
-	}
+	//public:
+	//	float getFrameRate() {
+	//		return fpsTarget.get();
+	//	}
+	//
+	//	bool getVerticalSync() {
+	//		return vSync.get();
+	//	}
 
 	//--
 
 	// Disables saving. So json file will not be overwritten.
+public:
 	void setLock(bool b) {
 		bDisableAutoSave = b;
 	}
@@ -397,15 +380,17 @@ private:
 	string path_filename;
 
 	bool bAutoSaveLoad = true; // load at startup
-	//TODO: (disabled->) and saves on exit
+	//TODO: is disabled but still saving on exit?
 
-	bool bFlagDoneSavedEasyCallback = false;
+	bool bFlagIsChanged = false; // to check if window moved or resized
 	bool bKeys = true; // keys enabled by default
 
-	ofParameter<int> window_W, window_H, window_X, window_Y;
+	//----
+
+	// Params
 
 	void setupParams();
-	//ofParameterGroup params{ "ofxWindowApp" };
+	//ofParameterGroup params{ "ofxWindowApp" };//TODO: avoid ofxSerializer. use one only groupParam instead.
 
 	ofParameterGroup paramsExtra { "Extra" };
 	ofParameterGroup paramsWindow { "Window" };
@@ -427,6 +412,8 @@ public:
 private:
 	ofParameter<bool> bShowDebugInfo { "ShowDebugInfo", true };
 
+	//----
+
 public:
 	bool bShowDebug = false;
 
@@ -439,17 +426,15 @@ private:
 	float fpsReal;
 
 #ifdef USE_CUSTOM_FONT
-	int pad = 8;
-	int xx = pad / 2;
-	int yy = 0;
+	int previewPad = 8;
+	int previewX = previewPad / 2;
+	int previewY = 0;
 #else
-	int xx = 10;
-	int yy = 0;
+	int previewX = 10;
+	int previewY = 0;
 #endif
 
-	//TODO: Add fullscreen/window bool ofParam to expose to an ui
 	bool bIsFullScreen = false;
-	//bool bIsFullScreenInSettings = false;
 
 	glm::vec2 posSettings = glm::vec2(0);
 	glm::vec2 sizeSettings = glm::vec2(0);
@@ -487,24 +472,29 @@ private:
 	void checkMonitors();
 	void drawDebugSystemMonitors();
 	vector<ofRectangle> monitorRects;
+	vector<std::string> monitorNames;
+	ofRectangle monitorsCanvasRect;
 
 	//----
 
 	// debug
 	void logSettings() {
 		ofLogNotice("ofxWindowApp") << "----------------------logSettings()";
-		ofLogNotice("ofxWindowApp") << "> ofGetWindow:";
-		ofLogNotice("ofxWindowApp") << "Window Position: "
-			<< ofToString(ofGetWindowPositionX()) << ","
-			<< ofToString(ofGetWindowPositionY());
-		ofLogNotice("ofxWindowApp") << "Window Width: " << ofToString(ofGetWindowWidth());
-		ofLogNotice("ofxWindowApp") << "Window Height: " << ofToString(ofGetWindowHeight());
-		ofLogNotice("ofxWindowApp") << "> windowSettings:";
+		ofLogNotice("ofxWindowApp") << "> ofGetWindow";
+		ofLogNotice("ofxWindowApp") << "Position: "
+									<< ofToString(ofGetWindowPositionX()) << ","
+									<< ofToString(ofGetWindowPositionY());
+		ofLogNotice("ofxWindowApp") << "Size:     "
+									<< ofToString(ofGetWindowWidth()) << "x"
+									<< ofToString(ofGetWindowHeight());
+		ofLogNotice("ofxWindowApp") << "> windowSettings";
 		ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
 		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
-		ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
-		ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
-		ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
+		ofLogNotice("ofxWindowApp") << "Position:  " << ofToString(windowSettings.getPosition());
+		ofLogNotice("ofxWindowApp") << "Size:      "
+									<< ofToString(windowSettings.getWidth())
+									<< "x" << ofToString(windowSettings.getHeight());
 		ofLogNotice("ofxWindowApp") << "----------------------";
+		ofLogNotice("ofxWindowApp");
 	}
 };

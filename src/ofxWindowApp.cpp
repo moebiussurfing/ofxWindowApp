@@ -36,10 +36,10 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 		if (!instance->bDoneSetup) return;
 		if (!instance->bDoneStartup) return;
 
-		instance->window_X = xpos;
-		instance->window_Y = ypos;
+		//instance->window_X = xpos;
+		//instance->window_Y = ypos;
 
-		instance->doRefreshGetWindowSettings();
+		instance->doGetWindowSettings();
 
 		instance->bFlagToSave = true;
 
@@ -71,7 +71,6 @@ ofxWindowApp::ofxWindowApp() {
 
 	setVerticalSync(vSync);
 	setFrameRate(fpsTarget);
-	setShowDebug(bShowDebugInfo);
 }
 
 //--------------------------------------------------------------
@@ -275,7 +274,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 		{
 			bFlagToSave = false;
 
-			bFlagDoneSavedEasyCallback = true;
+			bFlagIsChanged = true;
 
 			ofLogNotice("ofxWindowApp:update()") << "Going to save bc flagged... (bFlagToSave)";
 
@@ -322,15 +321,15 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM) {
 #ifdef USE_CUSTOM_FONT
-		yy = window_H - fontSize + 5;
+		previewY = ofGetWindowWidth() - fontSize + 5;
 #else
-		yy = window_H - 10;
+		previewY = ofGetWindowWidth() - 10;
 #endif
 	} else if (positionLayout == DEBUG_POSITION_TOP) {
 #ifdef USE_CUSTOM_FONT
-		yy = fontSize;
+		previewY = fontSize;
 #else
-		yy = 15;
+		previewY = 15;
 #endif
 	}
 
@@ -350,8 +349,8 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doRefreshGetWindowSettings() {
-	ofLogNotice("ofxWindowApp") << "doRefreshGetWindowSettings()";
+void ofxWindowApp::doGetWindowSettings() {
+	ofLogNotice("ofxWindowApp") << "doGetWindowSettings()";
 
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
@@ -373,7 +372,7 @@ void ofxWindowApp::save() {
 }
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettingsAfterRefresh() {
-	doRefreshGetWindowSettings();
+	doGetWindowSettings();
 	saveSettings();
 }
 //--------------------------------------------------------------
@@ -610,10 +609,10 @@ void ofxWindowApp::drawDebug() {
 	//	int x = 5 - 1;
 	//	int y = 16 - 1;
 	//	auto bb = font.getStringBoundingBox(s, x, y);
-	//	bb.setWidth(bb.getWidth() + pad);
-	//	bb.setHeight(bb.getHeight() + pad);
-	//	bb.translateX(-pad / 2);
-	//	bb.translateY(-pad / 2);
+	//	bb.setWidth(bb.getWidth() + previewPad);
+	//	bb.setHeight(bb.getHeight() + previewPad);
+	//	bb.translateX(-previewPad / 2);
+	//	bb.translateY(-previewPad / 2);
 	//	ofSetColor(0);
 	//	ofDrawRectangle(bb);
 	//	ofSetColor(255);
@@ -639,10 +638,12 @@ void ofxWindowApp::drawDebugInfo() {
 	string screenPosStr = "";
 	string screenMode = "";
 
-	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
+	//size
+	screenStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
 	screenStr += "px";
+	//pos
 	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
-
+	//fps
 	fpsRealStr = ofToString(fpsReal, 1);
 	fpsTargetStr = ofToString(fpsTarget);
 
@@ -689,15 +690,15 @@ void ofxWindowApp::drawDebugInfo() {
 	// A.tiny squared
 	ofPushStyle();
 	ofFill();
-	auto bb = font.getStringBoundingBox(str, xx, yy);
-	bb.setWidth(bb.getWidth() + pad);
-	bb.setHeight(bb.getHeight() + pad);
-	bb.translateX(-pad / 2);
-	bb.translateY(-pad / 2);
+	auto bb = font.getStringBoundingBox(str, previewX, previewY);
+	bb.setWidth(bb.getWidth() + previewPad);
+	bb.setHeight(bb.getHeight() + previewPad);
+	bb.translateX(-previewPad / 2);
+	bb.translateY(-previewPad / 2);
 	ofSetColor(0);
 	ofDrawRectangle(bb);
 	ofSetColor(255);
-	font.drawString(str, xx, yy);
+	font.drawString(str, previewX, previewY);
 	ofPopStyle();
 	#else
 	// B. rounded text box
@@ -705,7 +706,7 @@ void ofxWindowApp::drawDebugInfo() {
 	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
 	#endif
 #else
-	ofDrawBitmapStringHighlight(str, xx, yy);
+	ofDrawBitmapStringHighlight(str, previewX, previewY);
 #endif
 }
 
@@ -738,19 +739,19 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		fwMax = 100.f; //max width
 
 #ifdef USE_CUSTOM_FONT
-		fPad = 4.f; //pad to border
-		//fh = fontSize + pad - 4;
+		fPad = 4.f; //previewPad to border
+		//fh = fontSize + previewPad - 4;
 #else
 		fh = 10.f;
-		fPad = 5.f; //pad to border
+		fPad = 5.f; //previewPad to border
 #endif
 
 		// position
-		fx = window_W - fwMax - fPad;
+		fx = ofGetWindowWidth() - fwMax - fPad;
 
 #ifndef USE_CUSTOM_FONT
-		//fy = yy - fh - 50.0f;//little air
-		fy = yy - fh + 1.0f; //to the border
+		//fy = previewY - fh - 50.0f;//little air
+		fy = previewY - fh + 1.0f; //to the border
 #endif
 
 		fw = ofMap(fpsReal, 0.0f * fpsTarget, fpsTarget, 0, fwMax, true);
@@ -767,7 +768,7 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		ofPushStyle();
 
 		float _xx = fx - 68.f;
-		float _yy = yy;
+		float _yy = previewY;
 
 		// fps label
 		string str = diff;
@@ -775,10 +776,10 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		ofPushStyle();
 		ofFill();
 		auto bb = font.getStringBoundingBox(str, _xx, _yy);
-		bb.setWidth(bb.getWidth() + pad);
-		bb.setHeight(bb.getHeight() + pad);
-		bb.translateX(-pad / 2);
-		bb.translateY(-pad / 2);
+		bb.setWidth(bb.getWidth() + previewPad);
+		bb.setHeight(bb.getHeight() + previewPad);
+		bb.translateX(-previewPad / 2);
+		bb.translateY(-previewPad / 2);
 		ofSetColor(cAlert);
 		ofDrawRectangle(bb);
 		ofSetColor(255);
@@ -788,8 +789,8 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		fy = bb.getY();
 		fh = bb.getHeight() - 2;
 #else
-		//ofDrawBitmapStringHighlight(str, xx, yy);
-		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255)); //text fps diff
+		//ofDrawBitmapStringHighlight(str, previewX, previewY);
+		ofDrawBitmapStringHighlight(diff, fx - 68.f, previewY, cAlert, ofColor(255)); //text fps diff
 #endif
 
 		// out-performance bar
@@ -812,12 +813,7 @@ void ofxWindowApp::windowResized(int w, int h) {
 	ofLogNotice("ofxWindowApp:windowResized(w,h)") << ofToString(w) << ", " << ofToString(h);
 	ofLogNotice("ofxWindowApp:windowResized(w,h)") << "at frameNum: " << ofGetFrameNum();
 
-	window_W = w;
-	window_H = h;
-	window_X = ofGetWindowPositionX();
-	window_Y = ofGetWindowPositionY();
-
-	doRefreshGetWindowSettings();
+	doGetWindowSettings();
 
 	bFlagToSave = true;
 
@@ -849,91 +845,92 @@ void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
-	if (bKeys) {
-		const int & key = eventArgs.key;
+	if (!bKeys) return;
 
-		// modifiers
-		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
-		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); //macOS
-		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); //Windows. not working
-		mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+	const int & key = eventArgs.key;
 
-		if (!mod_ALT) return;
+	// modifiers
+	mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); //macOS
+	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); //Windows. not working
+	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
-		//--
+	if (!mod_ALT) return;
 
-		//ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
+	//--
 
-		// disable draw debug
-		if (key == 'W') {
-			bShowDebugInfo = !bShowDebugInfo;
-			ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowDebugInfo ? "ON" : "OFF");
-		}
+	//ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
 
-		// Switch window mode
-		else if (key == 'F') {
-			//TODO; fix monitor jump when full screen.
-			// try settings.windowMode = OF_GAME_MODE;
-			//auto m = ofGetWindowMode();
-			//ofSetWindow
-			//ofSetupScreen()
+	// disable draw debug
+	if (key == 'W') {
+		bShowDebugInfo = !bShowDebugInfo;
+		ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowDebugInfo ? "ON" : "OFF");
+	}
 
-			doRefreshToggleWindowMode();
-		} else if (key == 'V') // switch v-sync mode
-		{
-			vSync = !vSync;
-			ofSetVerticalSync(vSync);
-		}
+	// Switch window mode
+	else if (key == 'F') {
+		//TODO; fix monitor jump when full screen.
+		// try settings.windowMode = OF_GAME_MODE;
+		//auto m = ofGetWindowMode();
+		//ofSetWindow
+		//ofSetupScreen()
 
-		else if (key == 'L') // toggle disableSave
-		{
-			bDisableAutoSave = !bDisableAutoSave;
-		}
+		doRefreshToggleWindowMode();
+	} else if (key == 'V') // switch v-sync mode
+	{
+		vSync = !vSync;
+		ofSetVerticalSync(vSync);
+	}
 
-		else if (key == 'L') {
-			bDisableAutoSave = !bDisableAutoSave;
-		}
+	else if (key == 'L') // toggle disableSave
+	{
+		bDisableAutoSave = !bDisableAutoSave;
+	}
+
+	else if (key == 'L') {
+		bDisableAutoSave = !bDisableAutoSave;
+	}
 
 #ifdef SURFING_USE_STAY_ON_TOP
-		else if (key == 'T') {
-			setToggleStayOnTop();
-		}
+	else if (key == 'T') {
+		setToggleStayOnTop();
+	}
 #endif
 
-		else if (key == 'D') {
-			bShowDebug = !bShowDebug;
-		}
+	else if (key == 'D') {
+		bShowDebug = !bShowDebug;
+	}
 
-		else if (key == OF_KEY_BACKSPACE) {
-			doResetWindow();
-		}
+	else if (key == OF_KEY_BACKSPACE) {
+		doResetWindow();
+	}
 
-		else {
-			// set some custom common sizes:
-			// instagram, portrait, landscape, squared etc
-			// WINDOW PRESETS
-			// q: 800x800
-			// Q: w x w
-			// 1: IGTV Cover Photo
-			// 2: IG Landscape Photo
-			// 3: IG Portrait
-			// 4: IG Story
-			// 5: IG Square
-			ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
-		}
+	else {
+		// set some custom common sizes:
+		// instagram, portrait, landscape, squared etc
+		// WINDOW PRESETS
+		// q: 800x800
+		// Q: w x w
+		// 1: IGTV Cover Photo
+		// 2: IG Landscape Photo
+		// 3: IG Portrait
+		// 4: IG Story
+		// 5: IG Square
+		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 	}
 }
+
 //--------------------------------------------------------------
 void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
-	if (bKeys) {
-		const int & key = eventArgs.key;
+	if (!bKeys) return;
 
-		// Release modifiers
-		mod_COMMAND = key == OF_KEY_COMMAND; // macOS
-		mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
-		mod_ALT = key == OF_KEY_ALT;
-		mod_SHIFT = key == OF_KEY_SHIFT;
-	}
+	const int & key = eventArgs.key;
+
+	// Release modifiers
+	mod_COMMAND = key == OF_KEY_COMMAND; // macOS
+	mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
+	mod_ALT = key == OF_KEY_ALT;
+	mod_SHIFT = key == OF_KEY_SHIFT;
 }
 
 //--------------------------------------------------------------
@@ -1071,6 +1068,7 @@ void ofxWindowApp::checkMonitors() {
 	int numberOfMonitors = 0;
 	GLFWmonitor ** monitors = glfwGetMonitors(&numberOfMonitors);
 	monitorRects.clear();
+	monitorNames.clear();
 	for (int iC = 0; iC < numberOfMonitors; iC++) {
 		int xM;
 		int yM;
@@ -1078,6 +1076,16 @@ void ofxWindowApp::checkMonitors() {
 		const GLFWvidmode * desktopMode = glfwGetVideoMode(monitors[iC]);
 		ofRectangle monitorRect(xM, yM, desktopMode->width, desktopMode->height);
 		monitorRects.push_back(monitorRect);
+
+		string s0 = glfwGetMonitorName(monitors[iC]);
+		int xpos = 0;
+		int ypos = 0;
+		int width = 0;
+		int height = 0;
+		glfwGetMonitorWorkarea(monitors[iC], &xpos, &ypos, &width, &height);
+		string s1 = " \t " + ofToString(xpos) + "," + ofToString(ypos);
+		s1 += "    \t\t  " + ofToString(width) + "x" + ofToString(height);
+		monitorNames.push_back(s0 + " " + s1);
 	}
 }
 
@@ -1086,19 +1094,31 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	auto pos = glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY());
 	ofPushMatrix();
 	ofPushStyle();
-	ofTranslate(ofGetWidth() * 0.2f, ofGetHeight() * 0.5f);
-	ofScale(0.1f);
+
+	ofTranslate(ofGetWidth() * 0.5f, ofGetHeight() * 0.5f);
+	ofScale(0.07f);
+
+	int a = 180;
+
 	int i = 0;
 	for (auto & monitorRect : monitorRects) {
-		// check if pos is inside the ofRectangle
+		//canvas rect
+		if (i == 0)
+			monitorsCanvasRect.set(monitorRect);
+		else
+			monitorsCanvasRect.growToInclude(monitorRect);
+
+		//monitor rect
+		//check if pos is inside the ofRectangle
 		if (monitorRect.inside(pos)) {
-			ofSetColor(255, 0, 0);
+			ofSetColor(255, 255, 0, a); //window app is on this monitor
 		} else {
-			ofSetColor(255);
+			ofSetColor(255, 255, 255, a);
 		}
 		ofNoFill();
 		ofDrawRectangle(monitorRect);
 
+		//label
 		ofPushMatrix();
 		ofFill();
 		ofTranslate(monitorRect.getX(), monitorRect.getY());
@@ -1112,9 +1132,9 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 		ofDrawBitmapString(s, 0, 0);
 		ofPopMatrix();
 
-		// center num
+		//label center num
 		ofPushMatrix();
-		ofTranslate(monitorRect.getCenter().x, monitorRect.getCenter().y);
+		ofTranslate(monitorRect.getCenter());
 		s = ofToString(i);
 		ofDrawBitmapString(s, 0, 0);
 		ofPopMatrix();
@@ -1122,9 +1142,10 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 		i++;
 	}
 
-	// app window
+	//app window
+	ofPushMatrix();
 	ofNoFill();
-	ofSetColor(0, 255, 0);
+	ofSetColor(0, 255, 0, a);
 	ofRectangle rw = ofRectangle(pos.x, pos.y, ofGetWindowWidth(), ofGetWindowHeight());
 	ofDrawRectangle(rw);
 	string s = "";
@@ -1133,9 +1154,37 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	s += " " + ofToString(rw.width);
 	s += "x" + ofToString(rw.height);
 	ofTranslate(rw.getX(), rw.getY());
-	ofTranslate(0, 140);
-	//ofTranslate(0, -30);
+	ofTranslate(0, 170);
 	ofDrawBitmapString(s, 0, 0);
+	ofPopMatrix();
+	//label center name
+	ofPushMatrix();
+	ofTranslate(rw.getCenter());
+	s = "App\nWindow";
+	ofDrawBitmapString(s, 0, 0);
+	//ofBitmapFont bf;
+	//auto bb = bf.getBoundingBox(s, 0, 0);
+	//ofDrawBitmapString(s, -(bb.getWidth() / 2.f), -(bb.getHeight() / 2.f));
+	ofPopMatrix();
+
+	//canvas
+	ofNoFill();
+	monitorsCanvasRect.scaleFromCenter(1.1f);
+	//ofSetColor(0, 0, 0, a);
+	//ofDrawRectangle(monitorsCanvasRect); //canvas rect
+	ofPushMatrix();
+	ofTranslate(monitorsCanvasRect.getBottomLeft());
+
+	//monmitor names list
+	s = "\nSYSTEM DISPLAYS\n\n";
+	i = 0;
+	for (auto & monitorName : monitorNames) {
+		s += "#" + ofToString(i) + " " + monitorName + "\n";
+		i++;
+	}
+	ofSetColor(255, 255, 255, a);
+	ofDrawBitmapString(s, 0, 0);
+	ofPopMatrix();
 
 	ofPopStyle();
 	ofPopMatrix();

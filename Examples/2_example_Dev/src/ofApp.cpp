@@ -16,7 +16,7 @@ void ofApp::setup()
 void ofApp::draw()
 {
 	// debug feedback when changes
-	if (w.isChanged()) ofClear(ofColor::yellow);
+	if (w.isChanged()) ofClear(ofColor::green);
 	else ofClear(64);
 }
 
