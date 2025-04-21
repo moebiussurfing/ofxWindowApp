@@ -16,7 +16,10 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	if (!instance) return;
-	if (instance->bDisableCallback_windowMovedOrResized) return;
+	if (instance->bDisableCallback_windowMovedOrResized) {
+		ofLogNotice("ofxWindowApp:windowResized(GLFWwindow *,xpos,ypos)") << "Bypassed! (bDisableCallback_windowMovedOrResized)";
+		return;
+	}
 
 	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
 
@@ -37,7 +40,10 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
-	if (bDisableCallback_windowMovedOrResized) return;
+	if (bDisableCallback_windowMovedOrResized) {
+		ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "Bypassed! (bDisableCallback_windowMovedOrResized)";
+		return;
+	}
 
 	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
 	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "at frameNum: " << ofGetFrameNum();
@@ -47,8 +53,10 @@ void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h) {
-	if (bDisableCallback_windowMovedOrResized) return;
-
+	if (bDisableCallback_windowMovedOrResized) {
+		ofLogNotice("ofxWindowApp:windowResized(x,y)") << "Bypassed! (bDisableCallback_windowMovedOrResized)";
+		return;
+	}
 	ofLogNotice("ofxWindowApp:windowResized(w,h)") << ofToString(w) << ", " << ofToString(h);
 	ofLogNotice("ofxWindowApp:windowResized(w,h)") << "at frameNum: " << ofGetFrameNum();
 
@@ -67,13 +75,12 @@ void ofxWindowApp::windowResized(int w, int h) {
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	ofLogNotice("ofxWindowApp:~ofxWindowApp()") << "Constructor";
-	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "at frameNum: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "Constructor at frameNum: " << ofGetFrameNum();
 
 	doResetWindowExtraSettings();
 	doResetWindowSettings();
 
-	bDisableCallback_windowMovedOrResized = true;
+	bDisableCallback_windowMovedOrResized = true; //apply without saving json settings
 	doApplyWindowSettings();
 	doApplyWindowExtraSettings();
 	bDisableCallback_windowMovedOrResized = false;
@@ -197,10 +204,10 @@ void ofxWindowApp::setupParams() {
 //--------------------------------------------------------------
 void ofxWindowApp::startup() {
 	if (bDoneStartup) {
-		ofLogWarning("ofxWindowApp::startup()") << "Skip! at frameNum: " << ofGetFrameNum();
+		ofLogWarning("ofxWindowApp:startup()") << "Skip! at frameNum: " << ofGetFrameNum();
 		return;
 	}
-	ofLogNotice("ofxWindowApp::startup()") << "at frameNum: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:startup()") << "at frameNum: " << ofGetFrameNum();
 
 	//--
 
@@ -242,7 +249,7 @@ void ofxWindowApp::startup() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args) {
-	// Auto call setup on first frame if required.
+	// Auto call setup on first frame (or before?) if required.
 	if (!bDoneSetup) {
 		if (ofGetFrameNum() >= 0) {
 			setup();
@@ -252,7 +259,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 	// Auto call startup but after setup is done if required.
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
-			if (ofGetFrameNum() > 0) {
+			if (ofGetFrameNum() > 0) { // after framenum 0
 				// Workaround
 				startup();
 			}
@@ -276,12 +283,11 @@ void ofxWindowApp::update(ofEventArgs & args) {
 		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
 #endif
 		{
+			ofLogNotice("ofxWindowApp:update()") << "Going to call saveSettings() bc flagged (bFlagToSave)...";
 			bFlagToSave = false;
-			bFlagIsChanged = true;
-
-			ofLogNotice("ofxWindowApp:update()") << "Going to saveSettings() bc flagged (bFlagToSave) ...";
-
 			saveSettings();
+
+			bFlagIsChanged = true;
 		}
 	}
 
@@ -383,6 +389,7 @@ void ofxWindowApp::saveSettingsAfterRefresh() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
+	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()";
 	string path;
 	if (path_folder == "" && path_filename == "")
 		path = "ofxWindowApp.json";
@@ -399,7 +406,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofJson jExtra;
 
 	logSettings();
-	ofLogNotice("ofxWindowApp") << "Ready to save `windowSettings`...";
+	ofLogNotice("ofxWindowApp:saveSettings()") << "Ready to save `windowSettings`...";
 
 	ofxSerializer::ofxWindowApp::to_json(jApp, windowSettings);
 
@@ -417,17 +424,20 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	folderCheckAndCreate(path_folder);
 
 	// Save file
-	if (!bSlient) ofLogNotice("ofxWindowApp") << data.dump(4);
+	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << data.dump(4);
 	ofSavePrettyJson(path, data);
 
 	//--
 
 	bFlagShowFeedbackDoneSaved = true;
+
+	ofLogNotice("ofxWindowApp:saveSettings()") << "saveSettings()----------------------";
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::loadSettings() {
-	ofSetFullscreen(false);
+	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()";
+	//ofSetFullscreen(false);
 
 	string path = path_folder + "/" + path_filename;
 
@@ -443,7 +453,7 @@ void ofxWindowApp::loadSettings() {
 
 		ofJson data;
 		data = ofLoadJson(path);
-		ofLogNotice("ofxWindowApp") << "File JSON: \n"
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File JSON: \n"
 									<< data.dump(4);
 
 		ofJson jBig;
@@ -459,16 +469,16 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogNotice("ofxWindowApp") << "\tSettings: \m" << jBig.dump(4);
-			ofLogNotice("ofxWindowApp") << "\tExtras: \n"
+			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\tSettings: \m" << jBig.dump(4);
+			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
 										<< ofToString(paramsExtra);
 		} else {
-			ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
+			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp") << "Window: \n"
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "Window: \n"
 									 << jBig;
-		ofLogVerbose("ofxWindowApp") << "Extras: \n"
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "Extras: \n"
 									 << jExtra;
 
 		//--
@@ -488,11 +498,11 @@ void ofxWindowApp::loadSettings() {
 		// Remove from name the added \" by the serializer
 		ofStringReplace(jm, "\"", "");
 
-		ofLogVerbose("ofxWindowApp") << "x: " << jx;
-		ofLogVerbose("ofxWindowApp") << "y: " << jy;
-		ofLogVerbose("ofxWindowApp") << "w: " << jw;
-		ofLogVerbose("ofxWindowApp") << "h: " << jh;
-		ofLogVerbose("ofxWindowApp") << "m: " << jm;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "x: " << jx;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "y: " << jy;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "w: " << jw;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "h: " << jh;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "m: " << jm;
 
 		// Screen modes
 		// OF_WINDOW = 0
@@ -518,8 +528,8 @@ void ofxWindowApp::loadSettings() {
 
 		logSettings();
 
-		ofLogNotice("ofxWindowApp") << "Done load settings!";
-		ofLogNotice("ofxWindowApp") << "-------------------";
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "-------------------";
 
 		//--
 
@@ -544,8 +554,9 @@ void ofxWindowApp::loadSettings() {
 		}
 #endif
 	} else {
-		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
+		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path;
 	}
+	ofLogNotice("ofxWindowApp:loadFileSettings()") << "loadSettings()----------------------";
 }
 
 //--------------------------------------------------------------
