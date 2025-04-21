@@ -2,15 +2,13 @@
 
 /*
 	TODO:
-	+ add full screen bool param with listener. to allow expose on gui's
-	+ broken full screen save load?
-	+ add ofxScreenSetup addon to bundle all other features
+	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features
  */
 
 //----
 
 #define SURFING_WINDOW_APP__USE_STATIC
-// -> Main directive.
+// <- Main directive
 // Uncomment (enable) to allow WIN32 platform for probably better windowMove callback.
 
 //----
@@ -36,22 +34,23 @@
 	#endif
 #endif
 
-#include "ofxSerializerOfWindowSettings.h"
+#include "ofxSerializer_ofxWindowApp.h" //for windows size/pos serialization
+#include "ofxSurfingHelpersLite_ofxWindowApp.h"//for some windows sizes keycommands presets
 
-#define USING_ofxWindowApp
-#ifdef USING_ofxWindowApp
-	#include "ofxWindowApp.h"
-#endif
+//#define USING_ofxWindowApp
+//#ifdef USING_ofxWindowApp
+//	#include "ofxWindowApp.h"
+//#endif
 
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
-
 #define OFX_WINDOW_APP_BAR_HEIGHT 45 // probably fits on Win32 only.
 
 #define USE_CUSTOM_FONT
+#define SURFING_USE_STAYONTOP
+
+//--
 
 #define USING__OFX_WINDOW_APP
-
-#define SURFING_USE_STAYONTOP
 
 //--------
 
@@ -63,7 +62,7 @@ public:
 public:
 	void setup();
 
-	//--
+	//----
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 public:
@@ -81,7 +80,7 @@ public:
 	static void setInstance(ofxWindowApp * app); // Static function to set the instance
 #endif
 
-	//--
+	//----
 
 private:
 	bool bDoneSetup = false;
@@ -119,7 +118,7 @@ private:
 	bool mod_SHIFT = false;
 
 	bool bFlagToSave = 0;
-	bool bFlagDoneSaved = 0;
+	bool bFlagShowFeedbackDoneSaved = 0;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
@@ -127,8 +126,8 @@ private:
 
 	//--
 
-	void drawDebugHelpInfo();
-	void drawDebugPerformanceWidget();
+	void drawDebugInfo();
+	void drawDebugInfoPerformanceWidget();
 
 	//----
 
@@ -180,6 +179,8 @@ public:
 		ofLogNotice("ofxWindowApp::setEnableAllowQuitAppUsingEscapeKey");
 		ofSetEscapeQuitsApp(b);
 	}
+
+	//--
 
 #ifdef SURFING_USE_STAYONTOP
 	//--------------------------------------------------------------
@@ -262,7 +263,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setShowDebug(bool b = true) {
-		bShowWindowInfo = b;
+		bShowDebugInfo = b;
 		//bShowPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
@@ -271,15 +272,15 @@ public:
 	}
 	//--------------------------------------------------------------
 	bool getShowDebug() {
-		return bShowWindowInfo;
+		return bShowDebugInfo;
 	}
 	//--------------------------------------------------------------
 	void toggleShowDebug() {
-		bShowWindowInfo = !bShowWindowInfo;
+		bShowDebugInfo = !bShowDebugInfo;
 	}
 
 	//--------------------------------------------------------------
-	void setShowPerformanceAlways(bool b = true) {
+	void setShowPerformanceAlways(bool b = true) {//will display alert drop fps info ven when debug display disabled
 		bShowPerformanceAlways = b;
 	}
 
@@ -403,11 +404,13 @@ private:
 
 	ofParameter<int> window_W, window_H, window_X, window_Y;
 
+	void setupParams();
+	//ofParameterGroup params{ "ofxWindowApp" };
 	ofParameterGroup paramsExtra { "Extra" };
 	ofParameterGroup paramsWindow { "Window" };
 	ofParameterGroup paramsSession { "Session" };
 	ofParameter<bool> vSync { "vSync", false };
-	ofParameter<float> fpsTarget { "Fps", 60.f, 1, 120 };
+	ofParameter<float> fpsTarget { "Fps Target", 60.f, 1.f, 144.f };
 	ofParameter<bool> bShowPerformanceAlways { "DebugPerformance", true };
 
 	ofParameter<bool> bDisableAutoSave { "DisableAutosave", false };
@@ -420,8 +423,8 @@ public:
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
 #endif
 
-	ofParameter<bool> bShowWindowInfo { "ShowWindowInfo", true };
-	bool bShowDebugKeysInfo = false;
+	ofParameter<bool> bShowDebugInfo { "ShowWindowInfo", true };
+	bool bShowDebug = false;
 
 private:
 	bool bDoneStartup = false;
@@ -441,9 +444,9 @@ private:
 	int yy = 0;
 #endif
 
-	//TODO: Add full screen/window bool param
+	//TODO: Add fullscreen/window bool ofParam to expose to an ui
 	bool bIsFullScreen = false;
-	bool bIsFullScreenInSettings = false;
+	//bool bIsFullScreenInSettings = false;
 
 	glm::vec2 posSettings = glm::vec2(0);
 	glm::vec2 sizeSettings = glm::vec2(0);
@@ -452,12 +455,13 @@ private:
 
 public:
 	//--------------------------------------------------------------
-	void doReset() {
-		//bIsFullScreen = false;
-		//vSync = false;
-		//fpsTarget = 60;
+	void doResetWindow() {
+		ofLogNotice("ofxWindowApp") << "doResetWindow()";
 
-		// Default force
+		bIsFullScreen = false;
+		vSync = false;
+		fpsTarget = 60;
+
 		int w = 1280;
 		int h = w * (9.f / 16.f);
 		windowSettings.setSize(w, h);
@@ -466,85 +470,10 @@ public:
 		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); //centered fails
 
 		doApplyWindowMode();
+		doApplyExtraSettings();
 	}
 
-	//--------------------------------------------------------------
-	void drawDebugKeysInfo() {
-		//window title
-		string tp = "Pos:" + ofToString(ofGetWindowPositionX()) + ", " + ofToString(ofGetWindowPositionY());
-		string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-		ofSetWindowTitle(tp + "       " + ts);
-
-		string s;
-		s += "ofxWindowApp";
-		if (bFlagDoneSaved) s += "  SAVE";
-		s += "\n";
-		s += "DEBUG KEYS\n\n";
-		//s += "    ";
-		s += "> Press Alt +\n\n";
-		s += "D : SHOW DEBUG KEYS\n";
-		s += "    & MONITORS\n";
-		s += "W : SHOW INFO\n";
-		s += "V : V_SYNC = " + ofToString(vSync ? "ON " : "OFF") + "\n";
-		bool bMode = (ofGetWindowMode() == OF_FULLSCREEN);
-		s += "F : SCREEN = " + ofToString(bMode ? "FULLSCREEN_MODE" : "WINDOW_MODE") + "\n";
-
-#ifdef SURFING_USE_STAYONTOP
-#if defined(TARGET_WIN32)
-		s += "T : ON_TOP = " + ofToString(bWindowStayOnTop ? "TRUE" : "FALSE") + "\n";
-#endif
-#endif
-		s += "\n";
-
-		////TODO: WIP: Lock mode
-		//s += "L : NO_SAVE = " + ofToString(bDisableAutoSave ? "TRUE" : "FALSE");
-		//s += "\n\n";
-
-#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
-		s += "SAVES IF WINDOW IS\n";
-		s += "RESIZED OR MOVED";
-#else
-		s += "SAVES IF WINDOW IS\n";
-		s += "RESIZED\n";
-		if (bAutoSaverTimed) {
-			s += "MOVED AND TIMER FINISHED\n";
-			s += "\n";
-			s += "Autosaver Timed: " + ofToString((bAutoSaverTimed ? "ON " : "OFF"));
-			s += "\n";
-			s += ofToString(timePeriodToCheckIfSave / 10.f, 1) + "secs\n";
-			auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
-			int pct = ofMap(t, 0, timePeriodToCheckIfSave, 0, 100);
-			s += ofToString(pct) + "%";
-		}
-#endif
-
-		// Flash when saving
-		ofColor c1 = bFlagDoneSaved ? 255 : 0;
-		ofColor c2 = bFlagDoneSaved ? 0 : 255;
-		if (bFlagDoneSaved) bFlagDoneSaved = 0;
-
-#ifndef USE_CUSTOM_FONT
-		int x = 5 - 1;
-		int y = 16 - 1;
-		ofDrawBitmapStringHighlight(s, x, y, c1, c2);
-#endif
-#ifdef USE_CUSTOM_FONT
-		ofPushStyle();
-		ofFill();
-		int x = 5 - 1;
-		int y = 16 - 1;
-		auto bb = font.getStringBoundingBox(s, x, y);
-		bb.setWidth(bb.getWidth() + pad);
-		bb.setHeight(bb.getHeight() + pad);
-		bb.translateX(-pad / 2);
-		bb.translateY(-pad / 2);
-		ofSetColor(0);
-		ofDrawRectangle(bb);
-		ofSetColor(255);
-		font.drawString(s, x, y);
-		ofPopStyle();
-#endif
-	}
+	void drawDebug();
 
 	//--------------------------------------------------------------
 

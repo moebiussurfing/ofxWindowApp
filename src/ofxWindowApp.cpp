@@ -58,7 +58,7 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	doReset();
+	doResetWindow();
 
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 	//from main.cpp
@@ -66,11 +66,11 @@ ofxWindowApp::ofxWindowApp() {
 	// Default
 	vSync = false;
 	fpsTarget = 60;
-	bShowWindowInfo = false;
+	bShowDebugInfo = false;
 
 	setVerticalSync(vSync);
 	setFrameRate(fpsTarget);
-	setShowDebug(bShowWindowInfo);
+	setShowDebug(bShowDebugInfo);
 }
 
 //--------------------------------------------------------------
@@ -101,30 +101,29 @@ void ofxWindowApp::startup() {
 
 	//--
 
-	// Fix workaround
-	if (bIsFullScreenInSettings) {
-		ofSetFullscreen(true);
-
-		//TODO: full screen on different monitors make troubles to re load..
-		//ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
-		//ofSetWindowShape(ofGetWidth(), ofGetHeight());
-	}
+	//// Fix workaround
+	//if (bIsFullScreen) {
+	//	ofSetFullscreen(true);
+	//	//TODO: full screen on different monitors make troubles to re load..
+	//	//ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
+	//	//ofSetWindowShape(ofGetWidth(), ofGetHeight());
+	//}
 
 	//--
 
-#ifdef SURFING_USE_STAYONTOP
-	// On top
-	if (!bIsFullScreenInSettings) {
-		// Workaround
-		// Refresh
-	#if defined(TARGET_WIN32)
-		HWND W = GetActiveWindow();
-		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-	#endif
-		// Re trig
-		bWindowStayOnTop = bWindowStayOnTop;
-	}
-#endif
+	//#ifdef SURFING_USE_STAYONTOP
+	//	// On top
+	//	if (!bIsFullScreen) {
+	//		// Workaround
+	//		// Refresh
+	//	#if defined(TARGET_WIN32)
+	//		HWND W = GetActiveWindow();
+	//		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+	//	#endif
+	//		// Re trig
+	//		bWindowStayOnTop = bWindowStayOnTop;
+	//	}
+	//#endif
 
 	//--
 
@@ -150,10 +149,12 @@ void ofxWindowApp::setup() {
 
 	//--
 
+	// get rectanlges from os displays/monitors
 	checkMonitors();
 
 	//--
 
+	// create callback for window moved
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 	GLFWwindow * glfwWindow = glfwGetCurrentContext();
 	glfwSetWindowPosCallback(glfwWindow, windowMoved);
@@ -189,11 +190,26 @@ void ofxWindowApp::setup() {
 
 	//--
 
+	setupParams();
+
+	//--
+
+	// Default
+	setShowPerformanceAlways(true);
+
+	//--
+
+	bDoneSetup = true;
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::setupParams() {
+
 	// Extra settings
 	paramsWindow.add(vSync);
 	paramsWindow.add(fpsTarget);
 
-	paramsSession.add(bShowWindowInfo);
+	paramsSession.add(bShowDebugInfo);
 	paramsSession.add(bShowPerformanceAlways);
 
 #ifdef SURFING_USE_STAYONTOP
@@ -206,13 +222,6 @@ void ofxWindowApp::setup() {
 	paramsExtra.add(paramsSession);
 
 	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
-
-	// Default
-	setShowPerformanceAlways(true);
-
-	//--
-
-	bDoneSetup = true;
 }
 
 //--------------------------------------------------------------
@@ -318,15 +327,15 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	//--
 
-	if (bShowWindowInfo) {
-		drawDebugHelpInfo();
-		drawDebugPerformanceWidget();
+	if (bShowDebugInfo) {
+		drawDebugInfo();
+		drawDebugInfoPerformanceWidget();
 	} else {
-		if (bShowPerformanceAlways) drawDebugPerformanceWidget();
+		if (bShowPerformanceAlways) drawDebugInfoPerformanceWidget();
 	}
 
-	if (bShowDebugKeysInfo) {
-		drawDebugKeysInfo();
+	if (bShowDebug) {
+		drawDebug();
 		drawDebugSystemMonitors();
 	}
 }
@@ -376,7 +385,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofJson jApp;
 	ofJson jExtra;
 
-	ofxSerializerOfWindowSettings::to_json(jApp, windowSettings);
+	ofxSerializer::ofxWindowApp::to_json(jApp, windowSettings);
 
 	ofSerialize(jExtra, paramsExtra);
 
@@ -397,7 +406,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	//--
 
-	bFlagDoneSaved = true;
+	bFlagShowFeedbackDoneSaved = true;
 }
 
 //--------------------------------------------------------------
@@ -427,7 +436,7 @@ void ofxWindowApp::loadSettings() {
 		ofJson jExtra;
 
 		if (data.size() >= 2) {
-			jBig = data[0]; //TODO: Ugly workaround
+			jBig = data[0]; //TODO: Ugly workaround wil break if differs json object format!
 			jExtra = data[1];
 
 			// Recall both paramsExtra groups
@@ -459,11 +468,11 @@ void ofxWindowApp::loadSettings() {
 		// Remove from name the added \" by the serializer
 		ofStringReplace(jm, "\"", "");
 
-		ofLogVerbose("ofxWindowApp") << "jx: " << jx;
-		ofLogVerbose("ofxWindowApp") << "jy: " << jy;
-		ofLogVerbose("ofxWindowApp") << "jw: " << jw;
-		ofLogVerbose("ofxWindowApp") << "jh: " << jh;
-		ofLogVerbose("ofxWindowApp") << "jm: " << jm;
+		ofLogVerbose("ofxWindowApp") << "x: " << jx;
+		ofLogVerbose("ofxWindowApp") << "y: " << jy;
+		ofLogVerbose("ofxWindowApp") << "w: " << jw;
+		ofLogVerbose("ofxWindowApp") << "h: " << jh;
+		ofLogVerbose("ofxWindowApp") << "m: " << jm;
 
 		//// TODO:
 		//// Workaround to avoid negative values
@@ -474,26 +483,29 @@ void ofxWindowApp::loadSettings() {
 		//}
 
 		// Screen modes
-		//OF_WINDOW = 0
-		//OF_FULLSCREEN = 1
-		//OF_GAME_MODE = 2
+		// OF_WINDOW = 0
+		// OF_FULLSCREEN = 1
+		// OF_GAME_MODE = 2
 
-		if (jm == "OF_WINDOW")
+		if (jm == "0")
 			windowSettings.windowMode = ofWindowMode(0);
-		else if (jm == "OF_FULLSCREEN")
+		else if (jm == "1")
 			windowSettings.windowMode = ofWindowMode(1);
-		else if (jm == "OF_GAME_MODE")
+		else if (jm == "2")
 			windowSettings.windowMode = ofWindowMode(2);
 
-		if (jm == "OF_WINDOW")
+		if (windowSettings.windowMode == ofWindowMode(0)) //window
 			bIsFullScreen = false;
-		else if (jm == "OF_FULLSCREEN")
+		else if (windowSettings.windowMode == ofWindowMode(1)) //fullscreen
 			bIsFullScreen = true;
-		else if (jm == "OF_GAME_MODE")
+		else if (windowSettings.windowMode == ofWindowMode(2)) //game//TODO
 			bIsFullScreen = false;
-		bIsFullScreenInSettings = bIsFullScreen;
 
-		if (!bIsFullScreen) { //window
+		//bIsFullScreenInSettings = bIsFullScreen;
+
+		//window
+		//if (!bIsFullScreen)
+		{
 			windowSettings.setPosition(glm::vec2(jx, jy));
 			windowSettings.setSize(jw, jh);
 		}
@@ -505,7 +517,8 @@ void ofxWindowApp::loadSettings() {
 		ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
 		ofLogNotice("ofxWindowApp") << "Done load settings.";
 	} else {
-		ofLogError("ofxWindowApp") << "File NOT found: " << path;
+		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
+		doResetWindow();
 	}
 
 	//--
@@ -513,10 +526,108 @@ void ofxWindowApp::loadSettings() {
 	// Apply
 	doApplyWindowMode();
 	doApplyExtraSettings();
+
+	//--
+
+#ifdef SURFING_USE_STAYONTOP
+	// On top
+	if (!bIsFullScreen) {
+		// Workaround
+		// Refresh
+	#if defined(TARGET_WIN32)
+		HWND W = GetActiveWindow();
+		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+	#endif
+		// Re trig
+		bWindowStayOnTop = bWindowStayOnTop;
+	}
+#endif
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawDebugHelpInfo() {
+void ofxWindowApp::drawDebug() {
+	//window title
+	string tp = /*"Pos:" +*/ ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
+	string ts = /*"Size:" +*/ ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
+	ofSetWindowTitle(tp + "  " + ts);
+
+	string s;
+	s += "ofxWindowApp DEBUG\n";
+	if (bFlagShowFeedbackDoneSaved)
+		s += "SAVE";
+	else
+		s += "    ";
+	s += "\n";
+
+	s += "> PRESS ALT +\n\n";
+	s += "D : SHOW DEBUG & MONITORS\n";
+	s += "W : SHOW INFO & PERFORMANCE\n";
+
+	s += "\n";
+	s += "PRESETS\n";
+	s += "q : 800x800\n";
+	s += "Q : w x w\n";
+	s += "1 : IGTV Cover Photo\n";
+	s += "2 : IG Landscape Photo\n";
+	s += "3 : IG Portrait\n";
+	s += "4 : IG Story\n";
+	s += "5 : IG Square\n";
+	s += "BACKSPACE : Reset\n";
+
+	//#define SURFING_WINDOW_APP__DEBUG_TIMER
+#ifdef SURFING_WINDOW_APP__DEBUG_TIMER
+	s += "\n";
+	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
+	s += "SAVES IF WINDOW IS\n";
+	s += "RESIZED OR MOVED";
+	#else
+	s += "SAVES IF WINDOW IS\n";
+	s += "RESIZED\n";
+	if (bAutoSaverTimed) {
+		s += "MOVED AND TIMER FINISHED\n";
+		s += "\n";
+		s += "Autosaver Timed: " + ofToString((bAutoSaverTimed ? "ON " : "OFF"));
+		s += "\n";
+		s += ofToString(timePeriodToCheckIfSave / 10.f, 1) + "secs\n";
+		auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
+		int pct = ofMap(t, 0, timePeriodToCheckIfSave, 0, 100);
+		s += ofToString(pct) + "%";
+	}
+	#endif
+#endif
+
+	//// Debug feedback. Flash when saving
+	//ofColor c1 = bFlagShowFeedbackDoneSaved ? 255 : 0;
+	//ofColor c2 = bFlagShowFeedbackDoneSaved ? 0 : 255;
+	
+//#ifndef USE_CUSTOM_FONT
+//	int x = 5 - 1;
+//	int y = 16 - 1;
+//	ofDrawBitmapStringHighlight(s, x, y, c1, c2);
+//#endif
+//#ifdef USE_CUSTOM_FONT
+//	ofPushStyle();
+//	ofFill();
+//	int x = 5 - 1;
+//	int y = 16 - 1;
+//	auto bb = font.getStringBoundingBox(s, x, y);
+//	bb.setWidth(bb.getWidth() + pad);
+//	bb.setHeight(bb.getHeight() + pad);
+//	bb.translateX(-pad / 2);
+//	bb.translateY(-pad / 2);
+//	ofSetColor(0);
+//	ofDrawRectangle(bb);
+//	ofSetColor(255);
+//	font.drawString(s, x, y);
+//	ofPopStyle();
+//#endif
+
+	if (bFlagShowFeedbackDoneSaved) bFlagShowFeedbackDoneSaved = 0;
+	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::drawDebugInfo() {
 	// Debug overlay screen modes
 
 	string vSyncStr;
@@ -530,11 +641,20 @@ void ofxWindowApp::drawDebugHelpInfo() {
 
 	screenStr = ofToString(window_W) + "x" + ofToString(window_H);
 	screenStr += "px";
-	vSyncStr = ((vSync ? "ON" : "OFF"));
-	vSyncStr += ((vSync ? "[V] " : "[V]"));
-	fpsRealStr = ofToString(fpsReal, 0);
+	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
+
+	fpsRealStr = ofToString(fpsReal, 1);
 	fpsTargetStr = ofToString(fpsTarget);
-	screenPosStr = " " + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
+
+	str += "ALT+ [W]";
+
+	str += strPad + "SIZE:" + screenStr;
+	str += strPad + "POS:" + screenPosStr;
+	str += strPad + "FPS:" + fpsRealStr;
+	str += "[" + fpsTargetStr + "]";
+
+	vSyncStr = ofToString(vSync ? "ON " : "OFF");
+	str += strPad + "[V] VSYNC_" + vSyncStr;
 
 	bool bModeFullScreen = false;
 	if (ofGetWindowMode() == OF_WINDOW) // Go full screen
@@ -544,28 +664,24 @@ void ofxWindowApp::drawDebugHelpInfo() {
 	{
 		bModeFullScreen = true;
 	}
+	screenMode = "[F] ";
 	screenMode += bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE";
-	screenMode += "[F]";
-
-	str += "FPS " + fpsRealStr;
-	str += "[" + fpsTargetStr + "]";
-	str += strPad + "VSYNC-" + vSyncStr;
-	str += strPad + "SIZE " + screenStr;
-	str += strPad + "POSITION" + screenPosStr;
 	str += strPad + screenMode;
-	str += strPad + (bDisableAutoSave ? "NO_SAVE-ON" : "NO_SAVE-OFF");
-	str += (bDisableAutoSave ? "[L] " : "[L]");
+
+	str += strPad + "[L] " + ofToString(bDisableAutoSave ? "NO_SAVE  " : "AUTO_SAVE");
 
 #ifdef SURFING_USE_STAYONTOP
-	str += strPad + (bWindowStayOnTop ? "ON_TOP:TRUE" : "ON_TOP:FALSE") + "[T]";
+	str += strPad + "[T] " + ofToString(bWindowStayOnTop ? "ON_TOP:TRUE " : "ON_TOP:FALSE");
 #endif
 
+	str += strPad + "[D] DEBUG_" +ofToString(bShowDebug ? "ON " : "OFF");
+
 	str += strPad + "  ";
-	str += strPad + "[MOD ALT] "; //TODO: show mod key. hardcoded
-	str += strPad + (mod_COMMAND ? "CMD" : "   ");
-	str += strPad + (mod_ALT ? "ALT" : "   ");
-	str += strPad + (mod_CONTROL ? "CTRL" : "    ");
-	str += strPad + (mod_SHIFT ? "SHIFT" : "     ");
+	//str += strPad + "[MOD:ALT]";
+	str += " " + ofToString(mod_ALT ? "ALT" : "   ");
+	str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
+	str += " " + ofToString(mod_SHIFT ? "SHIFT" : "     ");
+	str += " " + ofToString(mod_COMMAND ? "CMD" : "   ");
 
 	//--
 
@@ -589,7 +705,7 @@ void ofxWindowApp::drawDebugHelpInfo() {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawDebugPerformanceWidget() {
+void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 	// monitor fps performance alert
 
 	bool bPreShow; //starts draw black
@@ -731,36 +847,22 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	if (bKeys) {
 		const int & key = eventArgs.key;
 
-		// modifier
-
-		////TODO:
-		//mod_COMMAND = key == OF_KEY_COMMAND; // macOS
-		//mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
-		//mod_ALT = key == OF_KEY_ALT;
-		//mod_SHIFT = key == OF_KEY_SHIFT;
-
+		// modifiers
+		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); //macOS
 		mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); //Windows. not working
-		mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
 		mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
-		// Pick and enable your preferred key modifier to allow the key commands
-		// *or to ignore keys when un pressed)
-		// global required modifier
-		//if (!mod_COMMAND) return;
-		//if (!mod_CONTROL) return;
 		if (!mod_ALT) return;
 
 		//--
 
-		if (0) ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
+		//ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
 
 		// disable draw debug
-		//if (mod_CONTROL && key == 'w' ||
-		//mod_CONTROL && key == 'w' ||
 		if (key == 'W') {
-			bShowWindowInfo = !bShowWindowInfo;
-			ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowWindowInfo ? "ON" : "OFF");
+			bShowDebugInfo = !bShowDebugInfo;
+			ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowDebugInfo ? "ON" : "OFF");
 		}
 
 		// Switch window mode
@@ -794,11 +896,24 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 #endif
 
 		else if (key == 'D') {
-			bShowDebugKeysInfo = !bShowDebugKeysInfo;
+			bShowDebug = !bShowDebug;
 		}
 
 		else if (key == OF_KEY_BACKSPACE) {
-			doReset();
+			doResetWindow();
+		}
+
+		// set some custom common sizes: instagram, portrait, landscape, squared etc
+		// WINDOW PRESETS
+		// q: 800x800
+		// Q: w x w
+		// 1: IGTV Cover Photo
+		// 2: IG Landscape Photo
+		// 3: IG Portrait
+		// 4: IG Story
+		// 5: IG Square
+		else {
+			ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 		}
 	}
 }
@@ -846,27 +961,25 @@ void ofxWindowApp::folderCheckAndCreate(string _path) {
 //--------------------------------------------------------------
 void ofxWindowApp::doRefreshToggleWindowMode() {
 	// Toggle Mode
-
 	if (ofGetWindowMode() == OF_WINDOW) // go full screen
 	{
 		ofSetFullscreen(true);
-		bIsFullScreen = true;
+		//bIsFullScreen = true;
 	} else if (ofGetWindowMode() == OF_FULLSCREEN) // go window mode
 	{
 		ofSetFullscreen(false);
+		//bIsFullScreen = false;
 
-		// Workaround:
-		// to fit window and his bar visible into the screen
-		float windowBar_h = 25;
+		//// workaround:
+		//// to fit window and his bar visible into the screen
+		//float windowBar_h = 25;
 
-		// workaround
-		// it's window mode..
-		// kick a little down to avoid hidden window title barF
-		window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
-		window_X = ofGetWindowPositionX();
-		ofSetWindowPosition(window_X, window_Y);
-
-		bIsFullScreen = false;
+		//// workaround
+		//// it's window mode..
+		//// kick a little down to avoid hidden window title barF
+		//window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
+		//window_X = ofGetWindowPositionX();
+		//ofSetWindowPosition(window_X, window_Y);
 	}
 
 	// update
@@ -888,14 +1001,16 @@ void ofxWindowApp::doApplyExtraSettings() {
 void ofxWindowApp::doApplyWindowMode() {
 	ofLogVerbose("ofxWindowApp") << "doApplyWindowMode()";
 
-	//window mode
-	if (!bIsFullScreen) {
+	// full screen
+	if (bIsFullScreen) {
+		ofSetFullscreen(true);
+	}
+
+	// window mode
+	else {
 		ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 		ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 	}
-
-	// full screen
-	if (bIsFullScreenInSettings) ofSetFullscreen(true);
 }
 
 //--------------------------------------------------------------
@@ -1011,7 +1126,8 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	s += " " + ofToString(rw.width);
 	s += "x" + ofToString(rw.height);
 	ofTranslate(rw.getX(), rw.getY());
-	ofTranslate(0, -30);
+	ofTranslate(0, 140);
+	//ofTranslate(0, -30);
 	ofDrawBitmapString(s, 0, 0);
 
 	ofPopStyle();

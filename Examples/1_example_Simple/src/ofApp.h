@@ -3,9 +3,7 @@
 
 #include "ofxWindowApp.h"
 
-// NOTE:
-// Press Alt + D
-// (uppercased!) to toggle show debug info and key commands
+// NOTE: Press "Alt + D" to toggle show debug!
 
 class ofApp : public ofBaseApp {
 public:

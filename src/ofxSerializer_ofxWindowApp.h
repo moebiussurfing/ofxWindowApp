@@ -12,7 +12,6 @@
 #include "glm/vec3.hpp"
 #include <nlohmann/json.hpp>
 
-//namespace ofxSerializerOfWindowSettings {//breaks iter cbegin value below
 namespace glm {
 
 template <typename T, glm::precision P>
@@ -26,28 +25,10 @@ inline void from_json(const nlohmann::json & j, glm::tvec2<T, P> & v) {
 	v.y = j.value("y", typename glm::tvec2<T, P>::value_type(0));
 }
 
-//template <typename T, glm::precision P>
-//inline void to_json(nlohmann::json & j, const glm::tvec3<T, P> & v) {
-//	j = { { "x", v.x }, { "y", v.y }, { "z", v.z } };
-//}
-
-//template <typename T, glm::precision P>
-//inline void from_json(const nlohmann::json & j, glm::tvec3<T, P> & v) {
-//	v.x = j.value("x", typename glm::tvec3<T, P>::value_type(0));
-//	v.y = j.value("y", typename glm::tvec3<T, P>::value_type(0));
-//	v.z = j.value("z", typename glm::tvec3<T, P>::value_type(0));
-//}
-
-//template <typename T, glm::precision P>
-//inline void to_json(nlohmann::json & j, const glm::tvec4<T, P> & v) {
-//	j = { { "x", v.x }, { "y", v.y }, { "z", v.z }, { "w", v.w } };
-//}
-
 };
-// namespace glm
-// //namespace ofxSerializerOfWindowSettings.h
 
-namespace ofxSerializerOfWindowSettings {
+namespace ofxSerializer {
+namespace ofxWindowApp {
 
 inline void to_json(nlohmann::json & j, const ofVec2f & v) {
 	to_json(j, toGlm(v));
@@ -59,25 +40,11 @@ inline void from_json(const nlohmann::json & j, ofVec2f & v) {
 	v = toOf(g);
 }
 
-//inline void to_json(nlohmann::json & j, const ofVec3f & v) {
-//	to_json(j, toGlm(v));
-//}
-//
-//inline void from_json(const nlohmann::json & j, ofVec3f & v) {
-//	glm::vec3 g;
-//	from_json(j, g);
-//	v = toOf(g);
-//}
-
 // -----------------------------------------------------------------------------
 
 #include "ofWindowSettings.h"
 
-NLOHMANN_JSON_SERIALIZE_ENUM( ofWindowMode, {
-    { OF_WINDOW, "OF_WINDOW" },
-    { OF_FULLSCREEN, "OF_FULLSCREEN"},
-    { OF_GAME_MODE, "OF_GAME_MODE"}
-})
+NLOHMANN_JSON_SERIALIZE_ENUM(ofWindowMode, { { OF_WINDOW, "OF_WINDOW" }, { OF_FULLSCREEN, "OF_FULLSCREEN" }, { OF_GAME_MODE, "OF_GAME_MODE" } })
 
 inline void to_json(nlohmann::json & j, const ofWindowSettings & v) {
 	if (v.isPositionSet())
@@ -108,4 +75,5 @@ inline void from_json(const nlohmann::json & j, ofWindowSettings & v) {
 	}
 }
 
-}; // namespace ofxSerializerOfWindowSettings
+};
+};

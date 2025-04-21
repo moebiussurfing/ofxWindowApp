@@ -1,5 +1,8 @@
 # ofxWindowApp
 
+> [!CAUTION] 
+> WIP. Currently partially broken!
+
 ## Screencast
 
 ![screenshot](readme_images/ofxWindowApp.gif?raw=true "MoebiusSurfing")
@@ -97,7 +100,7 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
             "height": 375,
             "width": 1709
         },
-        "window_mode": "OF_WINDOW"
+        "window_mode": 0
     },
     {
         "Extra": {
