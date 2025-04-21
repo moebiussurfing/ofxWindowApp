@@ -216,16 +216,6 @@ void ofxWindowApp::startup() {
 
 	//--
 
-	//// Fix workaround
-	//if (bIsFullScreen) {
-	//	ofSetFullscreen(true);
-	//	//TODO: full screen on different monitors make troubles to re load..
-	//	//ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
-	//	//ofSetWindowShape(ofGetWidth(), ofGetHeight());
-	//}
-
-	//--
-
 	//#ifdef SURFING_USE_STAY_ON_TOP
 	//	// On top
 	//	if (!bIsFullScreen) {
@@ -268,23 +258,15 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 	//--
 
-	////TODO
-	//// Force ignore saving at startup
-	//auto fm = ofGetFrameNum();
-	//if (fm < 120) {
-	//	if (bFlagToSave) {
-	//		bFlagToSave = false;
-	//	}
-	//}
-
 	// Check if flagged to save
 	if (bFlagToSave) {
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 		if (ofGetElapsedTimef() >= timeWhenToSaveFlag)
 #endif
 		{
-			ofLogNotice("ofxWindowApp:update()") << "Going to call saveSettings() bc flagged (bFlagToSave)...";
 			bFlagToSave = false;
+
+			ofLogNotice("ofxWindowApp:update()") << "Going to call saveSettings() bc flagged (bFlagToSave)...";
 			saveSettings();
 
 			bFlagIsChanged = true;
@@ -390,6 +372,7 @@ void ofxWindowApp::saveSettingsAfterRefresh() {
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
 	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()";
+
 	string path;
 	if (path_folder == "" && path_filename == "")
 		path = "ofxWindowApp.json";
@@ -454,7 +437,7 @@ void ofxWindowApp::loadSettings() {
 		ofJson data;
 		data = ofLoadJson(path);
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File JSON: \n"
-									<< data.dump(4);
+													   << data.dump(4);
 
 		ofJson jBig;
 
@@ -471,15 +454,15 @@ void ofxWindowApp::loadSettings() {
 
 			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\tSettings: \m" << jBig.dump(4);
 			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
-										<< ofToString(paramsExtra);
+														   << ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
 		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "Window: \n"
-									 << jBig;
+														<< jBig;
 		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "Extras: \n"
-									 << jExtra;
+														<< jExtra;
 
 		//--
 
@@ -956,7 +939,7 @@ void ofxWindowApp::doApplyWindowExtraSettings() {
 void ofxWindowApp::doApplyWindowSettings() {
 	ofLogNotice("ofxWindowApp") << "doApplyWindowSettings()";
 
-	//TODO
+	// apply settings from windowSettings
 	ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 	ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 
@@ -964,7 +947,6 @@ void ofxWindowApp::doApplyWindowSettings() {
 	if (bIsFullScreen) {
 		ofSetFullscreen(true);
 	}
-
 	// window mode
 	else {
 		ofSetFullscreen(false);
@@ -1008,11 +990,13 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 
 	if (name == vSync.getName()) {
 		bFlagToSave = true;
+		ofSetVerticalSync(vSync.get());
 		return;
 	}
 
 	if (name == fpsTarget.getName()) {
 		bFlagToSave = true;
+		ofSetFrameRate(int(fpsTarget.get()));
 		return;
 	}
 }

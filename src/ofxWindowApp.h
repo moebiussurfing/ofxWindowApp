@@ -117,9 +117,9 @@ private:
 	bool mod_ALT = false;
 	bool mod_SHIFT = false;
 
-	bool bFlagToSave = 0;
+	bool bFlagToSave = false;
 
-	bool bFlagShowFeedbackDoneSaved = 0;
+	bool bFlagShowFeedbackDoneSaved = false;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
