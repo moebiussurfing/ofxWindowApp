@@ -62,6 +62,7 @@ public:
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 public:
 	void setup(ofxWindowApp * app) {
+		ofLogNotice("ofxWindowApp::setup(ofxWindowApp * app)") << "at frame num: " << ofGetFrameNum();
 		this->setInstance(app);
 		setup();
 	}

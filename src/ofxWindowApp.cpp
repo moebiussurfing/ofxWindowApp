@@ -57,6 +57,7 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
+	ofLogNotice("ofxWindowApp::ofxWindowApp()") << "at frame num: " << ofGetFrameNum();
 
 	doResetWindow();
 
@@ -146,11 +147,11 @@ void ofxWindowApp::exit() {
 //--------------------------------------------------------------
 void ofxWindowApp::setup() {
 	if (bDoneSetup) {
-	ofLogWarning("ofxWindowApp::setup()") << "Skip! at frame num: " << ofGetFrameNum();
+		ofLogWarning("ofxWindowApp::setup()") << "Skip! at frame num: " << ofGetFrameNum();
 		return;
 	}
 
-	ofLogNotice("ofxWindowApp::setup()");
+	ofLogNotice("ofxWindowApp::setup()") << "at frame num: " << ofGetFrameNum();
 
 	//--
 
@@ -270,7 +271,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 			bFlagDoneSavedEasyCallback = true;
 
-			ofLogNotice("ofxWindowApp::update()") << "flag to save (bFlagToSave)";
+			ofLogNotice("ofxWindowApp::update()") << "Going to save bc flagged... (bFlagToSave)";
 
 			saveSettings();
 		}
@@ -359,7 +360,7 @@ void ofxWindowApp::doRefreshGetWindowSettings() {
 		bIsFullScreen = false;
 	else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
 		bIsFullScreen = true;
-	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE))
+	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE))//TODO
 		bIsFullScreen = false;
 }
 
@@ -380,7 +381,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	else
 		path = path_folder + "/" + path_filename;
 
-	ofLogNotice("ofxWindowApp::saveSettings") << path;
+	ofLogNotice("ofxWindowApp::saveSettings()") << path;
 
 	// Force mini to window, not full screen
 
@@ -390,6 +391,14 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	ofJson jApp;
 	ofJson jExtra;
+
+	ofLogNotice("ofxWindowApp") << "> `windowSettings`:";
+	ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
+	ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
+	ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
+	ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
+	ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
+	ofLogNotice("ofxWindowApp") << "Ready to save `windowSettings`...";
 
 	ofxSerializer::ofxWindowApp::to_json(jApp, windowSettings);
 
@@ -424,7 +433,7 @@ void ofxWindowApp::loadSettings() {
 	ofFile file(path);
 	bool bFileExist = file.exists();
 	if (bFileExist) {
-		ofLogNotice("ofxWindowApp") << "loadFileSettings(): File found: " << path;
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File found: " << path;
 
 		//--
 
@@ -433,7 +442,7 @@ void ofxWindowApp::loadSettings() {
 
 		ofJson data;
 		data = ofLoadJson(path);
-		ofLogNotice("ofxWindowApp") << "File JSON: " << data.dump(4);
+		ofLogNotice("ofxWindowApp") << "File JSON: \n" << data.dump(4);
 
 		ofJson jBig;
 
@@ -448,14 +457,14 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogNotice("ofxWindowApp") << "Settings: " << jBig.dump(4);
-			ofLogNotice("ofxWindowApp") << "Extras: " << ofToString(paramsExtra);
+			ofLogNotice("ofxWindowApp") << "Settings: \m" << jBig.dump(4);
+			ofLogNotice("ofxWindowApp") << "Extras: \n" << ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp") << "Window: " << jBig;
-		ofLogVerbose("ofxWindowApp") << "Extras: " << jExtra;
+		ofLogVerbose("ofxWindowApp") << "Window: \n" << jBig;
+		ofLogVerbose("ofxWindowApp") << "Extras: \n" << jExtra;
 
 		//--
 
@@ -480,14 +489,6 @@ void ofxWindowApp::loadSettings() {
 		ofLogVerbose("ofxWindowApp") << "h: " << jh;
 		ofLogVerbose("ofxWindowApp") << "m: " << jm;
 
-		//// TODO:
-		//// Workaround to avoid negative values
-		//// required to fix glfw o OF bugs..
-		//if (jy < SIZE_SECURE_GAP_INISDE_SCREEN) {
-		//	jy = (int)SIZE_SECURE_GAP_INISDE_SCREEN;
-		//	//jy = (int)OFX_WINDOW_APP_BAR_HEIGHT;
-		//}
-
 		// Screen modes
 		// OF_WINDOW = 0
 		// OF_FULLSCREEN = 1
@@ -504,18 +505,13 @@ void ofxWindowApp::loadSettings() {
 			bIsFullScreen = false;
 		else if (windowSettings.windowMode == ofWindowMode(1)) //fullscreen
 			bIsFullScreen = true;
-		else if (windowSettings.windowMode == ofWindowMode(2)) //game//TODO
+		else if (windowSettings.windowMode == ofWindowMode(2)) //game //TODO
 			bIsFullScreen = false;
 
-		//bIsFullScreenInSettings = bIsFullScreen;
+		windowSettings.setPosition(glm::vec2(jx, jy));
+		windowSettings.setSize(jw, jh);
 
-		//window
-		//if (!bIsFullScreen)
-		{
-			windowSettings.setPosition(glm::vec2(jx, jy));
-			windowSettings.setSize(jw, jh);
-		}
-
+		ofLogNotice("ofxWindowApp") << "> `windowSettings`:";
 		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
 		ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
 		ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
@@ -605,28 +601,28 @@ void ofxWindowApp::drawDebug() {
 	//// Debug feedback. Flash when saving
 	//ofColor c1 = bFlagShowFeedbackDoneSaved ? 255 : 0;
 	//ofColor c2 = bFlagShowFeedbackDoneSaved ? 0 : 255;
-	
-//#ifndef USE_CUSTOM_FONT
-//	int x = 5 - 1;
-//	int y = 16 - 1;
-//	ofDrawBitmapStringHighlight(s, x, y, c1, c2);
-//#endif
-//#ifdef USE_CUSTOM_FONT
-//	ofPushStyle();
-//	ofFill();
-//	int x = 5 - 1;
-//	int y = 16 - 1;
-//	auto bb = font.getStringBoundingBox(s, x, y);
-//	bb.setWidth(bb.getWidth() + pad);
-//	bb.setHeight(bb.getHeight() + pad);
-//	bb.translateX(-pad / 2);
-//	bb.translateY(-pad / 2);
-//	ofSetColor(0);
-//	ofDrawRectangle(bb);
-//	ofSetColor(255);
-//	font.drawString(s, x, y);
-//	ofPopStyle();
-//#endif
+
+	//#ifndef USE_CUSTOM_FONT
+	//	int x = 5 - 1;
+	//	int y = 16 - 1;
+	//	ofDrawBitmapStringHighlight(s, x, y, c1, c2);
+	//#endif
+	//#ifdef USE_CUSTOM_FONT
+	//	ofPushStyle();
+	//	ofFill();
+	//	int x = 5 - 1;
+	//	int y = 16 - 1;
+	//	auto bb = font.getStringBoundingBox(s, x, y);
+	//	bb.setWidth(bb.getWidth() + pad);
+	//	bb.setHeight(bb.getHeight() + pad);
+	//	bb.translateX(-pad / 2);
+	//	bb.translateY(-pad / 2);
+	//	ofSetColor(0);
+	//	ofDrawRectangle(bb);
+	//	ofSetColor(255);
+	//	font.drawString(s, x, y);
+	//	ofPopStyle();
+	//#endif
 
 	if (bFlagShowFeedbackDoneSaved) bFlagShowFeedbackDoneSaved = 0;
 	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
@@ -680,7 +676,7 @@ void ofxWindowApp::drawDebugInfo() {
 	str += strPad + "[T] " + ofToString(bWindowStayOnTop ? "ON_TOP:TRUE " : "ON_TOP:FALSE");
 #endif
 
-	str += strPad + "[D] DEBUG_" +ofToString(bShowDebug ? "ON " : "OFF");
+	str += strPad + "[D] DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 
 	str += strPad + "  ";
 	//str += strPad + "[MOD:ALT]";
@@ -820,12 +816,11 @@ void ofxWindowApp::windowResized(int w, int h) {
 	window_H = h;
 	window_X = ofGetWindowPositionX();
 	window_Y = ofGetWindowPositionY();
+	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
 
 	doRefreshGetWindowSettings();
 
 	bFlagToSave = true;
-
-	ofLogVerbose("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
