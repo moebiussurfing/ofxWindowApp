@@ -6,7 +6,7 @@ void ofApp::setup()
 	w.setup(&w);
 
 	// customize
-	//w.setFrameRate(120);
+	w.setFrameRate(120);
 
 	// force debug
 	w.bShowDebug = true;

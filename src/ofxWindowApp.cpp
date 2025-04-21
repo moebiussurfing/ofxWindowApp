@@ -18,7 +18,8 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	if (!instance) return;
 	ofLogNotice("ofxWindowApp:windowMoved(window, xpos, ypos)") << ofToString(xpos) << ", " << ofToString(ypos);
 
-	instance->windowChanged();
+	//instance->windowChanged();
+	instance->bFlagWindowChanged = true;
 }
 
 	#endif
@@ -28,19 +29,20 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
 	ofLogNotice("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
 
-	this->windowChanged();
+	//this->windowChanged();
+	bFlagWindowChanged = true;
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h) {
 	ofLogNotice("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
 
-	this->windowChanged();
+	//this->windowChanged();
+	bFlagWindowChanged = true;
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::windowChanged() {
-	// Merge/group/redirect all callbacks to this method!
+void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to this method!
 	if (bDisableAutoSaveLock) {
 		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
 		return;
@@ -76,7 +78,7 @@ void ofxWindowApp::windowChanged() {
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
-	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "Constructor at frameNum: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "Constructor. FrameNum: " << ofGetFrameNum();
 
 	doResetWindowExtraSettings();
 	doResetWindowSettings();
@@ -123,7 +125,7 @@ void ofxWindowApp::exit() {
 //--------------------------------------------------------------
 void ofxWindowApp::setup() {
 	if (bDoneSetup) {
-		ofLogWarning("ofxWindowApp:setup()") << "Skip! at frameNum: " << ofGetFrameNum();
+		ofLogWarning("ofxWindowApp:setup()") << "SKIP! FrameNum: " << ofGetFrameNum();
 		return;
 	}
 
@@ -205,7 +207,7 @@ void ofxWindowApp::setupParams() {
 //--------------------------------------------------------------
 void ofxWindowApp::startup() {
 	if (bDoneStartup) {
-		ofLogWarning("ofxWindowApp:startup()") << "Skip! at frameNum: " << ofGetFrameNum();
+		ofLogWarning("ofxWindowApp:startup()") << "SKIP! FrameNum: " << ofGetFrameNum();
 		return;
 	}
 	ofLogNotice("ofxWindowApp:startup()") << "FrameNum: " << ofGetFrameNum();
@@ -323,11 +325,20 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		drawDebug();
 		drawDebugSystemMonitors();
 	}
+
+	//--
+
+	//TODO: trying to fix som glfw/OF windows management problems...
+	// https://forum.openframeworks.cc/t/timing-of-windowresized/44492
+	if (bFlagWindowChanged) {
+		bFlagWindowChanged = false;
+		this->windowChanged();
+	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::doSetWindowSettingsFromAppWindow() {
-	ofLogNotice("ofxWindowApp") << "doSetWindowSettingsFromAppWindow()";
+	ofLogNotice("ofxWindowApp:doSetWindowSettingsFromAppWindow()");
 
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
@@ -390,7 +401,8 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	logSettings();
 
 	// Save file
-	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << data.dump(4);
+	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << endl
+															 << data.dump(4);
 	ofSavePrettyJson(path, data);
 
 	//--
@@ -416,7 +428,8 @@ void ofxWindowApp::loadSettings() {
 		// Load settings in one file
 		ofJson data;
 		data = ofLoadJson(path);
-		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File JSON: \n" << data.dump(4);
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File JSON: \n"
+													   << data.dump(4);
 
 		//--
 
@@ -430,14 +443,18 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n" << jWindowSettings.dump(4);
-			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n" << ofToString(paramsExtra);
+			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n"
+														   << jWindowSettings.dump(4);
+			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n"
+														   << ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n" << jWindowSettings;
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n" << jExtra;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n"
+														<< jWindowSettings;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
+														<< jExtra;
 
 		//--
 
@@ -489,8 +506,8 @@ void ofxWindowApp::loadSettings() {
 
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
 
-		// log
-		logSettings();
+		//// log
+		//logSettings();
 
 		//--
 
@@ -529,7 +546,7 @@ void ofxWindowApp::drawDebug() {
 	// Window title
 	string tp = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string ts = ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-	string t = "ofxWindowApp    DEBUG        " + tp + "    " + ts;
+	string t = "ofxWindowApp    DEBUG            " + tp + "    " + ts;
 	ofSetWindowTitle(t);
 
 	// Text box
@@ -864,15 +881,13 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	}
 
 	// Switch v-sync mode
-	else if (key == 'V')
-	{
+	else if (key == 'V') {
 		vSync = !vSync;
 		ofSetVerticalSync(vSync);
 	}
 
 	// Toggle disableSave
-	else if (key == 'L')
-	{
+	else if (key == 'L') {
 		bDisableAutoSaveLock = !bDisableAutoSaveLock;
 		setDisableAutoSaveLock(bDisableAutoSaveLock);
 	}
@@ -887,6 +902,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	// Reset
 	else if (key == OF_KEY_BACKSPACE) {
 		doResetWindowSettings();
+		doApplyWindowSettings();
 	}
 
 	// Layout pos
@@ -918,10 +934,10 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 	const int & key = eventArgs.key;
 
 	// Release modifiers
-	mod_COMMAND = key == OF_KEY_COMMAND; // macOS
-	mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
 	mod_ALT = key == OF_KEY_ALT;
-	mod_SHIFT = key == OF_KEY_SHIFT;
+	//mod_COMMAND = key == OF_KEY_COMMAND; // macOS
+	//mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
+	//mod_SHIFT = key == OF_KEY_SHIFT;
 }
 
 //--------------------------------------------------------------
@@ -962,10 +978,10 @@ void ofxWindowApp::doApplyToggleWindowMode() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::doApplyWindowExtraSettings() {
-	ofLogNotice("ofxWindowApp") << "doApplyWindowExtraSettings()";
+	ofLogNotice("ofxWindowApp:doApplyWindowExtraSettings()");
 
-	ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
-	ofLogVerbose("ofxWindowApp") << "vSync: " << vSync;
+	ofLogVerbose("ofxWindowApp:doApplyWindowExtraSettings()") << "FpsTarget: " << fpsTarget;
+	ofLogVerbose("ofxWindowApp:doApplyWindowExtraSettings()") << "vSync: " << vSync;
 
 	ofSetFrameRate(int(fpsTarget.get()));
 	ofSetVerticalSync(vSync.get());
@@ -975,7 +991,7 @@ void ofxWindowApp::doApplyWindowExtraSettings() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::doApplyWindowSettings() {
-	ofLogNotice("ofxWindowApp") << "doApplyWindowSettings()";
+	ofLogNotice("ofxWindowApp:doApplyWindowSettings()");
 
 	// apply settings from windowSettings
 	ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);

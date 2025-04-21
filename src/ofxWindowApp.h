@@ -134,14 +134,14 @@ public:
 	void setFrameRate(float f) {
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
-		saveSettings();
+		//saveSettings();//TODO
 	}
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
 		vSync = b;
 		ofSetVerticalSync(vSync);
-		saveSettings();
+		//saveSettings();//TODO
 	}
 
 	//--------------------------------------------------------------
@@ -244,7 +244,7 @@ public:
 	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
 	void setDisableAutoSaveLock(bool b) {
 		bDisableAutoSaveLock = b;
-		saveSettings();
+		//saveSettings();//TODO
 	}
 
 	//--------------------------------------------------------------
@@ -257,7 +257,7 @@ public:
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) { //will display alert drop fps info ven when debug display disabled
 		bShowInfoPerformanceAlways = b;
-		saveSettings();
+		//saveSettings();//TODO
 	}
 
 	//--
@@ -367,7 +367,7 @@ public:
 	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
 	ofParameter<bool> bShowInfo { "ShowDebugInfo", true };
 	ofParameter<bool> bShowInfoPerformanceAlways { "ShowDebugPerformance", true };
-	ofParameter<bool> bDisableAutoSaveLock { "DisableAutosaveLock", false };
+	ofParameter<bool> bDisableAutoSaveLock { "DisableAutoSaveLock", false };
 	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
 
@@ -416,6 +416,7 @@ private:
 	void drawDebug();
 
 	void windowChanged();
+	bool bFlagWindowChanged = false;
 
 	//--------------------------------------------------------------
 

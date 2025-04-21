@@ -23,12 +23,13 @@
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
 * Window **Mode** (window/full screen).
-* Window App target **FPS** settings (vs real current **framerate**).
-* Window App **vSync** state. 
+* Window target **FPS** settings (vs real current **framerate**).
+* Window **vSync** state. 
 * "**Alert**" with a **performance** red bar when **low FPS drops** too much under the expected target frame rate.
 * Easy change the app settings just by editing the **JSON file**, instead of the app code.
-* Optional custom TTF font for debug display.
+* Optional `custom TTF font` for debug display.
 * `Stay on top` mode, easy console window disabler. (**WIN32** only)
+* Window shape presets with `key commands` for squared and common `Instagram` sizes.
 
 ## KEY COMMANDS
 
