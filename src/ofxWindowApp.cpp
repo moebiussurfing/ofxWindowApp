@@ -14,19 +14,21 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-	// Ignore if pos not changed
-	static int xpos_ = -1;
-	static int ypos_ = -1;
-	bool bChanged = 0;
-	if (xpos != xpos_) {
-		xpos_ = xpos;
-		bChanged = true;
-	}
-	if (ypos != ypos_) {
-		ypos_ = ypos;
-		bChanged = true;
-	}
-	if (!bChanged) return;
+	ofLogVerbose("ofxWindowApp:windowMovedd(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
+
+	//// Ignore if pos not changed
+	//static int xpos_ = -1;
+	//static int ypos_ = -1;
+	//bool bChanged = 0;
+	//if (xpos != xpos_) {
+	//	xpos_ = xpos;
+	//	bChanged = true;
+	//}
+	//if (ypos != ypos_) {
+	//	ypos_ = ypos;
+	//	bChanged = true;
+	//}
+	//if (!bChanged) return;
 
 	//--
 
@@ -38,8 +40,6 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 		instance->window_Y = ypos;
 
 		instance->doRefreshGetWindowSettings();
-
-		ofLogVerbose("ofxWindowApp::windowMoved") << ofToString(xpos) << ", " << ofToString(ypos);
 
 		instance->bFlagToSave = true;
 
@@ -155,12 +155,12 @@ void ofxWindowApp::setup() {
 
 	//--
 
-	// get rectanlges from os displays/monitors
+	// Get rectanlges from os displays/monitors
 	checkMonitors();
 
 	//--
 
-	// create callback for window moved
+	// Create callback for window moved
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 	GLFWwindow * glfwWindow = glfwGetCurrentContext();
 	glfwSetWindowPosCallback(glfwWindow, windowMoved);
@@ -182,7 +182,7 @@ void ofxWindowApp::setup() {
 	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-	if (!b) b = font.load(OF_TTF_SANS, fontSize);
+	if (!b) b = font.load(OF_TTF_MONO, 10);
 #endif
 
 	//--
@@ -233,17 +233,17 @@ void ofxWindowApp::setupParams() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args) {
-	// Auto call setup on first frame.
+	// Auto call setup on first frame if required.
 	if (!bDoneSetup) {
 		if (ofGetFrameNum() >= 0) {
 			setup();
 		}
 	}
 
-	// Auto call startup but after setup is done.
+	// Auto call startup but after setup is done if required.
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
-			if (ofGetFrameNum() > 0) {
+			if (ofGetFrameNum() >= 0) {
 				// Workaround
 				startup();
 			}
@@ -271,7 +271,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 			bFlagDoneSavedEasyCallback = true;
 
-			ofLogNotice("ofxWindowApp::update()") << "Going to save bc flagged... (bFlagToSave)";
+			ofLogNotice("ofxWindowApp:update()") << "Going to save bc flagged... (bFlagToSave)";
 
 			saveSettings();
 		}
@@ -315,20 +315,17 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM) {
-#ifndef USE_CUSTOM_FONT
-		yy = window_H - 10; // little air
-#endif
 #ifdef USE_CUSTOM_FONT
 		yy = window_H - fontSize + 5;
+#else
+		yy = window_H - 10;
 #endif
 	}
-
 	else if (positionLayout == DEBUG_POSITION_TOP) {
-#ifndef USE_CUSTOM_FONT
-		yy = 15;
-#endif
 #ifdef USE_CUSTOM_FONT
 		yy = fontSize;
+#else
+		yy = 15;
 #endif
 	}
 
@@ -360,8 +357,10 @@ void ofxWindowApp::doRefreshGetWindowSettings() {
 		bIsFullScreen = false;
 	else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
 		bIsFullScreen = true;
-	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE))//TODO
+	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE)) //TODO
 		bIsFullScreen = false;
+
+	logSettings();
 }
 
 //--------------------------------------------------------------
@@ -381,9 +380,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	else
 		path = path_folder + "/" + path_filename;
 
-	ofLogNotice("ofxWindowApp::saveSettings()") << path;
-
-	// Force mini to window, not full screen
+	ofLogNotice("ofxWindowApp:saveSettings()") << path;
 
 	//--
 
@@ -392,12 +389,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofJson jApp;
 	ofJson jExtra;
 
-	ofLogNotice("ofxWindowApp") << "> `windowSettings`:";
-	ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
-	ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
-	ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
-	ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
-	ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
+	logSettings();
 	ofLogNotice("ofxWindowApp") << "Ready to save `windowSettings`...";
 
 	ofxSerializer::ofxWindowApp::to_json(jApp, windowSettings);
@@ -442,7 +434,8 @@ void ofxWindowApp::loadSettings() {
 
 		ofJson data;
 		data = ofLoadJson(path);
-		ofLogNotice("ofxWindowApp") << "File JSON: \n" << data.dump(4);
+		ofLogNotice("ofxWindowApp") << "File JSON: \n"
+									<< data.dump(4);
 
 		ofJson jBig;
 
@@ -457,14 +450,17 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogNotice("ofxWindowApp") << "Settings: \m" << jBig.dump(4);
-			ofLogNotice("ofxWindowApp") << "Extras: \n" << ofToString(paramsExtra);
+			ofLogNotice("ofxWindowApp") << "\tSettings: \m" << jBig.dump(4);
+			ofLogNotice("ofxWindowApp") << "\tExtras: \n"
+										<< ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp") << "Window: \n" << jBig;
-		ofLogVerbose("ofxWindowApp") << "Extras: \n" << jExtra;
+		ofLogVerbose("ofxWindowApp") << "Window: \n"
+									 << jBig;
+		ofLogVerbose("ofxWindowApp") << "Extras: \n"
+									 << jExtra;
 
 		//--
 
@@ -511,13 +507,8 @@ void ofxWindowApp::loadSettings() {
 		windowSettings.setPosition(glm::vec2(jx, jy));
 		windowSettings.setSize(jw, jh);
 
-		ofLogNotice("ofxWindowApp") << "> `windowSettings`:";
-		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
-		ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
-		ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
-		ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
-		ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
-		ofLogNotice("ofxWindowApp") << "Done load settings.";
+		logSettings();
+		ofLogNotice("ofxWindowApp") << "Done load settings!";
 	} else {
 		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
 		doResetWindow();
@@ -679,7 +670,6 @@ void ofxWindowApp::drawDebugInfo() {
 	str += strPad + "[D] DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 
 	str += strPad + "  ";
-	//str += strPad + "[MOD:ALT]";
 	str += " " + ofToString(mod_ALT ? "ALT" : "   ");
 	str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
 	str += " " + ofToString(mod_SHIFT ? "SHIFT" : "     ");
@@ -687,9 +677,6 @@ void ofxWindowApp::drawDebugInfo() {
 
 	//--
 
-#ifndef USE_CUSTOM_FONT
-	ofDrawBitmapStringHighlight(str, xx, yy);
-#endif
 #ifdef USE_CUSTOM_FONT
 	ofPushStyle();
 	ofFill();
@@ -703,6 +690,8 @@ void ofxWindowApp::drawDebugInfo() {
 	ofSetColor(255);
 	font.drawString(str, xx, yy);
 	ofPopStyle();
+#else
+	ofDrawBitmapStringHighlight(str, xx, yy);
 #endif
 }
 
@@ -734,13 +723,12 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		float fx, fy, fw, fh, fwMax, fPad;
 		fwMax = 100.f; //max width
 
-#ifndef USE_CUSTOM_FONT
-		fh = 10.f;
-		fPad = 5.f; //pad to border
-#endif
 #ifdef USE_CUSTOM_FONT
 		fPad = 4.f; //pad to border
 		//fh = fontSize + pad - 4;
+#else
+		fh = 10.f;
+		fPad = 5.f; //pad to border
 #endif
 
 		// position
@@ -769,13 +757,8 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 
 		// fps label
 		string str = diff;
-#ifndef USE_CUSTOM_FONT
-		//ofDrawBitmapStringHighlight(str, xx, yy);
-		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255)); //text fps diff
-#endif
 #ifdef USE_CUSTOM_FONT
 		ofPushStyle();
-
 		ofFill();
 		auto bb = font.getStringBoundingBox(str, _xx, _yy);
 		bb.setWidth(bb.getWidth() + pad);
@@ -786,8 +769,10 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		ofDrawRectangle(bb);
 		ofSetColor(255);
 		font.drawString(str, _xx, _yy);
-
 		ofPopStyle();
+#else
+		//ofDrawBitmapStringHighlight(str, xx, yy);
+		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255)); //text fps diff
 #endif
 
 #ifdef USE_CUSTOM_FONT
@@ -998,6 +983,8 @@ void ofxWindowApp::doApplyExtraSettings() {
 
 	ofSetFrameRate(int(fpsTarget.get()));
 	ofSetVerticalSync(vSync.get());
+
+	logSettings();
 }
 
 //--------------------------------------------------------------
@@ -1014,6 +1001,8 @@ void ofxWindowApp::doApplyWindowMode() {
 		ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 		ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 	}
+
+	logSettings();
 }
 
 //--------------------------------------------------------------
