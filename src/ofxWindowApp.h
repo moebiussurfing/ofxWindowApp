@@ -481,7 +481,7 @@ private:
 
 	// debug
 	void logSettings() {
-		ofLogNotice("ofxWindowApp") << "----------------------logSettings()";
+		ofLogNotice("ofxWindowApp") << "----------------------logSettings()--BEGIN";
 		ofLogNotice("ofxWindowApp") << "> ofGetWindow";
 		ofLogNotice("ofxWindowApp") << "Position: "
 									<< ofToString(ofGetWindowPositionX()) << ","
@@ -496,8 +496,7 @@ private:
 		ofLogNotice("ofxWindowApp") << "Size:      "
 									<< ofToString(windowSettings.getWidth())
 									<< "x" << ofToString(windowSettings.getHeight());
-		ofLogNotice("ofxWindowApp") << "----------------------";
-		ofLogNotice("ofxWindowApp");
+		ofLogNotice("ofxWindowApp") << "----------------------logSettings()--END";
 	}
 };
 

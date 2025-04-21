@@ -371,7 +371,7 @@ void ofxWindowApp::saveSettingsAfterRefresh() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
-	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()";
+	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()--BEGIN";
 
 	string path;
 	if (path_folder == "" && path_filename == "")
@@ -414,12 +414,12 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	bFlagShowFeedbackDoneSaved = true;
 
-	ofLogNotice("ofxWindowApp:saveSettings()") << "saveSettings()----------------------";
+	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()--END";
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::loadSettings() {
-	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()";
+	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()--BEGIN";
 	//ofSetFullscreen(false);
 
 	string path = path_folder + "/" + path_filename;
@@ -472,6 +472,7 @@ void ofxWindowApp::loadSettings() {
 		//--
 
 		// Big
+		//TODO: no using ofxSerializer when loading... could remove and make new approach..
 		jx = jBig["position"]["x"];
 		jy = jBig["position"]["y"];
 		jw = jBig["size"]["width"];
@@ -487,10 +488,12 @@ void ofxWindowApp::loadSettings() {
 		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "h: " << jh;
 		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "m: " << jm;
 
+		// Set windowSettings:
+		
 		// Screen modes
 		// OF_WINDOW = 0
 		// OF_FULLSCREEN = 1
-		// OF_GAME_MODE = 2
+		// OF_GAME_MODE = 2 //TODO
 
 		if (jm == "0")
 			windowSettings.windowMode = ofWindowMode(0);
@@ -499,11 +502,11 @@ void ofxWindowApp::loadSettings() {
 		else if (jm == "2")
 			windowSettings.windowMode = ofWindowMode(2);
 
-		if (windowSettings.windowMode == ofWindowMode(0)) //window
+		if (windowSettings.windowMode == ofWindowMode(0))
 			bIsFullScreen = false;
-		else if (windowSettings.windowMode == ofWindowMode(1)) //fullscreen
+		else if (windowSettings.windowMode == ofWindowMode(1))
 			bIsFullScreen = true;
-		else if (windowSettings.windowMode == ofWindowMode(2)) //game //TODO
+		else if (windowSettings.windowMode == ofWindowMode(2))
 			bIsFullScreen = false;
 
 		windowSettings.setPosition(glm::vec2(jx, jy));
@@ -539,7 +542,7 @@ void ofxWindowApp::loadSettings() {
 	} else {
 		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path;
 	}
-	ofLogNotice("ofxWindowApp:loadFileSettings()") << "loadSettings()----------------------";
+	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()--END";
 }
 
 //--------------------------------------------------------------
@@ -855,6 +858,11 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	else if (key == OF_KEY_BACKSPACE) {
 		doResetWindowSettings();
+	}
+
+	// debug load
+	else if (key == OF_KEY_F1) {
+		loadSettings();
 	}
 
 	else {
