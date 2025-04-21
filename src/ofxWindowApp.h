@@ -49,6 +49,9 @@
 #include "ofxSerializer_ofxWindowApp.h" //for windows size/pos serialization
 #include "ofxSurfingHelpersLite_ofxWindowApp.h" //for some windows sizes keycommands presets
 
+//TODO
+//#include "FileChangeChecker.h"
+
 //--------
 
 #define USING__OFX_WINDOW_APP
@@ -82,6 +85,9 @@ public:
 #endif
 
 	//----
+
+//private:
+//	std::unique_ptr<FileChangeChecker> checker;
 
 private:
 	void startup();

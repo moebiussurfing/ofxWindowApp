@@ -151,10 +151,14 @@ void ofxWindowApp::setup() {
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
 
+	////TODO
+	//string path = path_folder + "/" + path_filename;
+	//checker = std::make_unique<FileChangeChecker>(path);
+
 	//--
 
 	// Custom font
-	if (1) {
+	if (1) { //disable to use bitmap OF fonts
 		fontSize = 10;
 		string _path = "assets/fonts/"; // assets fonts folder
 		bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
@@ -241,6 +245,12 @@ void ofxWindowApp::update(ofEventArgs & args) {
 			}
 		}
 	}
+
+	//TODO
+	//if (checker->hasFileChanged()) {
+	//	string path = path_folder + "/" + path_filename;
+	//	ofLogNotice("ofxWindowApp:update()") << "checker->hasFileChanged() File changed! "<<path;
+	//}
 
 	//--
 
