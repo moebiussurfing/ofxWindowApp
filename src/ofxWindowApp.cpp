@@ -16,23 +16,9 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	if (!instance) return;
-	if (instance->bDisableCallback_windowMovedOrResized) {
-		ofLogNotice("ofxWindowApp:windowResized(GLFWwindow *,xpos,ypos)") << "Bypassed! (bDisableCallback_windowMovedOrResized)";
-		return;
-	}
+	ofLogNotice("ofxWindowApp:windowMoved(window, xpos, ypos)") << ofToString(xpos) << ", " << ofToString(ypos);
 
-	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
-
-	if (!instance->bDoneSetup) return;
-	if (!instance->bDoneStartup) return;
-
-	instance->doGetWindowSettings(); // get raw values/states from the app window to windowSettings
-
-	instance->bFlagToSave = true; // flag to save json on next frame
-
-		#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
-	instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-		#endif
+	instance->windowChanged();
 }
 
 	#endif
@@ -40,27 +26,42 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
-	if (bDisableCallback_windowMovedOrResized) {
-		ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "Bypassed! (bDisableCallback_windowMovedOrResized)";
-		return;
-	}
+	ofLogNotice("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
 
-	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
-	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "at frameNum: " << ofGetFrameNum();
-
-	windowResized(resize.width, resize.height);
+	this->windowChanged();
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h) {
-	if (bDisableCallback_windowMovedOrResized) {
-		ofLogNotice("ofxWindowApp:windowResized(x,y)") << "Bypassed! (bDisableCallback_windowMovedOrResized)";
+	ofLogNotice("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
+
+	this->windowChanged();
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowChanged() {
+	// Merge/group/redirect all callbacks to this method!
+	if (bDisableAutoSaveLock) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
 		return;
 	}
-	ofLogNotice("ofxWindowApp:windowResized(w,h)") << ofToString(w) << ", " << ofToString(h);
-	ofLogNotice("ofxWindowApp:windowResized(w,h)") << "at frameNum: " << ofGetFrameNum();
+	// ignored changes when not ended setup, startup processes or is forced flagged to bypass callbacks
+	if (!bDoneSetup) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneSetup) > FrameNum: " << ofGetFrameNum();
+		return;
+	}
+	if (!bDoneStartup) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneStartup) > FrameNum: " << ofGetFrameNum();
+		return;
+	}
+	if (bDisableCallback_windowMovedOrResized) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableCallback_windowMovedOrResized) > FrameNum: " << ofGetFrameNum();
+		return;
+	}
 
-	doGetWindowSettings(); // get raw values/states from the app window to windowSettings
+	ofLogNotice("ofxWindowApp:windowChanged()") << "FrameNum: " << ofGetFrameNum();
+
+	doSetWindowSettingsFromAppWindow(); // get raw values/states from the app window to windowSettings
 
 	bFlagToSave = true; // flag to save json on next frame
 
@@ -80,7 +81,7 @@ ofxWindowApp::ofxWindowApp() {
 	doResetWindowExtraSettings();
 	doResetWindowSettings();
 
-	bDisableCallback_windowMovedOrResized = true; //apply without saving json settings
+	bDisableCallback_windowMovedOrResized = true; // apply without saving json settings
 	doApplyWindowSettings();
 	doApplyWindowExtraSettings();
 	bDisableCallback_windowMovedOrResized = false;
@@ -111,7 +112,7 @@ void ofxWindowApp::exit() {
 	ofLogNotice("ofxWindowApp:exit()");
 
 #ifdef SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT
-	if (bAutoSaveLoad && !bDisableAutoSave) {
+	if (!bDisableAutoSaveLock) {
 		save();
 	}
 #endif
@@ -126,7 +127,7 @@ void ofxWindowApp::setup() {
 		return;
 	}
 
-	ofLogNotice("ofxWindowApp:setup()") << "at frameNum: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:setup()") << "FrameNum: " << ofGetFrameNum();
 
 	//--
 
@@ -189,7 +190,7 @@ void ofxWindowApp::setupParams() {
 	// Session
 	paramsSession.add(bShowInfo);
 	paramsSession.add(bShowInfoPerformanceAlways);
-	paramsSession.add(bDisableAutoSave);
+	paramsSession.add(bDisableAutoSaveLock);
 #ifdef SURFING_USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
 #endif
@@ -207,28 +208,12 @@ void ofxWindowApp::startup() {
 		ofLogWarning("ofxWindowApp:startup()") << "Skip! at frameNum: " << ofGetFrameNum();
 		return;
 	}
-	ofLogNotice("ofxWindowApp:startup()") << "at frameNum: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:startup()") << "FrameNum: " << ofGetFrameNum();
 
 	//--
 
 	// Load
-	if (bAutoSaveLoad) loadSettings();
-
-	//--
-
-	//#ifdef SURFING_USE_STAY_ON_TOP
-	//	// On top
-	//	if (!bIsFullScreen) {
-	//		// Workaround
-	//		// Refresh
-	//	#if defined(TARGET_WIN32)
-	//		HWND W = GetActiveWindow();
-	//		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-	//	#endif
-	//		// Re trig
-	//		bWindowStayOnTop = bWindowStayOnTop;
-	//	}
-	//#endif
+	if (bAutoLoad) loadSettings();
 
 	//--
 
@@ -250,7 +235,6 @@ void ofxWindowApp::update(ofEventArgs & args) {
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
 			if (ofGetFrameNum() > 0) { // after framenum 0
-				// Workaround
 				startup();
 			}
 		}
@@ -279,7 +263,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 	// Auto saver timer
 	// is no required to resize the window or to close the app window to save.
 	// then the app can crash an window shape will be stored 1 time each 10 seconds by default.
-	if (bAutoSaverTimed && !bDisableAutoSave) {
+	if (bAutoSaverTimed && !bDisableAutoSaveLock) {
 		auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
 		if (t > timePeriodToCheckIfSave) {
 			bool bModeSaveOnlyIfWindowMoved = 1;
@@ -310,16 +294,17 @@ void ofxWindowApp::update(ofEventArgs & args) {
 void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
 
+	// layouts top/bottom
 	if (positionLayout == DEBUG_POSITION_BOTTOM) {
-		if (!font.isLoaded()) {
+		if (font.isLoaded()) {
+			previewY = ofGetWindowHeight() - fontSize + 5;
+		} else {
 			previewX = 10;
 			previewY = ofGetWindowHeight() - 10;
-		} else {
-			previewY = ofGetWindowHeight() - fontSize + 5;
 		}
 	} else if (positionLayout == DEBUG_POSITION_TOP) {
 		if (font.isLoaded()) {
-			previewY = fontSize;
+			previewY = fontSize + 4;
 		} else {
 			previewY = 15;
 		}
@@ -341,19 +326,20 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doGetWindowSettings() {
-	ofLogNotice("ofxWindowApp") << "doGetWindowSettings()";
+void ofxWindowApp::doSetWindowSettingsFromAppWindow() {
+	ofLogNotice("ofxWindowApp") << "doSetWindowSettingsFromAppWindow()";
 
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
-	if (windowSettings.windowMode == ofWindowMode(OF_WINDOW))
-		bIsFullScreen = false;
-	else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
-		bIsFullScreen = true;
-	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE)) //TODO
-		bIsFullScreen = false;
+
+	//if (windowSettings.windowMode == ofWindowMode(OF_WINDOW))
+	//	bIsFullScreen = false;
+	//else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
+	//	bIsFullScreen = true;
+	//else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE)) //TODO
+	//	bIsFullScreen = false;
 
 	//logSettings();
 }
@@ -365,32 +351,27 @@ void ofxWindowApp::save() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettingsAfterRefresh() {
-	doGetWindowSettings();
+	doSetWindowSettingsFromAppWindow();
 	saveSettings();
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
-	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()--BEGIN";
+	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings() <--BEGIN";
 
-	string path;
-	if (path_folder == "" && path_filename == "")
-		path = "ofxWindowApp.json";
-	else
-		path = path_folder + "/" + path_filename;
-
+	string path = path_folder + "/" + path_filename;
 	ofLogNotice("ofxWindowApp:saveSettings()") << path;
 
 	//--
 
 	// Save window settings
 
-	ofJson jApp;
+	ofJson jWindowSettings;
 	ofJson jExtra;
 
 	ofLogNotice("ofxWindowApp:saveSettings()") << "Ready to save `windowSettings`...";
 
-	ofxSerializer::ofxWindowApp::to_json(jApp, windowSettings);
+	ofxSerializer::ofxWindowApp::to_json(jWindowSettings, windowSettings);
 
 	ofSerialize(jExtra, paramsExtra);
 
@@ -399,7 +380,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	// Settings in one file
 
 	ofJson data;
-	data.push_back(jApp);
+	data.push_back(jWindowSettings);
 	data.push_back(jExtra);
 
 	// Check if we need to create data folder first
@@ -416,13 +397,12 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	bFlagShowFeedbackDoneSaved = true;
 
-	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()--END";
+	ofLogNotice("ofxWindowApp:saveSettings()") << "----------------------saveSettings()--> END";
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::loadSettings() {
-	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()--BEGIN";
-	//ofSetFullscreen(false);
+	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings() <--BEGIN";
 
 	string path = path_folder + "/" + path_filename;
 
@@ -433,38 +413,31 @@ void ofxWindowApp::loadSettings() {
 
 		//--
 
-		// Load settings
-		// Settings in one file
-
+		// Load settings in one file
 		ofJson data;
 		data = ofLoadJson(path);
-		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File JSON: \n"
-													   << data.dump(4);
-
-		ofJson jBig;
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File JSON: \n" << data.dump(4);
 
 		//--
 
+		ofJson jWindowSettings;
 		ofJson jExtra;
 
 		if (data.size() >= 2) {
-			jBig = data[0]; //TODO: Ugly workaround wil break if differs json object format!
+			jWindowSettings = data[0]; //TODO: Ugly workaround wil break if differs json object format!
 			jExtra = data[1];
 
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\tSettings: \m" << jBig.dump(4);
-			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
-														   << ofToString(paramsExtra);
+			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n" << jWindowSettings.dump(4);
+			ofLogNotice("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n" << ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "Window: \n"
-														<< jBig;
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "Extras: \n"
-														<< jExtra;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n" << jWindowSettings;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n" << jExtra;
 
 		//--
 
@@ -475,11 +448,11 @@ void ofxWindowApp::loadSettings() {
 
 		// Big
 		//TODO: no using ofxSerializer when loading... could remove and make new approach..
-		jx = jBig["position"]["x"];
-		jy = jBig["position"]["y"];
-		jw = jBig["size"]["width"];
-		jh = jBig["size"]["height"];
-		jm = ofToString(jBig["window_mode"]);
+		jx = jWindowSettings["position"]["x"];
+		jy = jWindowSettings["position"]["y"];
+		jw = jWindowSettings["size"]["width"];
+		jh = jWindowSettings["size"]["height"];
+		jm = ofToString(jWindowSettings["window_mode"]);
 
 		// Remove from name the added \" by the serializer
 		ofStringReplace(jm, "\"", "");
@@ -491,7 +464,7 @@ void ofxWindowApp::loadSettings() {
 		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "m: " << jm;
 
 		// Set windowSettings:
-		
+
 		// Screen modes
 		// OF_WINDOW = 0
 		// OF_FULLSCREEN = 1
@@ -515,13 +488,13 @@ void ofxWindowApp::loadSettings() {
 		windowSettings.setSize(jw, jh);
 
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
-		ofLogNotice("ofxWindowApp:loadFileSettings()") << "-------------------";
 
 		// log
 		logSettings();
 
 		//--
 
+		// bypass windowChanged callbacks (to avoid save json file again)
 		bDisableCallback_windowMovedOrResized = true;
 		doApplyWindowSettings();
 		doApplyWindowExtraSettings();
@@ -548,7 +521,7 @@ void ofxWindowApp::loadSettings() {
 	} else {
 		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path;
 	}
-	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()--END";
+	ofLogNotice("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()--> END";
 }
 
 //--------------------------------------------------------------
@@ -556,7 +529,8 @@ void ofxWindowApp::drawDebug() {
 	// Window title
 	string tp = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string ts = ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-	ofSetWindowTitle("ofxWindowApp    DEBUG    " + tp + "    " + ts);
+	string t = "ofxWindowApp    DEBUG        " + tp + "    " + ts;
+	ofSetWindowTitle(t);
 
 	// Text box
 	string s;
@@ -568,7 +542,7 @@ void ofxWindowApp::drawDebug() {
 	s += "\n";
 
 	s += "> PRESS ALT +\n\n";
-	s += "D : SHOW DEBUG & MONITORS\n";
+	s += "D : SHOW DEBUG & DISPLAYS\n";
 	s += "W : SHOW INFO & PERFORMANCE\n";
 
 	s += "\n";
@@ -582,6 +556,7 @@ void ofxWindowApp::drawDebug() {
 	s += "5 : IG Square\n";
 	s += "BKSP : Reset default\n";
 
+	// Debug
 	//#define SURFING_WINDOW_APP__DEBUG_TIMER
 #ifdef SURFING_WINDOW_APP__DEBUG_TIMER
 	s += "\n";
@@ -607,8 +582,12 @@ void ofxWindowApp::drawDebug() {
 	if (font.isLoaded()) {
 		ofPushStyle();
 		ofFill();
-		int x = 4;
+		int x = 5;
 		int y = 17;
+		// fix space when using top layout
+		if (positionLayout == DEBUG_POSITION_TOP) {
+			y += 18;
+		}
 		x += SURFING__PAD_TO_WINDOW_BORDERS;
 		y += SURFING__PAD_TO_WINDOW_BORDERS;
 		auto bb = font.getStringBoundingBox(s, x, y);
@@ -635,7 +614,7 @@ void ofxWindowApp::drawInfo() {
 	string vSyncStr;
 	string fpsRealStr;
 	string fpsTargetStr;
-	string strPad = "  "; // Add spaces
+	string strPad = "  ";
 	string str;
 	string screenStr = "";
 	string screenPosStr = "";
@@ -662,28 +641,28 @@ void ofxWindowApp::drawInfo() {
 	vSyncStr = ofToString(vSync ? "ON " : "OFF");
 	str += strPad + "[V]_VSYNC_" + vSyncStr;
 
-	bool bModeFullScreen = false;
+	bool _bModeFullScreen = false;
 	if (ofGetWindowMode() == OF_WINDOW) // Is full screen
 	{
-		bModeFullScreen = false;
+		_bModeFullScreen = false;
 	} else if (ofGetWindowMode() == OF_FULLSCREEN) // Is window mode
 	{
-		bModeFullScreen = true;
+		_bModeFullScreen = true;
 	}
 	screenMode = "[F]_";
-	screenMode += bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE";
+	screenMode += _bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE";
 	str += strPad + screenMode;
 
-	str += strPad + "[L]_" + ofToString(bDisableAutoSave ? "NO_SAVE  " : "AUTO_SAVE");
+	str += strPad + "[L]_" + ofToString(bDisableAutoSaveLock ? "AUTO_SAVE_OFF" : "AUTO_SAVE_ON ");
 
 #ifdef SURFING_USE_STAY_ON_TOP
-	str += strPad + "[T]_" + ofToString(bWindowStayOnTop ? "ON_TOP:TRUE " : "ON_TOP:FALSE");
+	str += strPad + "[T]_" + ofToString(bWindowStayOnTop ? "ON_TOP_TRUE " : "ON_TOP_FALSE");
 #endif
 
 	str += strPad + "[D]_DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 	str += strPad;
 
-	// debug mod keys
+	// Debug mod keys
 	//str += strPad + "  ";
 	//str += " " + ofToString(mod_ALT ? "ALT" : "   ");
 	//str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
@@ -818,11 +797,48 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	const int & key = eventArgs.key;
 
-	// modifiers
+	// Modifiers
 	mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
-	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
-	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
-	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+	//mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
+	//mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
+	//mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+
+	//--
+
+	// Debug
+
+	if (bShowDebug) {
+		// set a window shape
+		if (key == OF_KEY_F1) {
+			ofSetWindowPosition(-1111, 1111);
+			ofSetWindowShape(1000, 1000);
+			logSettings();
+			return;
+		}
+		// log
+		if (key == OF_KEY_F2) {
+			logSettings();
+			return;
+		}
+		// refresh + log
+		if (key == OF_KEY_F3) {
+			doSetWindowSettingsFromAppWindow();
+			logSettings();
+			return;
+		}
+		// load
+		if (key == OF_KEY_F4) {
+			loadSettings();
+			return;
+		}
+		// save
+		if (key == OF_KEY_F5) {
+			saveSettings();
+			return;
+		}
+	}
+
+	//--
 
 	if (!mod_ALT) return;
 
@@ -845,33 +861,41 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	// Switch window mode
 	else if (key == 'F') {
 		doApplyToggleWindowMode();
-	} else if (key == 'V') // switch v-sync mode
+	}
+
+	// Switch v-sync mode
+	else if (key == 'V')
 	{
 		vSync = !vSync;
 		ofSetVerticalSync(vSync);
 	}
 
-	else if (key == 'L') // toggle disableSave
+	// Toggle disableSave
+	else if (key == 'L')
 	{
-		bDisableAutoSave = !bDisableAutoSave;
+		bDisableAutoSaveLock = !bDisableAutoSaveLock;
+		setDisableAutoSaveLock(bDisableAutoSaveLock);
 	}
 
 #ifdef SURFING_USE_STAY_ON_TOP
+	// Stay on top
 	else if (key == 'T') {
 		setToggleStayOnTop();
 	}
 #endif
 
+	// Reset
 	else if (key == OF_KEY_BACKSPACE) {
 		doResetWindowSettings();
 	}
 
-	// debug load
-	else if (key == OF_KEY_F1) {
-		loadSettings();
+	// Layout pos
+	else if (key == 'P') {
+		doTogglePositionDisplayInfo();
 	}
 
 	else {
+		// Window presets
 		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 		// set some custom common sizes:
 		// instagram, portrait, landscape, squared etc
@@ -902,7 +926,7 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::folderCheckAndCreate(string _path) {
-	ofLogNotice("ofxWindowApp") << "folderCheckAndCreate(). Path: " << _path;
+	ofLogNotice("ofxWindowApp:folderCheckAndCreate()") << "Path: " << _path;
 	if (_path == "") return;
 
 	ofDirectory dataDirectory(ofToDataPath(_path, true));
@@ -933,7 +957,7 @@ void ofxWindowApp::doApplyToggleWindowMode() {
 		ofSetFullscreen(false);
 	}
 
-	doGetWindowSettings();
+	doSetWindowSettingsFromAppWindow();
 }
 
 //--------------------------------------------------------------
@@ -1128,7 +1152,7 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	ofTranslate(monitorsCanvasRect.getBottomLeft());
 
 	//monitor names list
-	s = "\n\n\nSYSTEM DISPLAYS\n\n";
+	s = "\n\n\nDISPLAYS\n\n";
 	i = 0;
 	for (auto & monitorName : monitorNames) {
 		s += "#" + ofToString(i) + " " + monitorName + "\n";

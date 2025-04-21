@@ -66,14 +66,13 @@ public:
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 public:
 	void setup(ofxWindowApp * app) {
-		ofLogNotice("ofxWindowApp:setup(ofxWindowApp * app)") << "at frameNum: " << ofGetFrameNum();
+		ofLogNotice("ofxWindowApp:setup(ofxWindowApp * app)") << "FrameNum: " << ofGetFrameNum();
 		this->setInstance(app);
 		setup();
 	}
 
 private:
 	static void windowMoved(GLFWwindow * window, int xpos, int ypos);
-	bool bDisableCallback_windowMovedOrResized = false;
 
 private:
 	static ofxWindowApp * instance; // Static pointer to hold the instance
@@ -83,9 +82,6 @@ public:
 #endif
 
 	//----
-
-private:
-	bool bDoneSetup = false;
 
 private:
 	void startup();
@@ -103,7 +99,7 @@ private:
 	//--
 
 private:
-	ofWindowSettings windowSettings;
+	ofWindowSettings windowSettings; // main storage for window shape and window mode
 
 	ofTrueTypeFont font;
 	int fontSize;
@@ -116,10 +112,6 @@ private:
 	bool mod_CONTROL = false;
 	bool mod_ALT = false;
 	bool mod_SHIFT = false;
-
-	bool bFlagToSave = false;
-
-	bool bFlagShowFeedbackDoneSaved = false;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
@@ -142,33 +134,27 @@ public:
 	void setFrameRate(float f) {
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
+		saveSettings();
 	}
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
 		vSync = b;
 		ofSetVerticalSync(vSync);
+		saveSettings();
 	}
 
-	////--------------------------------------------------------------
-	//void setFullScreen(bool b) {
-	//	if (b) {
-	//		ofSetFullscreen(true);
-	//		bIsFullScreen = true;
-	//	} else {
-	//		ofSetFullscreen(false);
-	//		bIsFullScreen = false;
-
-	//		//float windowBar_h = 25;
-	//		//window_Y = MAX(ofGetWindowPositionY(), windowBar_h);
-	//		//// avoid negative out of screen. minimal h is 25
-	//		//window_X = ofGetWindowPositionX();
-	//		//ofSetWindowPosition(window_X, window_Y);
-	//	}
-
-	//	// Update
-	//	windowResized(ofGetWidth(), ofGetHeight());
-	//}
+	//--------------------------------------------------------------
+	void setFullScreen(bool b) {
+		if (b) {
+			ofSetFullscreen(true);
+			bIsFullScreen = true;
+		} else {
+			ofSetFullscreen(false);
+			bIsFullScreen = false;
+		}
+		doSetWindowSettingsFromAppWindow();
+	}
 
 	//--
 
@@ -199,53 +185,53 @@ private:
 
 	//--
 
-public:
-	//TODO
-	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
-	//--------------------------------------------------------------
-	void setConsoleVisible(bool show) {
-#if defined(TARGET_WIN32)
-		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
-#endif
-	}
-	//--------------------------------------------------------------
-	bool getConsoleVisible() {
-		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
-	}
+//public:
+//	//TODO
+//	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
+//	//--------------------------------------------------------------
+//	void setConsoleVisible(bool show) {
+//#if defined(TARGET_WIN32)
+//		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
+//#endif
+//	}
+//	//--------------------------------------------------------------
+//	bool getConsoleVisible() {
+//		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
+//	}
 
 	//--
 
 private:
-	void doGetWindowSettings();
-	void saveSettings(bool bSlient = false);
+	// Sync/apply states methods
+	void doSetWindowSettingsFromAppWindow();
+	void doApplyToggleWindowMode();
+	void doApplyWindowExtraSettings();
+	void doApplyWindowSettings();
+
+	void saveSettings(bool bSlient = false); // main save method
+	void loadSettings(); // main save method
 
 public:
 	void save(); // alias and public API
 
 private:
-	void saveSettingsAfterRefresh();
-	void loadSettings();
-
-private:
-	void doApplyWindowSettings();
+	void saveSettingsAfterRefresh(); // refresh update before save
 
 	//--
 
-public:
-	//string getPathFolder() const {
-	//	return path_folder;
-	//}
-	//string getPathSettings() const {
-	//	string p = path_folder + "/" + path_filename;
-	//	return p;
-	//}
+private:
+	// Path settings
+	// This is to folder all files to avoid mixing with other add-ons data
+	string path_folder;
+	string path_filename;
 
+	void folderCheckAndCreate(string _path); // check if required create folder or already exist
+
+//public:
 	////--------------------------------------------------------------
 	//void setPathFolder(string s) {
 	//	path_folder = s;
 	//}
-
-	void folderCheckAndCreate(string _path);
 
 	////--------------------------------------------------------------
 	//void setPathFilename(string s) {
@@ -254,32 +240,24 @@ public:
 
 	//--
 
-	////--------------------------------------------------------------
-	//void setAutoSaveLoad(bool b) {
-	//	bAutoSaveLoad = b;
-	//}
+public:
+	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
+	void setDisableAutoSaveLock(bool b) {
+		bDisableAutoSaveLock = b;
+		saveSettings();
+	}
 
-	////--------------------------------------------------------------
-	//void setShowDebug(bool b = true) {
-	//	bShowInfo = b;
-	//	//bShowInfoPerformanceAlways = b;
-	//}
-	////--------------------------------------------------------------
-	//void setShowDebugPerformance(bool b = true) {
-	//	bShowInfoPerformanceAlways = b;
-	//}
-	////--------------------------------------------------------------
-	//bool getShowDebug() {
-	//	return bShowInfo;
-	//}
-	////--------------------------------------------------------------
-	//void toggleShowDebug() {
-	//	bShowInfo = !bShowInfo;
-	//}
+	//--------------------------------------------------------------
+	void setAutoLoad(bool b) {
+		bAutoLoad = b;
+	}
+
+	//--
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) { //will display alert drop fps info ven when debug display disabled
 		bShowInfoPerformanceAlways = b;
+		saveSettings();
 	}
 
 	//--
@@ -297,9 +275,6 @@ public:
 	}
 
 	//--
-
-private:
-	void doApplyWindowExtraSettings(); // fps and vsync only
 
 public:
 	// Layout modes
@@ -320,35 +295,12 @@ public:
 		positionLayout = POS;
 	}
 
-	int getDEBUG_Position() {
-		return positionLayout;
-	}
-
-	void togglePositionDebugInfo() {
+	void doTogglePositionDisplayInfo() {
 		setPositionDebugInfo((positionLayout == 1) ? 0 : 1);
 	}
 
 	void setEnableKeys(bool b) {
 		bKeys = b;
-	}
-
-	//--
-
-	//public:
-	//	float getFrameRate() {
-	//		return fpsTarget.get();
-	//	}
-	//
-	//	bool getVerticalSync() {
-	//		return vSync.get();
-	//	}
-
-	//--
-
-	// Disables saving. So json file will not be overwritten.
-public:
-	void setLock(bool b) {
-		bDisableAutoSave = b;
 	}
 
 	//--
@@ -375,21 +327,36 @@ private:
 	//--
 
 private:
-	// This is to folder all files to avoid mixing with other add-ons data
-	string path_folder;
-	string path_filename;
-
-	bool bAutoSaveLoad = true; // load at startup
-	//TODO: is disabled but still saving on exit?
-
-	bool bFlagIsChanged = false; // to check if window moved or resized
+	bool bAutoLoad = true; // load at startup
 	bool bKeys = true; // keys enabled by default
+
+	bool bDoneSetup = false;
+	bool bDoneStartup = false;
+
+	bool bDisableCallback_windowMovedOrResized = false;
+
+	bool bFlagToSave = false; // listen in update to do the save
+	bool bFlagIsChanged = false; // feedback to check if window moved or resized
+	bool bFlagShowFeedbackDoneSaved = false; // feedback to know settings has been saved
+
+	bool bIsFullScreen = false; // only to feedback display info
+
+	// Layout text boxes
+	int previewPad = 8;
+	int previewX = previewPad / 2;
+	int previewY = 0;
+
+	float fpsReal; // current fps to display debug only
+
+public:
+	bool bShowDebug = false; // show text debug box
 
 	//----
 
 	// Params
 
 	void setupParams();
+
 	//ofParameterGroup params{ "ofxWindowApp" };//TODO: avoid ofxSerializer. use one only groupParam instead.
 
 	ofParameterGroup paramsExtra { "Extra" };
@@ -398,9 +365,9 @@ private:
 
 	ofParameter<bool> vSync { "vSync", false };
 	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
+	ofParameter<bool> bShowInfo { "ShowDebugInfo", true };
 	ofParameter<bool> bShowInfoPerformanceAlways { "ShowDebugPerformance", true };
-
-	ofParameter<bool> bDisableAutoSave { "DisableAutosave", false };
+	ofParameter<bool> bDisableAutoSaveLock { "DisableAutosaveLock", false };
 	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
 
@@ -410,41 +377,22 @@ public:
 #endif
 
 private:
-	ofParameter<bool> bShowInfo { "ShowDebugInfo", true };
 
 	//----
 
-public:
-	bool bShowDebug = false;
-
-private:
-	bool bDoneStartup = false;
-
 private:
 	void Changed_ParamsExtra(ofAbstractParameter & e);
-
-	float fpsReal;
-
-	int previewPad = 8;
-	int previewX = previewPad / 2;
-	int previewY = 0;
-
-	bool bIsFullScreen = false;
-
-	glm::vec2 posSettings = glm::vec2(0);
-	glm::vec2 sizeSettings = glm::vec2(0);
-
-	void doApplyToggleWindowMode();
 
 private:
 	//--------------------------------------------------------------
 	void doResetWindowExtraSettings() {
 		ofLogNotice("ofxWindowApp") << "doResetWindowExtraSettings()";
+
 		// Default settings
 		vSync = false;
 		fpsTarget = 60;
 		bShowInfo = false;
-		bDisableAutoSave = false;
+		bDisableAutoSaveLock = false;
 		bShowInfoPerformanceAlways = true;
 	}
 
@@ -467,9 +415,11 @@ private:
 
 	void drawDebug();
 
+	void windowChanged();
+
 	//--------------------------------------------------------------
 
-	// debug system monitors
+	// Debug system monitors
 private:
 	void checkMonitors();
 	void drawDebugSystemMonitors();
@@ -481,27 +431,34 @@ private:
 
 	// debug
 	void logSettings() {
-		ofLogNotice("ofxWindowApp") << "----------------------logSettings()--BEGIN";
-		ofLogNotice("ofxWindowApp") << "> ofGetWindow";
-		ofLogNotice("ofxWindowApp") << "Position: "
-									<< ofToString(ofGetWindowPositionX()) << ","
-									<< ofToString(ofGetWindowPositionY());
-		ofLogNotice("ofxWindowApp") << "Size:     "
-									<< ofToString(ofGetWindowWidth()) << "x"
-									<< ofToString(ofGetWindowHeight());
-		ofLogNotice("ofxWindowApp") << "> windowSettings";
-		ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
-		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
-		ofLogNotice("ofxWindowApp") << "Position:  " << ofToString(windowSettings.getPosition());
-		ofLogNotice("ofxWindowApp") << "Size:      "
-									<< ofToString(windowSettings.getWidth())
-									<< "x" << ofToString(windowSettings.getHeight());
-		ofLogNotice("ofxWindowApp") << "----------------------logSettings()--END";
+		ofLogNotice("ofxWindowApp:logSettings()") << "----------------------logSettings() <--BEGIN";
+		ofLogNotice("ofxWindowApp:logSettings()") << "FrameNum: " << ofGetFrameNum();
+		ofLogNotice("ofxWindowApp:logSettings()");
+		ofLogNotice("ofxWindowApp:logSettings()") << "> ofGetWindow()";
+		ofLogNotice("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(ofGetWindowMode());
+		ofLogNotice("ofxWindowApp:logSettings()") << "Position:   "
+												  << ofToString(ofGetWindowPositionX()) << ","
+												  << ofToString(ofGetWindowPositionY());
+		ofLogNotice("ofxWindowApp:logSettings()") << "Size:       "
+												  << ofToString(ofGetWindowWidth()) << "x"
+												  << ofToString(ofGetWindowHeight());
+		ofLogNotice("ofxWindowApp:logSettings()");
+		ofLogNotice("ofxWindowApp:logSettings()") << "> windowSettings";
+		ofLogNotice("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(windowSettings.windowMode);
+		ofLogNotice("ofxWindowApp:logSettings()") << "Position:   " << ofToString(windowSettings.getPosition());
+		ofLogNotice("ofxWindowApp:logSettings()") << "Size:       "
+												  << ofToString(windowSettings.getWidth())
+												  << "x" << ofToString(windowSettings.getHeight());
+		ofLogNotice("ofxWindowApp:logSettings()") << "----------------------logSettings()--> END";
 	}
 };
 
 
+//------
 
+// NOTES
+
+//--
 
 //// workaround:
 //// to fit window and his bar visible into the screen
@@ -513,3 +470,25 @@ private:
 //window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
 //window_X = ofGetWindowPositionX();
 //ofSetWindowPosition(window_X, window_Y);
+
+//--
+
+//#ifdef SURFING_USE_STAY_ON_TOP
+//	// On top
+//	if (!bIsFullScreen) {
+//		// Workaround
+//		// Refresh
+//	#if defined(TARGET_WIN32)
+//		HWND W = GetActiveWindow();
+//		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+//	#endif
+//		// Re trig
+//		bWindowStayOnTop = bWindowStayOnTop;
+//	}
+//#endif
+
+//float windowBar_h = 25;
+//		//window_Y = MAX(ofGetWindowPositionY(), windowBar_h);
+//		//// avoid negative out of screen. minimal h is 25
+//		//window_X = ofGetWindowPositionX();
+//		//ofSetWindowPosition(window_X, window_Y);
