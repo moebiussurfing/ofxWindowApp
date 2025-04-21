@@ -17,7 +17,7 @@
 //#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
 //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
 
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER //would be force disabled on Windows platform in static mode.
+#define SURFING_WINDOW_APP__USE_TIMED_SAVER // would be force disabled on Windows platform in static mode.
 
 //----
 
@@ -34,25 +34,20 @@
 	#endif
 #endif
 
-#include "ofxSerializer_ofxWindowApp.h" //for windows size/pos serialization
-#include "ofxSurfingHelpersLite_ofxWindowApp.h"//for some windows sizes keycommands presets
-
-//#define USING_ofxWindowApp
-//#ifdef USING_ofxWindowApp
-//	#include "ofxWindowApp.h"
-//#endif
-
 #define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
 #define OFX_WINDOW_APP_BAR_HEIGHT 45 // probably fits on Win32 only.
 
+//#define SURFING_USE_STAY_ON_TOP
 #define USE_CUSTOM_FONT
-#define SURFING_USE_STAYONTOP
 
 //--
 
-#define USING__OFX_WINDOW_APP
+#include "ofxSerializer_ofxWindowApp.h" //for windows size/pos serialization
+#include "ofxSurfingHelpersLite_ofxWindowApp.h"//for some windows sizes keycommands presets
 
 //--------
+
+#define USING__OFX_WINDOW_APP
 
 class ofxWindowApp {
 public:
@@ -131,7 +126,7 @@ private:
 
 	//----
 
-	// API METHODS TO CONFIGURE
+	// API METHODS TO FORCE CONFIG
 
 public:
 	// Setters
@@ -182,7 +177,7 @@ public:
 
 	//--
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 	//--------------------------------------------------------------
 	void setToggleStayOnTop() {
 		ofLogNotice("ofxWindowApp::setToggleStayOnTop");
@@ -264,11 +259,11 @@ public:
 	//--------------------------------------------------------------
 	void setShowDebug(bool b = true) {
 		bShowDebugInfo = b;
-		//bShowPerformanceAlways = b;
+		//bShowDebugPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
 	void setShowDebugPerformance(bool b = true) {
-		bShowPerformanceAlways = b;
+		bShowDebugPerformanceAlways = b;
 	}
 	//--------------------------------------------------------------
 	bool getShowDebug() {
@@ -281,7 +276,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) {//will display alert drop fps info ven when debug display disabled
-		bShowPerformanceAlways = b;
+		bShowDebugPerformanceAlways = b;
 	}
 
 	//--
@@ -410,8 +405,8 @@ private:
 	ofParameterGroup paramsWindow { "Window" };
 	ofParameterGroup paramsSession { "Session" };
 	ofParameter<bool> vSync { "vSync", false };
-	ofParameter<float> fpsTarget { "Fps Target", 60.f, 1.f, 144.f };
-	ofParameter<bool> bShowPerformanceAlways { "DebugPerformance", true };
+	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
+	ofParameter<bool> bShowDebugPerformanceAlways { "ShowDebugPerformance", true };
 
 	ofParameter<bool> bDisableAutoSave { "DisableAutosave", false };
 	// Ignores next window modification.
@@ -419,11 +414,11 @@ private:
 
 public:
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
 #endif
 
-	ofParameter<bool> bShowDebugInfo { "ShowWindowInfo", true };
+	ofParameter<bool> bShowDebugInfo { "ShowDebugInfo", true };
 	bool bShowDebug = false;
 
 private:

@@ -90,9 +90,11 @@ ofxWindowApp::~ofxWindowApp() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::startup() {
-	if (bDoneStartup) return;
-
-	ofLogNotice("ofxWindowApp::startup()") << " at frame num: " << ofGetFrameNum();
+	if (bDoneStartup) {
+		ofLogWarning("ofxWindowApp::startup()") << "Skip! at frame num: " << ofGetFrameNum();
+		return;
+	}
+	ofLogNotice("ofxWindowApp::startup()") << "at frame num: " << ofGetFrameNum();
 
 	//--
 
@@ -111,7 +113,7 @@ void ofxWindowApp::startup() {
 
 	//--
 
-	//#ifdef SURFING_USE_STAYONTOP
+	//#ifdef SURFING_USE_STAY_ON_TOP
 	//	// On top
 	//	if (!bIsFullScreen) {
 	//		// Workaround
@@ -143,7 +145,10 @@ void ofxWindowApp::exit() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::setup() {
-	if (bDoneSetup) return;
+	if (bDoneSetup) {
+	ofLogWarning("ofxWindowApp::setup()") << "Skip! at frame num: " << ofGetFrameNum();
+		return;
+	}
 
 	ofLogNotice("ofxWindowApp::setup()");
 
@@ -204,15 +209,16 @@ void ofxWindowApp::setup() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::setupParams() {
+	ofLogNotice("ofxWindowApp::setupParams()");
 
 	// Extra settings
 	paramsWindow.add(vSync);
 	paramsWindow.add(fpsTarget);
 
 	paramsSession.add(bShowDebugInfo);
-	paramsSession.add(bShowPerformanceAlways);
+	paramsSession.add(bShowDebugPerformanceAlways);
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
 #endif
 
@@ -264,7 +270,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 			bFlagDoneSavedEasyCallback = true;
 
-			ofLogNotice("ofxWindowApp::Changed") << "Just saved after window changed (update/bFlagToSave)";
+			ofLogNotice("ofxWindowApp::update()") << "flag to save (bFlagToSave)";
 
 			saveSettings();
 		}
@@ -331,7 +337,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		drawDebugInfo();
 		drawDebugInfoPerformanceWidget();
 	} else {
-		if (bShowPerformanceAlways) drawDebugInfoPerformanceWidget();
+		if (bShowDebugPerformanceAlways) drawDebugInfoPerformanceWidget();
 	}
 
 	if (bShowDebug) {
@@ -342,7 +348,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::doRefreshGetWindowSettings() {
-	ofLogVerbose("ofxWindowApp") << "doRefreshGetWindowSettings()";
+	ofLogNotice("ofxWindowApp") << "doRefreshGetWindowSettings()";
 
 	// Big
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
@@ -529,7 +535,7 @@ void ofxWindowApp::loadSettings() {
 
 	//--
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 	// On top
 	if (!bIsFullScreen) {
 		// Workaround
@@ -572,7 +578,7 @@ void ofxWindowApp::drawDebug() {
 	s += "3 : IG Portrait\n";
 	s += "4 : IG Story\n";
 	s += "5 : IG Square\n";
-	s += "BACKSPACE : Reset\n";
+	s += "BKSP : Reset\n";
 
 	//#define SURFING_WINDOW_APP__DEBUG_TIMER
 #ifdef SURFING_WINDOW_APP__DEBUG_TIMER
@@ -670,7 +676,7 @@ void ofxWindowApp::drawDebugInfo() {
 
 	str += strPad + "[L] " + ofToString(bDisableAutoSave ? "NO_SAVE  " : "AUTO_SAVE");
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 	str += strPad + "[T] " + ofToString(bWindowStayOnTop ? "ON_TOP:TRUE " : "ON_TOP:FALSE");
 #endif
 
@@ -889,7 +895,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 			bDisableAutoSave = !bDisableAutoSave;
 		}
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 		else if (key == 'T') {
 			setToggleStayOnTop();
 		}
@@ -960,6 +966,8 @@ void ofxWindowApp::folderCheckAndCreate(string _path) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::doRefreshToggleWindowMode() {
+	ofLogNotice("ofxWindowApp") << "doRefreshToggleWindowMode()";
+
 	// Toggle Mode
 	if (ofGetWindowMode() == OF_WINDOW) // go full screen
 	{
@@ -988,7 +996,7 @@ void ofxWindowApp::doRefreshToggleWindowMode() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::doApplyExtraSettings() {
-	ofLogVerbose("ofxWindowApp") << "doApplyExtraSettings()";
+	ofLogNotice("ofxWindowApp") << "doApplyExtraSettings()";
 
 	ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
 	ofLogVerbose("ofxWindowApp") << "vSync: " << vSync;
@@ -999,7 +1007,7 @@ void ofxWindowApp::doApplyExtraSettings() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::doApplyWindowMode() {
-	ofLogVerbose("ofxWindowApp") << "doApplyWindowMode()";
+	ofLogNotice("ofxWindowApp") << "doApplyWindowMode()";
 
 	// full screen
 	if (bIsFullScreen) {
@@ -1023,7 +1031,7 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 	string name = e.getName();
 	ofLogNotice("ofxWindowApp::Changed") << " " << name << " : " << e;
 
-#ifdef SURFING_USE_STAYONTOP
+#ifdef SURFING_USE_STAY_ON_TOP
 	if (name == bWindowStayOnTop.getName()) {
 	#if defined(TARGET_WIN32)
 		if (bWindowStayOnTop.get()) {
