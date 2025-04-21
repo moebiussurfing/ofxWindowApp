@@ -2,9 +2,10 @@
 
 /*
 	TODO:
-	- add vars/ofRectangle for window pos/sz to avoid startup moves..
-	- 
+	- add vars/ofRectangle for aux window pos/sz to avoid startup moves..
+	- fps plot graph
 	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features
+	- add unlock full fps / fps=0 toggle
  */
 
 //----

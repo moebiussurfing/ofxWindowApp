@@ -512,6 +512,7 @@ void ofxWindowApp::loadSettings() {
 		windowSettings.setSize(jw, jh);
 
 		logSettings();
+
 		ofLogNotice("ofxWindowApp") << "Done load settings!";
 		ofLogNotice("ofxWindowApp") << "-------------------";
 	} else {
@@ -547,7 +548,7 @@ void ofxWindowApp::drawDebug() {
 	//window title
 	string tp = /*"Pos:" +*/ ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string ts = /*"Size:" +*/ ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-	ofSetWindowTitle(tp + "  " + ts);
+	ofSetWindowTitle("ofxWindowApp DEBUG      " + tp + "    " + ts);
 
 	string s;
 	s += "ofxWindowApp DEBUG\n";
