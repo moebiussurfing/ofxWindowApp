@@ -12,7 +12,7 @@ void ofApp::setup()
 	w.bShowDebug = true;
 
 	// log
-	//ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
+	ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
 }
 
 //--------------------------------------------------------------

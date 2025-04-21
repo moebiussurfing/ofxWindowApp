@@ -2,11 +2,12 @@
 
 /*
 	TODO:
-	- add vars/ofRectangle for aux window pos/sz to avoid startup moves..
-	- fps plot graph
-	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features
-	- add unlock full fps / fps=0 toggle
-	- add fullscreen/window and other bool ofParams to expose to a control ui
+	- add vars/ofRectangle for aux window pos/sz to avoid startup moves...
+	- fps plot graph.
+	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features.
+	- add unlock full fps / fps=0 toggle.
+	- add fullscreen/window and other bool ofParams to expose to a control ui.
+	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart.
  */
 
 //----
@@ -42,7 +43,6 @@
 #define OFX_WINDOW_APP_BAR_HEIGHT 45 // probably fits on Win32 only.
 
 //#define SURFING_USE_STAY_ON_TOP
-#define USE_CUSTOM_FONT
 
 //--
 
@@ -105,10 +105,8 @@ private:
 private:
 	ofWindowSettings windowSettings;
 
-#ifdef USE_CUSTOM_FONT
 	ofTrueTypeFont font;
 	int fontSize;
-#endif
 
 	//--
 
@@ -120,6 +118,7 @@ private:
 	bool mod_SHIFT = false;
 
 	bool bFlagToSave = 0;
+
 	bool bFlagShowFeedbackDoneSaved = 0;
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
@@ -128,8 +127,8 @@ private:
 
 	//--
 
-	void drawDebugInfo();
-	void drawDebugInfoPerformanceWidget();
+	void drawInfo();
+	void drawInfoPerformanceWidget();
 
 	//----
 
@@ -262,25 +261,25 @@ public:
 
 	////--------------------------------------------------------------
 	//void setShowDebug(bool b = true) {
-	//	bShowDebugInfo = b;
-	//	//bShowDebugPerformanceAlways = b;
+	//	bShowInfo = b;
+	//	//bShowInfoPerformanceAlways = b;
 	//}
 	////--------------------------------------------------------------
 	//void setShowDebugPerformance(bool b = true) {
-	//	bShowDebugPerformanceAlways = b;
+	//	bShowInfoPerformanceAlways = b;
 	//}
 	////--------------------------------------------------------------
 	//bool getShowDebug() {
-	//	return bShowDebugInfo;
+	//	return bShowInfo;
 	//}
 	////--------------------------------------------------------------
 	//void toggleShowDebug() {
-	//	bShowDebugInfo = !bShowDebugInfo;
+	//	bShowInfo = !bShowInfo;
 	//}
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) { //will display alert drop fps info ven when debug display disabled
-		bShowDebugPerformanceAlways = b;
+		bShowInfoPerformanceAlways = b;
 	}
 
 	//--
@@ -399,7 +398,7 @@ private:
 
 	ofParameter<bool> vSync { "vSync", false };
 	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
-	ofParameter<bool> bShowDebugPerformanceAlways { "ShowDebugPerformance", true };
+	ofParameter<bool> bShowInfoPerformanceAlways { "ShowDebugPerformance", true };
 
 	ofParameter<bool> bDisableAutoSave { "DisableAutosave", false };
 	// Ignores next window modification.
@@ -411,7 +410,7 @@ public:
 #endif
 
 private:
-	ofParameter<bool> bShowDebugInfo { "ShowDebugInfo", true };
+	ofParameter<bool> bShowInfo { "ShowDebugInfo", true };
 
 	//----
 
@@ -426,14 +425,9 @@ private:
 
 	float fpsReal;
 
-#ifdef USE_CUSTOM_FONT
 	int previewPad = 8;
 	int previewX = previewPad / 2;
 	int previewY = 0;
-#else
-	int previewX = 10;
-	int previewY = 0;
-#endif
 
 	bool bIsFullScreen = false;
 
@@ -449,9 +443,9 @@ private:
 		// Default settings
 		vSync = false;
 		fpsTarget = 60;
-		bShowDebugInfo = false;
+		bShowInfo = false;
 		bDisableAutoSave = false;
-		bShowDebugPerformanceAlways = true;
+		bShowInfoPerformanceAlways = true;
 	}
 
 private:

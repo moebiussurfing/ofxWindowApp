@@ -15,9 +15,8 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-
 	if (!instance) return;
-	if (!instance->bDisableCallback_windowMovedOrResized) return;
+	if (instance->bDisableCallback_windowMovedOrResized) return;
 
 	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
 
@@ -143,21 +142,13 @@ void ofxWindowApp::setup() {
 
 	//--
 
-#ifdef USE_CUSTOM_FONT
 	// Font
 	fontSize = 10;
 	string _path = "assets/fonts/"; // assets fonts folder
 	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-	if (!b) {
-		b = font.load(OF_TTF_MONO, 11);
-		if (b)
-			ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF";
-		else
-			ofLogError("ofxWindowApp:setup()") << "Error loading OF_TTF";
-	}
-#endif
+	if (!b) ofLogError("ofxWindowApp:setup()") << "Error loading ttf font file";
 
 	//--
 
@@ -186,8 +177,8 @@ void ofxWindowApp::setupParams() {
 	paramsWindow.add(fpsTarget);
 
 	// Session
-	paramsSession.add(bShowDebugInfo);
-	paramsSession.add(bShowDebugPerformanceAlways);
+	paramsSession.add(bShowInfo);
+	paramsSession.add(bShowInfoPerformanceAlways);
 	paramsSession.add(bDisableAutoSave);
 #ifdef SURFING_USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
@@ -283,7 +274,6 @@ void ofxWindowApp::update(ofEventArgs & args) {
 #endif
 		{
 			bFlagToSave = false;
-
 			bFlagIsChanged = true;
 
 			ofLogNotice("ofxWindowApp:update()") << "Going to saveSettings() bc flagged (bFlagToSave) ...";
@@ -330,26 +320,27 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM) {
-#ifdef USE_CUSTOM_FONT
-		previewY = ofGetWindowHeight() - fontSize + 5;
-#else
-		previewY = ofGetWindowHeight() - 10;
-#endif
+		if (!font.isLoaded()) {
+			previewX = 10;
+			previewY = ofGetWindowHeight() - 10;
+		} else {
+			previewY = ofGetWindowHeight() - fontSize + 5;
+		}
 	} else if (positionLayout == DEBUG_POSITION_TOP) {
-#ifdef USE_CUSTOM_FONT
-		previewY = fontSize;
-#else
-		previewY = 15;
-#endif
+		if (font.isLoaded()) {
+			previewY = fontSize;
+		} else {
+			previewY = 15;
+		}
 	}
 
 	//--
 
-	if (bShowDebugInfo) {
-		drawDebugInfo();
-		drawDebugInfoPerformanceWidget();
+	if (bShowInfo) {
+		drawInfo();
+		drawInfoPerformanceWidget();
 	} else {
-		if (bShowDebugPerformanceAlways) drawDebugInfoPerformanceWidget();
+		if (bShowInfoPerformanceAlways) drawInfoPerformanceWidget();
 	}
 
 	if (bShowDebug) {
@@ -380,11 +371,13 @@ void ofxWindowApp::doGetWindowSettings() {
 void ofxWindowApp::save() {
 	saveSettingsAfterRefresh();
 }
+
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettingsAfterRefresh() {
 	doGetWindowSettings();
 	saveSettings();
 }
+
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
 	string path;
@@ -554,13 +547,14 @@ void ofxWindowApp::loadSettings() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawDebug() {
-	//window title
+	// window title
 	string tp = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string ts = ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
 	ofSetWindowTitle("ofxWindowApp    DEBUG    " + tp + "    " + ts);
 
+	// text box
 	string s;
-	s += "ofxWindowApp    DEBUG\n";
+	s += "ofxWindowApp         DEBUG\n";
 	if (bFlagShowFeedbackDoneSaved)
 		s += "SAVE";
 	else
@@ -573,8 +567,8 @@ void ofxWindowApp::drawDebug() {
 
 	s += "\n";
 	s += "PRESETS\n";
-	s += "q : Squared 800 x 800\n";
-	s += "Q : Squared W x W\n";
+	s += "Q : Squared 800 x 800\n";
+	s += "q : Squared W x W\n";
 	s += "1 : IGTV Cover Photo\n";
 	s += "2 : IG Landscape Photo\n";
 	s += "3 : IG Portrait\n";
@@ -604,74 +598,69 @@ void ofxWindowApp::drawDebug() {
 	#endif
 #endif
 
-	//// Debug feedback. Flash when saving
-	//ofColor c1 = bFlagShowFeedbackDoneSaved ? 255 : 0;
-	//ofColor c2 = bFlagShowFeedbackDoneSaved ? 0 : 255;
-
-	//#ifndef USE_CUSTOM_FONT
-	//	int x = 5 - 1;
-	//	int y = 16 - 1;
-	//	ofDrawBitmapStringHighlight(s, x, y, c1, c2);
-	//#endif
-	//#ifdef USE_CUSTOM_FONT
-	//	ofPushStyle();
-	//	ofFill();
-	//	int x = 5 - 1;
-	//	int y = 16 - 1;
-	//	auto bb = font.getStringBoundingBox(s, x, y);
-	//	bb.setWidth(bb.getWidth() + previewPad);
-	//	bb.setHeight(bb.getHeight() + previewPad);
-	//	bb.translateX(-previewPad / 2);
-	//	bb.translateY(-previewPad / 2);
-	//	ofSetColor(0);
-	//	ofDrawRectangle(bb);
-	//	ofSetColor(255);
-	//	font.drawString(s, x, y);
-	//	ofPopStyle();
-	//#endif
+	if (font.isLoaded()) {
+		ofPushStyle();
+		ofFill();
+		int x = 4;
+		int y = 18;
+		x += SURFING__PAD_TO_WINDOW_BORDERS;
+		y += SURFING__PAD_TO_WINDOW_BORDERS;
+		auto bb = font.getStringBoundingBox(s, x, y);
+		bb.setWidth(bb.getWidth() + SURFING__STRING_BOX__DEFAULT_XPAD);
+		bb.setHeight(bb.getHeight() + SURFING__STRING_BOX__DEFAULT_YPAD);
+		bb.translateX(-SURFING__STRING_BOX__DEFAULT_XPAD / 2);
+		bb.translateY(-SURFING__STRING_BOX__DEFAULT_YPAD / 2);
+		ofSetColor(0);
+		ofDrawRectRounded(bb, SURFING__STRING_BOX__DEFAULT_ROUND);
+		ofSetColor(255);
+		font.drawString(s, x, y);
+		ofPopStyle();
+	} else {
+		ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
+	}
 
 	if (bFlagShowFeedbackDoneSaved) bFlagShowFeedbackDoneSaved = 0;
-
-	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawDebugInfo() {
+void ofxWindowApp::drawInfo() {
 	// Debug overlay screen modes
 
 	string vSyncStr;
 	string fpsRealStr;
 	string fpsTargetStr;
-	string strPad = "  "; //add spaces
+	string strPad = "  "; // Add spaces
 	string str;
 	string screenStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
 
-	//size
+	// Size
 	screenStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
+
 	screenStr += "px";
-	//pos
+	// Pos
 	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
-	//fps
+
+	// Fps
 	fpsRealStr = ofToString(fpsReal, 1);
 	fpsTargetStr = ofToString(fpsTarget);
 
-	str += strPad + "SIZE:" + screenStr;
+	str += strPad + strPad + "SIZE:" + screenStr;
 	str += strPad + "POS:" + screenPosStr;
 	str += strPad + "FPS:" + fpsRealStr;
 	str += "[" + fpsTargetStr + "]";
 
-	str += strPad + "|" + strPad + "ALT + [W]_INFO";
+	str += strPad + strPad + "|" + strPad + strPad + "ALT +" + strPad + "[W]_INFO";
 
 	vSyncStr = ofToString(vSync ? "ON " : "OFF");
 	str += strPad + "[V]_VSYNC_" + vSyncStr;
 
 	bool bModeFullScreen = false;
-	if (ofGetWindowMode() == OF_WINDOW) // Go full screen
+	if (ofGetWindowMode() == OF_WINDOW) // Is full screen
 	{
 		bModeFullScreen = false;
-	} else if (ofGetWindowMode() == OF_FULLSCREEN) // Go window mode
+	} else if (ofGetWindowMode() == OF_FULLSCREEN) // Is window mode
 	{
 		bModeFullScreen = true;
 	}
@@ -686,58 +675,60 @@ void ofxWindowApp::drawDebugInfo() {
 #endif
 
 	str += strPad + "[D]_DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
+	str += strPad;
 
-	str += strPad + "  ";
-	str += " " + ofToString(mod_ALT ? "ALT" : "   ");
-	str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
-	str += " " + ofToString(mod_SHIFT ? "SHIFT" : "     ");
-	str += " " + ofToString(mod_COMMAND ? "CMD" : "   ");
+	// debug mods
+	//str += strPad + "  ";
+	//str += " " + ofToString(mod_ALT ? "ALT" : "   ");
+	//str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
+	//str += " " + ofToString(mod_SHIFT ? "SHIFT" : "     ");
+	//str += " " + ofToString(mod_COMMAND ? "CMD" : "   ");
 
 	//--
 
-#ifdef USE_CUSTOM_FONT
-	#if 1
-	// A.tiny squared
-	ofPushStyle();
-	ofFill();
-	auto bb = font.getStringBoundingBox(str, previewX, previewY);
-	bb.setWidth(bb.getWidth() + previewPad);
-	bb.setHeight(bb.getHeight() + previewPad);
-	bb.translateX(-previewPad / 2);
-	bb.translateY(-previewPad / 2);
-	ofSetColor(0);
-	ofDrawRectangle(bb);
-	ofSetColor(255);
-	font.drawString(str, previewX, previewY);
-	ofPopStyle();
-	#else
-	// B. rounded text box
-	auto bb = ofxSurfingHelpersLite::ofxWindowApp::getBBBitmapStringBoxToLayout(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
-	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
-	#endif
+	if (font.isLoaded()) {
+#if 1
+		// A.tiny squared
+		ofPushStyle();
+		ofFill();
+		auto bb = font.getStringBoundingBox(str, previewX, previewY);
+		bb.setWidth(bb.getWidth() + previewPad);
+		bb.setHeight(bb.getHeight() + previewPad);
+		bb.translateX(-previewPad / 2);
+		bb.translateY(-previewPad / 2);
+		ofSetColor(0);
+		ofDrawRectangle(bb);
+		ofSetColor(255);
+		font.drawString(str, previewX, previewY);
+		ofPopStyle();
 #else
-	ofDrawBitmapStringHighlight(str, previewX, previewY);
+		// B. rounded text box
+		auto bb = ofxSurfingHelpersLite::ofxWindowApp::getBBBitmapStringBoxToLayout(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
+		ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
 #endif
+	} else {
+		ofDrawBitmapStringHighlight(str, previewX, previewY);
+	}
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawDebugInfoPerformanceWidget() {
-	// monitor fps performance alert
+void ofxWindowApp::drawInfoPerformanceWidget() {
+	// Monitor fps performance alert
 
-	bool bPreShow; //starts draw black
-	bool bAlert; //draws red
+	bool bPreShow; // starts draw black
+	bool bAlert; // draws red
 	float fpsThreshold;
 
 	//// A. Thresholds by factor fps between target and real fps
-	//fpsThreshold = 0.9f;//below this trigs alert red state
-	//bPreShow = (fpsReal < fpsTarget*0.999);//by ratio
-	//bAlert = (fpsReal < fpsTarget*fpsThreshold);//A. by ratio
+	//fpsThreshold = 0.9f; // below this trigs alert red state
+	//bPreShow = (fpsReal < fpsTarget*0.999); // by ratio
+	//bAlert = (fpsReal < fpsTarget*fpsThreshold); // A. by ratio
 
 	// B. Thresholds by absolute fps difference between desired target and real fps
 	// monitor fps performance
-	fpsThreshold = 10.f; //num frames below this trigs alert red state
-	bPreShow = (fpsReal < fpsTarget - 5); //below 5 fps starts showing bar
-	bAlert = (fpsReal < (fpsTarget - fpsThreshold)); //B. by absolute fps diff
+	fpsThreshold = 10.f; // num frames below this trigs alert red state
+	bPreShow = (fpsReal < fpsTarget - 5); // below 5 fps starts showing bar
+	bAlert = (fpsReal < (fpsTarget - fpsThreshold)); // B. by absolute fps diff
 
 	//-
 
@@ -746,23 +737,22 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 	if (bPreShow) // to draw only under pre threshold
 	{
 		float fx, fy, fw, fh, fwMax, fPad;
-		fwMax = 100.f; //max width
+		fwMax = 100.f; // max width
 
-#ifdef USE_CUSTOM_FONT
-		fPad = 4.f; //previewPad to border
-		//fh = fontSize + previewPad - 4;
-#else
-		fh = 10.f;
-		fPad = 5.f; //previewPad to border
-#endif
+		if (font.isLoaded()) {
+			fh = fontSize + previewPad - 4;
+			//fh = 10.f;
+			fPad = 4.f; //previewPad to border
+		} else {
+			fh = 10.f;
+			fPad = 5.f; //previewPad to border
+		}
+
+		fy = previewY - fh + 1.0f; // to the border
+		//fy = previewY - fh - 50.0f;// little air
 
 		// position
 		fx = ofGetWindowWidth() - fwMax - fPad;
-
-#ifndef USE_CUSTOM_FONT
-		//fy = previewY - fh - 50.0f;//little air
-		fy = previewY - fh + 1.0f; //to the border
-#endif
 
 		fw = ofMap(fpsReal, 0.0f * fpsTarget, fpsTarget, 0, fwMax, true);
 		int fa = 150; //alpha
@@ -782,26 +772,25 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 
 		// fps label
 		string str = diff;
-#ifdef USE_CUSTOM_FONT
-		ofPushStyle();
-		ofFill();
-		auto bb = font.getStringBoundingBox(str, _xx, _yy);
-		bb.setWidth(bb.getWidth() + previewPad);
-		bb.setHeight(bb.getHeight() + previewPad);
-		bb.translateX(-previewPad / 2);
-		bb.translateY(-previewPad / 2);
-		ofSetColor(cAlert);
-		ofDrawRectangle(bb);
-		ofSetColor(255);
-		font.drawString(str, _xx, _yy);
-		ofPopStyle();
+		if (font.isLoaded()) {
+			ofPushStyle();
+			ofFill();
+			auto bb = font.getStringBoundingBox(str, _xx, _yy);
+			bb.setWidth(bb.getWidth() + previewPad);
+			bb.setHeight(bb.getHeight() + previewPad);
+			bb.translateX(-previewPad / 2);
+			bb.translateY(-previewPad / 2);
+			ofSetColor(cAlert);
+			ofDrawRectangle(bb);
+			ofSetColor(255);
+			font.drawString(str, _xx, _yy);
+			ofPopStyle();
 
-		fy = bb.getY();
-		fh = bb.getHeight() - 2;
-#else
-		//ofDrawBitmapStringHighlight(str, previewX, previewY);
-		ofDrawBitmapStringHighlight(diff, fx - 68.f, previewY, cAlert, ofColor(255)); //text fps diff
-#endif
+			fy = bb.getY();
+			fh = bb.getHeight() - 2;
+		} else {
+			ofDrawBitmapStringHighlight(diff, fx - 68.f, previewY, cAlert, ofColor(255)); // text fps diff
+		}
 
 		// out-performance bar
 		ofFill();
@@ -836,10 +825,16 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	ofLogVerbose("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
 
-	// disable draw debug
+	// Draw info
 	if (key == 'W') {
-		bShowDebugInfo = !bShowDebugInfo;
-		ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowDebugInfo ? "ON" : "OFF");
+		bShowInfo = !bShowInfo;
+		ofLogNotice("ofxWindowApp") << "changed draw info: " << (bShowInfo ? "ON" : "OFF");
+	}
+
+	// Draw debug
+	else if (key == 'D') {
+		bShowDebug = !bShowDebug;
+		ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowInfo ? "ON" : "OFF");
 	}
 
 	// Switch window mode
@@ -856,37 +851,29 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 		bDisableAutoSave = !bDisableAutoSave;
 	}
 
-	else if (key == 'L') {
-		bDisableAutoSave = !bDisableAutoSave;
-	}
-
 #ifdef SURFING_USE_STAY_ON_TOP
 	else if (key == 'T') {
 		setToggleStayOnTop();
 	}
 #endif
 
-	else if (key == 'D') {
-		bShowDebug = !bShowDebug;
-	}
-
 	else if (key == OF_KEY_BACKSPACE) {
 		doResetWindowSettings();
 	}
 
 	else {
+		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 		// set some custom common sizes:
 		// instagram, portrait, landscape, squared etc
 		//s += "PRESETS\n";
-		//s += "q : Squared 800 x 800\n";
-		//s += "Q : Squared W x W\n";
+		//s += "Q : Squared 800 x 800\n";
+		//s += "q : Squared W x W\n";
 		//s += "1 : IGTV Cover Photo\n";
 		//s += "2 : IG Landscape Photo\n";
 		//s += "3 : IG Portrait\n";
 		//s += "4 : IG Story\n";
 		//s += "5 : IG Square\n";
 		//s += "BKSP : Reset default\n";
-		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 	}
 }
 
@@ -1113,14 +1100,12 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	ofTranslate(0, 170);
 	ofDrawBitmapString(s, 0, 0);
 	ofPopMatrix();
+
 	//label center name
 	ofPushMatrix();
 	ofTranslate(rw.getCenter());
 	s = "App\nWindow";
 	ofDrawBitmapString(s, 0, 0);
-	//ofBitmapFont bf;
-	//auto bb = bf.getBoundingBox(s, 0, 0);
-	//ofDrawBitmapString(s, -(bb.getWidth() / 2.f), -(bb.getHeight() / 2.f));
 	ofPopMatrix();
 
 	//canvas
