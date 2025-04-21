@@ -71,8 +71,9 @@ public:
 		setup();
 	}
 
-public:
+private:
 	static void windowMoved(GLFWwindow * window, int xpos, int ypos);
+	bool bDisableCallback_windowMoved = false;
 
 private:
 	static ofxWindowApp * instance; // Static pointer to hold the instance
@@ -174,7 +175,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setEnableAllowQuitAppUsingEscapeKey(bool b) {
-		ofLogNotice("ofxWindowApp::setEnableAllowQuitAppUsingEscapeKey");
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey");
 		ofSetEscapeQuitsApp(b);
 	}
 
@@ -183,13 +184,13 @@ public:
 #ifdef SURFING_USE_STAY_ON_TOP
 	//--------------------------------------------------------------
 	void setToggleStayOnTop() {
-		ofLogNotice("ofxWindowApp::setToggleStayOnTop");
+		ofLogNotice("ofxWindowApp:setToggleStayOnTop");
 		setStayOnTop(!bIsWindowStayOnTop);
 	}
 
 	//--------------------------------------------------------------
 	void setStayOnTop(bool b) {
-		ofLogNotice("ofxWindowApp::setStayOnTop") << b;
+		ofLogNotice("ofxWindowApp:setStayOnTop") << b;
 		bWindowStayOnTop = b;
 	}
 
@@ -227,7 +228,7 @@ private:
 	void loadSettings();
 
 private:
-	void doApplyWindowMode();
+	void doApplyWindowSettings();
 
 	//--
 
@@ -299,7 +300,7 @@ public:
 	//--
 
 private:
-	void doApplyExtraSettings(); // fps and vsync only
+	void doApplyWindowExtraSettings(); // fps and vsync only
 
 public:
 	// Layout modes
@@ -441,26 +442,33 @@ private:
 
 	void doRefreshToggleWindowMode();
 
-public:
+private:
 	//--------------------------------------------------------------
-	void doResetWindow() {
-		ofLogNotice("ofxWindowApp") << "doResetWindow()";
-
-		// Default window App
-
-		bIsFullScreen = false;
+	void doResetWindowExtraSettings() {
+		ofLogNotice("ofxWindowApp") << "doResetWindowExtraSettings()";
+		// Default settings
 		vSync = false;
 		fpsTarget = 60;
+		bShowDebugInfo = false;
+		bDisableAutoSave = false;
+		bShowDebugPerformanceAlways = true;
+	}
 
+private:
+	//--------------------------------------------------------------
+	void doResetWindowSettings() {
+		ofLogNotice("ofxWindowApp") << "doResetWindowSettings()";
+
+		// window mode
+		windowSettings.windowMode = ofWindowMode(0);
+
+		// shape
 		int w = 1280;
 		int h = w * (9.f / 16.f);
 		windowSettings.setSize(w, h);
 
 		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); // left top
 		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); // centered fails
-
-		doApplyWindowMode();
-		doApplyExtraSettings();
 	}
 
 	void drawDebug();

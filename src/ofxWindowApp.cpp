@@ -7,6 +7,7 @@ ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointe
 
 //--------------------------------------------------------------
 void ofxWindowApp::setInstance(ofxWindowApp * app) {
+	ofLogNotice("ofxWindowApp:setInstance(ofxWindowApp * app)");
 	instance = app; // Set the instance
 }
 
@@ -16,37 +17,19 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
 
-	//// Ignore if pos not changed
-	//static int xpos_ = -1;
-	//static int ypos_ = -1;
-	//bool bChanged = 0;
-	//if (xpos != xpos_) {
-	//	xpos_ = xpos;
-	//	bChanged = true;
-	//}
-	//if (ypos != ypos_) {
-	//	ypos_ = ypos;
-	//	bChanged = true;
-	//}
-	//if (!bChanged) return;
+	if (!instance) return;
 
-	//--
+	if (!instance->bDisableCallback_windowMoved) return;
+	if (!instance->bDoneSetup) return;
+	if (!instance->bDoneStartup) return;
 
-	if (instance) {
-		if (!instance->bDoneSetup) return;
-		if (!instance->bDoneStartup) return;
+	instance->doGetWindowSettings();
 
-		//instance->window_X = xpos;
-		//instance->window_Y = ypos;
-
-		instance->doGetWindowSettings();
-
-		instance->bFlagToSave = true;
+	instance->bFlagToSave = true;
 
 		#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
-		instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+	instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
 		#endif
-	}
 }
 
 	#endif
@@ -57,25 +40,19 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
+
 	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "at frameNum: " << ofGetFrameNum();
 
-	doResetWindow();
+	doResetWindowExtraSettings();
+	doResetWindowSettings();
 
-	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
-	//from main.cpp
-
-	// Default
-	vSync = false;
-	fpsTarget = 60;
-	bShowDebugInfo = false;
-
-	setVerticalSync(vSync);
-	setFrameRate(fpsTarget);
+	doApplyWindowSettings();
+	doApplyWindowExtraSettings();
 }
 
 //--------------------------------------------------------------
 ofxWindowApp::~ofxWindowApp() {
-	ofLogNotice("ofxWindowApp") << "Destructor";
+	ofLogNotice("ofxWindowApp:~ofxWindowApp()") << "Destructor";
 
 	ofRemoveListener(ofEvents().update, this, &ofxWindowApp::update);
 	ofRemoveListener(ofEvents().draw, this, &ofxWindowApp::draw);
@@ -83,9 +60,115 @@ ofxWindowApp::~ofxWindowApp() {
 	ofRemoveListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
 	ofRemoveListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
 
-	ofRemoveListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
+#ifdef SURFING_WINDOW_APP__USE_STATIC
+	GLFWwindow * glfwWindow = glfwGetCurrentContext();
+	if (glfwWindow) {
+		glfwSetWindowPosCallback(glfwWindow, nullptr);
+	}
+#endif
 
-	//exit();//removed to avoid possible exceptions
+	ofRemoveListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::exit() {
+	ofLogNotice("ofxWindowApp:exit()") << "Constructor";
+
+#ifdef SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT
+	if (bAutoSaveLoad && !bDisableAutoSave) {
+		save();
+	}
+#endif
+}
+
+//----
+
+//--------------------------------------------------------------
+void ofxWindowApp::setup() {
+	if (bDoneSetup) {
+		ofLogWarning("ofxWindowApp:setup()") << "Skip! at frameNum: " << ofGetFrameNum();
+		return;
+	}
+
+	ofLogNotice("ofxWindowApp:setup()") << "at frameNum: " << ofGetFrameNum();
+
+	//--
+
+	// Create callback for window moved
+#ifdef SURFING_WINDOW_APP__USE_STATIC
+	GLFWwindow * glfwWindow = glfwGetCurrentContext();
+	glfwSetWindowPosCallback(glfwWindow, windowMoved);
+#endif
+
+	//--
+
+	// Get rectanlges from os displays/monitors
+	checkMonitors();
+
+	//--
+
+	// Default settings folder:
+	// bin/data/ofxWindowApp/ofxWindowApp.json
+	path_folder = "ofxWindowApp";
+	path_filename = "ofxWindowApp.json";
+
+	//--
+
+#ifdef USE_CUSTOM_FONT
+	// Font
+	fontSize = 10;
+	string _path = "assets/fonts/"; // assets fonts folder
+	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
+	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
+	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
+	if (!b) {
+		b = font.load(OF_TTF_MONO, 11);
+		if (b)
+			ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF";
+		else
+			ofLogError("ofxWindowApp:setup()") << "Error loading OF_TTF";
+	}
+#endif
+
+	//--
+
+	setupParams();
+
+	//--
+
+	// Callbacks to auto call update/draw/keyPressed
+	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
+	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw, OF_EVENT_ORDER_AFTER_APP);
+	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
+	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
+	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
+
+	//--
+
+	bDoneSetup = true;
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::setupParams() {
+	ofLogNotice("ofxWindowApp:setupParams()");
+
+	// Window
+	paramsWindow.add(vSync);
+	paramsWindow.add(fpsTarget);
+
+	// Session
+	paramsSession.add(bShowDebugInfo);
+	paramsSession.add(bShowDebugPerformanceAlways);
+	paramsSession.add(bDisableAutoSave);
+#ifdef SURFING_USE_STAY_ON_TOP
+	paramsSession.add(bWindowStayOnTop);
+#endif
+
+	// Extra
+	paramsExtra.add(paramsWindow);
+	paramsExtra.add(paramsSession);
+
+	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
 }
 
 //--------------------------------------------------------------
@@ -132,109 +215,7 @@ void ofxWindowApp::startup() {
 	bDoneStartup = true;
 }
 
-//--------------------------------------------------------------
-void ofxWindowApp::exit() {
-	ofLogNotice("ofxWindowApp:exit()");
-
-#ifdef SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT
-	if (bAutoSaveLoad && !bDisableAutoSave) {
-		save();
-	}
-#endif
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::setup() {
-	if (bDoneSetup) {
-		ofLogWarning("ofxWindowApp:setup()") << "Skip! at frameNum: " << ofGetFrameNum();
-		return;
-	}
-
-	ofLogNotice("ofxWindowApp:setup()") << "at frameNum: " << ofGetFrameNum();
-
-	//--
-
-	// Get rectanlges from os displays/monitors
-	checkMonitors();
-
-	//--
-
-	// Create callback for window moved
-#ifdef SURFING_WINDOW_APP__USE_STATIC
-	GLFWwindow * glfwWindow = glfwGetCurrentContext();
-	glfwSetWindowPosCallback(glfwWindow, windowMoved);
-#endif
-
-	//--
-
-	// Default folders:
-	// bin/data/ofxWindowApp/ofxWindowApp.json
-	path_folder = "ofxWindowApp";
-	path_filename = "ofxWindowApp.json";
-
-	//--
-
-#ifdef USE_CUSTOM_FONT
-	// Font
-	fontSize = 10;
-	string _path = "assets/fonts/"; // assets fonts folder
-	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
-	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
-	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-	if (!b) {
-		b = font.load(OF_TTF_MONO, 11);
-		if (b)
-			ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF";
-		else
-			ofLogError("ofxWindowApp:setup()") << "Error loading OF_TTF";
-	}
-#endif
-
-	//--
-
-	// Callbacks to auto call update/draw/keyPressed
-	ofAddListener(ofEvents().update, this, &ofxWindowApp::update);
-	ofAddListener(ofEvents().draw, this, &ofxWindowApp::draw, OF_EVENT_ORDER_AFTER_APP);
-	ofAddListener(ofEvents().keyPressed, this, &ofxWindowApp::keyPressed);
-	ofAddListener(ofEvents().keyReleased, this, &ofxWindowApp::keyReleased);
-	ofAddListener(ofEvents().windowResized, this, &ofxWindowApp::windowResized);
-
-	//--
-
-	setupParams();
-
-	//--
-
-	// Default
-	setShowPerformanceAlways(true);
-
-	//--
-
-	bDoneSetup = true;
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::setupParams() {
-	ofLogNotice("ofxWindowApp::setupParams()");
-
-	// Extra settings
-	paramsWindow.add(vSync);
-	paramsWindow.add(fpsTarget);
-
-	paramsSession.add(bShowDebugInfo);
-	paramsSession.add(bShowDebugPerformanceAlways);
-
-#ifdef SURFING_USE_STAY_ON_TOP
-	paramsSession.add(bWindowStayOnTop);
-#endif
-
-	paramsSession.add(bDisableAutoSave);
-
-	paramsExtra.add(paramsWindow);
-	paramsExtra.add(paramsSession);
-
-	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
-}
+//----
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args) {
@@ -248,7 +229,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 	// Auto call startup but after setup is done if required.
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
-			if (ofGetFrameNum() >= 0) {
+			if (ofGetFrameNum() > 0) {
 				// Workaround
 				startup();
 			}
@@ -276,7 +257,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 			bFlagIsChanged = true;
 
-			ofLogNotice("ofxWindowApp:update()") << "Going to save bc flagged... (bFlagToSave)";
+			ofLogNotice("ofxWindowApp:update()") << "Going to saveSettings() bc flagged (bFlagToSave) ...";
 
 			saveSettings();
 		}
@@ -321,9 +302,9 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	if (positionLayout == DEBUG_POSITION_BOTTOM) {
 #ifdef USE_CUSTOM_FONT
-		previewY = ofGetWindowWidth() - fontSize + 5;
+		previewY = ofGetWindowHeight() - fontSize + 5;
 #else
-		previewY = ofGetWindowWidth() - 10;
+		previewY = ofGetWindowHeight() - 10;
 #endif
 	} else if (positionLayout == DEBUG_POSITION_TOP) {
 #ifdef USE_CUSTOM_FONT
@@ -354,8 +335,8 @@ void ofxWindowApp::doGetWindowSettings() {
 
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
-	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 
+	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
 	if (windowSettings.windowMode == ofWindowMode(OF_WINDOW))
 		bIsFullScreen = false;
 	else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
@@ -516,14 +497,14 @@ void ofxWindowApp::loadSettings() {
 		ofLogNotice("ofxWindowApp") << "-------------------";
 	} else {
 		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
-		doResetWindow();
+		doResetWindowSettings();
 	}
 
 	//--
 
 	// Apply
-	doApplyWindowMode();
-	doApplyExtraSettings();
+	doApplyWindowSettings();
+	doApplyWindowExtraSettings();
 
 	//--
 
@@ -902,7 +883,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	}
 
 	else if (key == OF_KEY_BACKSPACE) {
-		doResetWindow();
+		doResetWindowSettings();
 	}
 
 	else {
@@ -986,8 +967,8 @@ void ofxWindowApp::doRefreshToggleWindowMode() {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doApplyExtraSettings() {
-	ofLogNotice("ofxWindowApp") << "doApplyExtraSettings()";
+void ofxWindowApp::doApplyWindowExtraSettings() {
+	ofLogNotice("ofxWindowApp") << "doApplyWindowExtraSettings()";
 
 	ofLogVerbose("ofxWindowApp") << "FpsTarget: " << fpsTarget;
 	ofLogVerbose("ofxWindowApp") << "vSync: " << vSync;
@@ -999,8 +980,12 @@ void ofxWindowApp::doApplyExtraSettings() {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doApplyWindowMode() {
-	ofLogNotice("ofxWindowApp") << "doApplyWindowMode()";
+void ofxWindowApp::doApplyWindowSettings() {
+	ofLogNotice("ofxWindowApp") << "doApplyWindowSettings()";
+
+	//TODO
+	ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
+	ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 
 	// full screen
 	if (bIsFullScreen) {
@@ -1009,9 +994,7 @@ void ofxWindowApp::doApplyWindowMode() {
 
 	// window mode
 	else {
-		//TODO
-		ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
-		ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
+		ofSetFullscreen(false);
 	}
 
 	logSettings();
