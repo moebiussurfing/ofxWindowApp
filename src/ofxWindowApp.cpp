@@ -182,7 +182,11 @@ void ofxWindowApp::setup() {
 	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-	if (!b) b = font.load(OF_TTF_MONO, 10);
+	if (!b) {
+		b = font.load(OF_TTF_MONO, 10);
+		if (b) ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF_MONO";
+		else ofLogError("ofxWindowApp:setup()") << "Error loading OF_TTF_MONO";
+	}
 #endif
 
 	//--
