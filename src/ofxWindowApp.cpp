@@ -563,8 +563,8 @@ void ofxWindowApp::drawDebug() {
 
 	s += "\n";
 	s += "PRESETS\n";
-	s += "q : 800 x 800\n";
-	s += "Q : W x W\n";
+	s += "q : Squared 800 x 800\n";
+	s += "Q : Squared W x W\n";
 	s += "1 : IGTV Cover Photo\n";
 	s += "2 : IG Landscape Photo\n";
 	s += "3 : IG Portrait\n";
@@ -1169,14 +1169,14 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 
 	//canvas
 	ofNoFill();
-	monitorsCanvasRect.scaleFromCenter(1.1f);
+	//monitorsCanvasRect.scaleFromCenter(1.1f);
 	//ofSetColor(0, 0, 0, a);
 	//ofDrawRectangle(monitorsCanvasRect); //canvas rect
 	ofPushMatrix();
 	ofTranslate(monitorsCanvasRect.getBottomLeft());
 
-	//monmitor names list
-	s = "\nSYSTEM DISPLAYS\n\n";
+	//monitor names list
+	s = "\n\n\nSYSTEM DISPLAYS\n\n";
 	i = 0;
 	for (auto & monitorName : monitorNames) {
 		s += "#" + ofToString(i) + " " + monitorName + "\n";

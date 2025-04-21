@@ -94,30 +94,32 @@ inline string setWindowShapeForInstagram(size_t i = 0, bool bForcePos = false) {
 
 //--------------------------------------------------------------
 inline string keyPressedToSetWindowShape(int key) {
-	// WINDOW PRESETS
-	// q: 800x800
-	// Q: w x w
-	// 1: IGTV Cover Photo
-	// 2: IG Landscape Photo
-	// 3: IG Portrait
-	// 4: IG Story
-	// 5: IG Square
+	//s += "\n";
+	//s += "PRESETS\n";
+	//s += "q : Squared 800 x 800\n";
+	//s += "Q : Squared W x W\n";
+	//s += "1 : IGTV Cover Photo\n";
+	//s += "2 : IG Landscape Photo\n";
+	//s += "3 : IG Portrait\n";
+	//s += "4 : IG Story\n";
+	//s += "5 : IG Square\n";
+	//s += "BKSP : Reset\n";
 
 	string sWindowDimensions = "";
 	if (key == 'q')
-		sWindowDimensions = setWindowShapeSquared(); // 800 x 800
+		sWindowDimensions = setWindowShapeSquared(); // Squared 800 x 800
 	else if (key == 'Q')
-		sWindowDimensions = setWindowShapeSquared(ofGetWidth()); // w x w
+		sWindowDimensions = setWindowShapeSquared(ofGetWidth()); // Squared w x w
 	else if (key == '1')
-		sWindowDimensions = setWindowShapeForInstagram(0); // IGTV Cover Photo
+		sWindowDimensions = setWindowShapeForInstagram(4); // IGTV Cover Photo
 	else if (key == '2')
-		sWindowDimensions = setWindowShapeForInstagram(1); // IG Landscape Photo
+		sWindowDimensions = setWindowShapeForInstagram(3); // IG Landscape Photo
 	else if (key == '3')
 		sWindowDimensions = setWindowShapeForInstagram(2); // IG Portrait
 	else if (key == '4')
-		sWindowDimensions = setWindowShapeForInstagram(3); // IG Story
+		sWindowDimensions = setWindowShapeForInstagram(0); // IG Story
 	else if (key == '5')
-		sWindowDimensions = setWindowShapeForInstagram(4); // IG Square
+		sWindowDimensions = setWindowShapeForInstagram(1); // IG Square
 	//else sWindowDimensions = ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight()) + " px";
 	return sWindowDimensions;
 }
