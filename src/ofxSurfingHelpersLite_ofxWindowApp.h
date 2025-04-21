@@ -103,7 +103,6 @@ inline string keyPressedToSetWindowShape(int key) {
 	//s += "3 : IG Portrait\n";
 	//s += "4 : IG Story\n";
 	//s += "5 : IG Square\n";
-	//s += "BKSP : Reset\n";
 
 	string sWindowDimensions = "";
 	if (key == 'q')
