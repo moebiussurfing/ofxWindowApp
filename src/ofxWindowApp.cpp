@@ -1,7 +1,7 @@
 #include "ofxWindowApp.h"
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
-#if defined(TARGET_WIN32)
+	#if defined(TARGET_WIN32)
 
 ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointer
 
@@ -28,12 +28,12 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 
 	instance->bFlagToSave = true; // flag to save json on next frame
 
-	#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+		#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-	#endif
+		#endif
 }
 
-#endif
+	#endif
 #endif
 
 //--------------------------------------------------------------
@@ -57,9 +57,9 @@ void ofxWindowApp::windowResized(int w, int h) {
 
 	bFlagToSave = true; // flag to save json on next frame
 
-	#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-	#endif
+#endif
 }
 
 //----
@@ -74,10 +74,8 @@ ofxWindowApp::ofxWindowApp() {
 	doResetWindowSettings();
 
 	bDisableCallback_windowMovedOrResized = true;
-
 	doApplyWindowSettings();
 	doApplyWindowExtraSettings();
-
 	bDisableCallback_windowMovedOrResized = false;
 }
 
@@ -526,43 +524,43 @@ void ofxWindowApp::loadSettings() {
 
 		ofLogNotice("ofxWindowApp") << "Done load settings!";
 		ofLogNotice("ofxWindowApp") << "-------------------";
-	} else {
-		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
-		doResetWindowSettings();
-	}
 
-	//--
+		//--
 
-	// Apply
-	doApplyWindowSettings();
-	doApplyWindowExtraSettings();
+		bDisableCallback_windowMovedOrResized = true;
+		doApplyWindowSettings();
+		doApplyWindowExtraSettings();
+		bDisableCallback_windowMovedOrResized = false;
 
-	//--
+		//--
 
 #ifdef SURFING_USE_STAY_ON_TOP
-	// On top
-	if (!bIsFullScreen) {
-		// Workaround
-		// Refresh
+		// On top
+		if (!bIsFullScreen) {
+			// Workaround
+			// Refresh
 	#if defined(TARGET_WIN32)
-		HWND W = GetActiveWindow();
-		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+			HWND W = GetActiveWindow();
+			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 	#endif
-		// Re trig
-		bWindowStayOnTop = bWindowStayOnTop;
-	}
+			// Re trig
+			bWindowStayOnTop = bWindowStayOnTop;
+		}
 #endif
+	} else {
+		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
+	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawDebug() {
 	//window title
-	string tp = /*"Pos:" +*/ ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
-	string ts = /*"Size:" +*/ ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-	ofSetWindowTitle("ofxWindowApp DEBUG      " + tp + "    " + ts);
+	string tp = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
+	string ts = ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
+	ofSetWindowTitle("ofxWindowApp    DEBUG    " + tp + "    " + ts);
 
 	string s;
-	s += "ofxWindowApp DEBUG\n";
+	s += "ofxWindowApp    DEBUG\n";
 	if (bFlagShowFeedbackDoneSaved)
 		s += "SAVE";
 	else
@@ -582,7 +580,7 @@ void ofxWindowApp::drawDebug() {
 	s += "3 : IG Portrait\n";
 	s += "4 : IG Story\n";
 	s += "5 : IG Square\n";
-	s += "BKSP : Reset\n";
+	s += "BKSP : Reset default\n";
 
 	//#define SURFING_WINDOW_APP__DEBUG_TIMER
 #ifdef SURFING_WINDOW_APP__DEBUG_TIMER
@@ -828,15 +826,15 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	// modifiers
 	mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
-	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); //macOS
-	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); //Windows. not working
+	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
+	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
 	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 
 	if (!mod_ALT) return;
 
 	//--
 
-	//ofLogNotice("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
+	ofLogVerbose("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
 
 	// disable draw debug
 	if (key == 'W') {
@@ -846,13 +844,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	// Switch window mode
 	else if (key == 'F') {
-		//TODO; fix monitor jump when full screen.
-		// try settings.windowMode = OF_GAME_MODE;
-		//auto m = ofGetWindowMode();
-		//ofSetWindow
-		//ofSetupScreen()
-
-		doRefreshToggleWindowMode();
+		doApplyToggleWindowMode();
 	} else if (key == 'V') // switch v-sync mode
 	{
 		vSync = !vSync;
@@ -885,14 +877,15 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	else {
 		// set some custom common sizes:
 		// instagram, portrait, landscape, squared etc
-		// WINDOW PRESETS
-		// q: 800x800
-		// Q: w x w
-		// 1: IGTV Cover Photo
-		// 2: IG Landscape Photo
-		// 3: IG Portrait
-		// 4: IG Story
-		// 5: IG Square
+		//s += "PRESETS\n";
+		//s += "q : Squared 800 x 800\n";
+		//s += "Q : Squared W x W\n";
+		//s += "1 : IGTV Cover Photo\n";
+		//s += "2 : IG Landscape Photo\n";
+		//s += "3 : IG Portrait\n";
+		//s += "4 : IG Story\n";
+		//s += "5 : IG Square\n";
+		//s += "BKSP : Reset default\n";
 		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 	}
 }
@@ -933,33 +926,17 @@ void ofxWindowApp::folderCheckAndCreate(string _path) {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::doRefreshToggleWindowMode() {
-	ofLogNotice("ofxWindowApp") << "doRefreshToggleWindowMode()";
+void ofxWindowApp::doApplyToggleWindowMode() {
+	ofLogNotice("ofxWindowApp") << "doApplyToggleWindowMode()";
 
 	// Toggle Mode
-	if (ofGetWindowMode() == OF_WINDOW) // go full screen
-	{
+	if (ofGetWindowMode() == OF_WINDOW) {
 		ofSetFullscreen(true);
-		//bIsFullScreen = true;
-	} else if (ofGetWindowMode() == OF_FULLSCREEN) // go window mode
-	{
+	} else if (ofGetWindowMode() == OF_FULLSCREEN) {
 		ofSetFullscreen(false);
-		//bIsFullScreen = false;
-
-		//// workaround:
-		//// to fit window and his bar visible into the screen
-		//float windowBar_h = 25;
-
-		//// workaround
-		//// it's window mode..
-		//// kick a little down to avoid hidden window title barF
-		//window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
-		//window_X = ofGetWindowPositionX();
-		//ofSetWindowPosition(window_X, window_Y);
 	}
 
-	// update
-	windowResized(ofGetWidth(), ofGetHeight());
+	doGetWindowSettings();
 }
 
 //--------------------------------------------------------------

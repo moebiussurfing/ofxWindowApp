@@ -440,7 +440,7 @@ private:
 	glm::vec2 posSettings = glm::vec2(0);
 	glm::vec2 sizeSettings = glm::vec2(0);
 
-	void doRefreshToggleWindowMode();
+	void doApplyToggleWindowMode();
 
 private:
 	//--------------------------------------------------------------
@@ -506,3 +506,17 @@ private:
 		ofLogNotice("ofxWindowApp");
 	}
 };
+
+
+
+
+//// workaround:
+//// to fit window and his bar visible into the screen
+//float windowBar_h = 25;
+
+//// workaround
+//// it's window mode..
+//// kick a little down to avoid hidden window title barF
+//window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
+//window_X = ofGetWindowPositionX();
+//ofSetWindowPosition(window_X, window_Y);
