@@ -93,25 +93,24 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 [
     {
         "position": {
-            "x": -1569.0,
-            "y": 1415.0
+            "x": -2469.0,
+            "y": 1150.0
         },
         "size": {
-            "height": 375,
-            "width": 1709
+            "height": 800,
+            "width": 1539
         },
         "window_mode": 0
     },
     {
         "Extra": {
             "Session": {
-                "DebugPerformance": "1",
                 "DisableAutosave": "0",
-                "ShowWindowInfo": "1",
-                "WindowOnTop": "0"
+                "ShowDebugInfo": "1",
+                "ShowDebugPerformance": "1"
             },
             "Window": {
-                "Fps": "60",
+                "FpsTarget": "60",
                 "vSync": "1"
             }
         }
