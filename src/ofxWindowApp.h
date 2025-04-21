@@ -73,7 +73,7 @@ public:
 
 private:
 	static void windowMoved(GLFWwindow * window, int xpos, int ypos);
-	bool bDisableCallback_windowMoved = false;
+	bool bDisableCallback_windowMovedOrResized = false;
 
 private:
 	static ofxWindowApp * instance; // Static pointer to hold the instance

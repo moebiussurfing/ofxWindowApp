@@ -1,7 +1,7 @@
 #include "ofxWindowApp.h"
 
 #ifdef SURFING_WINDOW_APP__USE_STATIC
-	#if defined(TARGET_WIN32)
+#if defined(TARGET_WIN32)
 
 ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointer
 
@@ -15,25 +15,52 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
 
 	if (!instance) return;
+	if (!instance->bDisableCallback_windowMovedOrResized) return;
 
-	if (!instance->bDisableCallback_windowMoved) return;
+	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
+
 	if (!instance->bDoneSetup) return;
 	if (!instance->bDoneStartup) return;
 
-	instance->doGetWindowSettings();
+	instance->doGetWindowSettings(); // get raw values/states from the app window to windowSettings
 
-	instance->bFlagToSave = true;
+	instance->bFlagToSave = true; // flag to save json on next frame
 
-		#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+	#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
 	instance->timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-		#endif
+	#endif
 }
 
-	#endif
 #endif
+#endif
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
+	if (bDisableCallback_windowMovedOrResized) return;
+
+	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
+	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "at frameNum: " << ofGetFrameNum();
+
+	windowResized(resize.width, resize.height);
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowResized(int w, int h) {
+	if (bDisableCallback_windowMovedOrResized) return;
+
+	ofLogNotice("ofxWindowApp:windowResized(w,h)") << ofToString(w) << ", " << ofToString(h);
+	ofLogNotice("ofxWindowApp:windowResized(w,h)") << "at frameNum: " << ofGetFrameNum();
+
+	doGetWindowSettings(); // get raw values/states from the app window to windowSettings
+
+	bFlagToSave = true; // flag to save json on next frame
+
+	#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+	#endif
+}
 
 //----
 
@@ -46,8 +73,12 @@ ofxWindowApp::ofxWindowApp() {
 	doResetWindowExtraSettings();
 	doResetWindowSettings();
 
+	bDisableCallback_windowMovedOrResized = true;
+
 	doApplyWindowSettings();
 	doApplyWindowExtraSettings();
+
+	bDisableCallback_windowMovedOrResized = false;
 }
 
 //--------------------------------------------------------------
@@ -787,41 +818,6 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 
 		ofPopStyle();
 	}
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::windowResized(int w, int h) {
-	ofLogNotice("ofxWindowApp:windowResized(w,h)") << ofToString(w) << ", " << ofToString(h);
-	ofLogNotice("ofxWindowApp:windowResized(w,h)") << "at frameNum: " << ofGetFrameNum();
-
-	doGetWindowSettings();
-
-	bFlagToSave = true;
-
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
-	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-#endif
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
-	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
-	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "at frameNum: " << ofGetFrameNum();
-
-	windowResized(resize.width, resize.height);
-
-	//static int w = -1;
-	//static int h = -1;
-	//bool bChanged = 0;
-	//if (w != resize.width) {
-	//	bChanged = 1;
-	//	w = resize.width;
-	//}
-	//if (h != resize.height) {
-	//	bChanged = 1;
-	//	h = resize.height;
-	//}
-	//if (bChanged) windowResized(w, h);
 }
 
 //--------------------------------------------------------------
