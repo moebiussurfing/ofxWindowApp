@@ -183,7 +183,7 @@ void ofxWindowApp::setup() {
 	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
 	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
 	if (!b) {
-		b = font.load(OF_TTF_MONO, 10);
+		b = font.load(OF_TTF_MONO, 11);
 		if (b)
 			ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF";
 		else
@@ -645,15 +645,15 @@ void ofxWindowApp::drawDebugInfo() {
 	fpsRealStr = ofToString(fpsReal, 1);
 	fpsTargetStr = ofToString(fpsTarget);
 
-	str += "ALT+ [W]";
-
 	str += strPad + "SIZE:" + screenStr;
 	str += strPad + "POS:" + screenPosStr;
 	str += strPad + "FPS:" + fpsRealStr;
 	str += "[" + fpsTargetStr + "]";
 
+	str += strPad + "| ALT + [W]_INFO";
+
 	vSyncStr = ofToString(vSync ? "ON " : "OFF");
-	str += strPad + "[V] VSYNC_" + vSyncStr;
+	str += strPad + "[V]_VSYNC_" + vSyncStr;
 
 	bool bModeFullScreen = false;
 	if (ofGetWindowMode() == OF_WINDOW) // Go full screen
@@ -663,17 +663,17 @@ void ofxWindowApp::drawDebugInfo() {
 	{
 		bModeFullScreen = true;
 	}
-	screenMode = "[F] ";
+	screenMode = "[F]_";
 	screenMode += bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE";
 	str += strPad + screenMode;
 
-	str += strPad + "[L] " + ofToString(bDisableAutoSave ? "NO_SAVE  " : "AUTO_SAVE");
+	str += strPad + "[L]_" + ofToString(bDisableAutoSave ? "NO_SAVE  " : "AUTO_SAVE");
 
 #ifdef SURFING_USE_STAY_ON_TOP
-	str += strPad + "[T] " + ofToString(bWindowStayOnTop ? "ON_TOP:TRUE " : "ON_TOP:FALSE");
+	str += strPad + "[T]_" + ofToString(bWindowStayOnTop ? "ON_TOP:TRUE " : "ON_TOP:FALSE");
 #endif
 
-	str += strPad + "[D] DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
+	str += strPad + "[D]_DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 
 	str += strPad + "  ";
 	str += " " + ofToString(mod_ALT ? "ALT" : "   ");
@@ -685,7 +685,7 @@ void ofxWindowApp::drawDebugInfo() {
 
 #ifdef USE_CUSTOM_FONT
 	#if 1
-	// tiny squared
+	// A.tiny squared
 	ofPushStyle();
 	ofFill();
 	auto bb = font.getStringBoundingBox(str, xx, yy);
@@ -699,7 +699,7 @@ void ofxWindowApp::drawDebugInfo() {
 	font.drawString(str, xx, yy);
 	ofPopStyle();
 	#else
-	// rounded text box
+	// B. rounded text box
 	auto bb = ofxSurfingHelpersLite::ofxWindowApp::getBBBitmapStringBoxToLayout(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
 	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
 	#endif
