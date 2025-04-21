@@ -4,12 +4,10 @@
 > WIP. Currently partially broken!
 
 ## Screencast
-
-![screenshot](readme_images/ofxWindowApp.gif?raw=true "MoebiusSurfing")
+![screenshot](ofxWindowApp.gif)
 
 ## Screenshot
-
-![screenshot](readme_images/screenshot2.JPG?raw=true "MoebiusSurfing")
+![screenshot](Capture.png)
 
 ## OVERVIEW
 
