@@ -14,7 +14,7 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-	ofLogNotice("ofxWindowApp:windowMovedd(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
+	ofLogNotice("ofxWindowApp:windowMoved(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
 
 	//// Ignore if pos not changed
 	//static int xpos_ = -1;
@@ -184,8 +184,10 @@ void ofxWindowApp::setup() {
 	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
 	if (!b) {
 		b = font.load(OF_TTF_MONO, 10);
-		if (b) ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF_MONO";
-		else ofLogError("ofxWindowApp:setup()") << "Error loading OF_TTF_MONO";
+		if (b)
+			ofLogNotice("ofxWindowApp:setup()") << "loaded OF_TTF";
+		else
+			ofLogError("ofxWindowApp:setup()") << "Error loading OF_TTF";
 	}
 #endif
 
@@ -324,8 +326,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 #else
 		yy = window_H - 10;
 #endif
-	}
-	else if (positionLayout == DEBUG_POSITION_TOP) {
+	} else if (positionLayout == DEBUG_POSITION_TOP) {
 #ifdef USE_CUSTOM_FONT
 		yy = fontSize;
 #else
@@ -512,6 +513,7 @@ void ofxWindowApp::loadSettings() {
 
 		logSettings();
 		ofLogNotice("ofxWindowApp") << "Done load settings!";
+		ofLogNotice("ofxWindowApp") << "-------------------";
 	} else {
 		ofLogError("ofxWindowApp") << "File settings NOT found: " << path;
 		doResetWindow();
@@ -619,6 +621,7 @@ void ofxWindowApp::drawDebug() {
 	//#endif
 
 	if (bFlagShowFeedbackDoneSaved) bFlagShowFeedbackDoneSaved = 0;
+
 	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
 }
 
@@ -681,6 +684,8 @@ void ofxWindowApp::drawDebugInfo() {
 	//--
 
 #ifdef USE_CUSTOM_FONT
+	#if 1
+	// tiny squared
 	ofPushStyle();
 	ofFill();
 	auto bb = font.getStringBoundingBox(str, xx, yy);
@@ -693,6 +698,11 @@ void ofxWindowApp::drawDebugInfo() {
 	ofSetColor(255);
 	font.drawString(str, xx, yy);
 	ofPopStyle();
+	#else
+	// rounded text box
+	auto bb = ofxSurfingHelpersLite::ofxWindowApp::getBBBitmapStringBoxToLayout(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
+	ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
+	#endif
 #else
 	ofDrawBitmapStringHighlight(str, xx, yy);
 #endif
@@ -773,14 +783,12 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 		ofSetColor(255);
 		font.drawString(str, _xx, _yy);
 		ofPopStyle();
+
+		fy = bb.getY();
+		fh = bb.getHeight() - 2;
 #else
 		//ofDrawBitmapStringHighlight(str, xx, yy);
 		ofDrawBitmapStringHighlight(diff, fx - 68.f, yy, cAlert, ofColor(255)); //text fps diff
-#endif
-
-#ifdef USE_CUSTOM_FONT
-		fy = bb.getY();
-		fh = bb.getHeight() - 2;
 #endif
 
 		// out-performance bar
@@ -899,16 +907,17 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 			doResetWindow();
 		}
 
-		// set some custom common sizes: instagram, portrait, landscape, squared etc
-		// WINDOW PRESETS
-		// q: 800x800
-		// Q: w x w
-		// 1: IGTV Cover Photo
-		// 2: IG Landscape Photo
-		// 3: IG Portrait
-		// 4: IG Story
-		// 5: IG Square
 		else {
+			// set some custom common sizes:
+			// instagram, portrait, landscape, squared etc
+			// WINDOW PRESETS
+			// q: 800x800
+			// Q: w x w
+			// 1: IGTV Cover Photo
+			// 2: IG Landscape Photo
+			// 3: IG Portrait
+			// 4: IG Story
+			// 5: IG Square
 			ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 		}
 	}
@@ -917,7 +926,6 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 	if (bKeys) {
 		const int & key = eventArgs.key;
-
 
 		// Release modifiers
 		mod_COMMAND = key == OF_KEY_COMMAND; // macOS
@@ -1003,6 +1011,7 @@ void ofxWindowApp::doApplyWindowMode() {
 
 	// window mode
 	else {
+		//TODO
 		ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 		ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 	}

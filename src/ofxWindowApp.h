@@ -2,6 +2,8 @@
 
 /*
 	TODO:
+	- add vars/ofRectangle for window pos/sz to avoid startup moves..
+	- 
 	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features
  */
 
@@ -72,6 +74,7 @@ public:
 
 private:
 	static ofxWindowApp * instance; // Static pointer to hold the instance
+
 public:
 	static void setInstance(ofxWindowApp * app); // Static function to set the instance
 #endif
@@ -218,7 +221,7 @@ private:
 	void saveSettings(bool bSlient = false);
 
 public:
-	void save(); //alias and public
+	void save(); // alias and public API
 
 private:
 	void saveSettingsAfterRefresh();
@@ -402,9 +405,11 @@ private:
 
 	void setupParams();
 	//ofParameterGroup params{ "ofxWindowApp" };
+
 	ofParameterGroup paramsExtra { "Extra" };
 	ofParameterGroup paramsWindow { "Window" };
 	ofParameterGroup paramsSession { "Session" };
+
 	ofParameter<bool> vSync { "vSync", false };
 	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
 	ofParameter<bool> bShowDebugPerformanceAlways { "ShowDebugPerformance", true };
@@ -420,6 +425,7 @@ public:
 
 private:
 	ofParameter<bool> bShowDebugInfo { "ShowDebugInfo", true };
+
 public:
 	bool bShowDebug = false;
 
@@ -431,13 +437,12 @@ private:
 
 	float fpsReal;
 
-#ifndef USE_CUSTOM_FONT
-	int xx = 10;
-	int yy = 0;
-#endif
 #ifdef USE_CUSTOM_FONT
 	int pad = 8;
 	int xx = pad / 2;
+	int yy = 0;
+#else
+	int xx = 10;
 	int yy = 0;
 #endif
 
@@ -455,6 +460,8 @@ public:
 	void doResetWindow() {
 		ofLogNotice("ofxWindowApp") << "doResetWindow()";
 
+		// Default window App
+
 		bIsFullScreen = false;
 		vSync = false;
 		fpsTarget = 60;
@@ -463,8 +470,8 @@ public:
 		int h = w * (9.f / 16.f);
 		windowSettings.setSize(w, h);
 
-		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); //left top
-		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); //centered fails
+		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); // left top
+		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); // centered fails
 
 		doApplyWindowMode();
 		doApplyExtraSettings();
@@ -480,6 +487,9 @@ private:
 	void drawDebugSystemMonitors();
 	vector<ofRectangle> monitorRects;
 
+	//----
+
+	// debug
 	void logSettings() {
 		ofLogNotice("ofxWindowApp") << "----------------------logSettings()";
 		ofLogNotice("ofxWindowApp") << "> ofGetWindow:";
