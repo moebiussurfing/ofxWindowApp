@@ -5,7 +5,7 @@ void ofApp::setup()
 {
 	w.setup(&w);
 
-	// custom
+	// customize
 	//w.setFrameRate(120);
 
 	// force debug
@@ -15,7 +15,7 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
-	// debug feedback
+	// debug feedback when changes
 	if (w.isChanged()) ofClear(ofColor::yellow);
 	else ofClear(64);
 }
