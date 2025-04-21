@@ -51,7 +51,7 @@ Q : Squared W x W
 3 : IG Portrait
 4 : IG Story
 5 : IG Square
-BKSP : Reset default
+BACKSPACE : Reset default
 ```
 
 ## WHY?

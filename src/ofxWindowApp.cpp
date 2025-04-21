@@ -67,6 +67,7 @@ void ofxWindowApp::windowResized(int w, int h) {
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 
+	ofLogNotice("ofxWindowApp:~ofxWindowApp()") << "Constructor";
 	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "at frameNum: " << ofGetFrameNum();
 
 	doResetWindowExtraSettings();
@@ -100,7 +101,7 @@ ofxWindowApp::~ofxWindowApp() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::exit() {
-	ofLogNotice("ofxWindowApp:exit()") << "Constructor";
+	ofLogNotice("ofxWindowApp:exit()");
 
 #ifdef SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT
 	if (bAutoSaveLoad && !bDisableAutoSave) {
@@ -142,13 +143,15 @@ void ofxWindowApp::setup() {
 
 	//--
 
-	// Font
-	fontSize = 10;
-	string _path = "assets/fonts/"; // assets fonts folder
-	bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
-	if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
-	if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-	if (!b) ofLogError("ofxWindowApp:setup()") << "Error loading ttf font file";
+	// Custom font
+	if (1) {
+		fontSize = 10;
+		string _path = "assets/fonts/"; // assets fonts folder
+		bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
+		if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
+		if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
+		if (!b) ofLogError("ofxWindowApp:setup()") << "Error loading ttf font file";
+	}
 
 	//--
 
@@ -547,14 +550,14 @@ void ofxWindowApp::loadSettings() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawDebug() {
-	// window title
+	// Window title
 	string tp = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string ts = ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
 	ofSetWindowTitle("ofxWindowApp    DEBUG    " + tp + "    " + ts);
 
-	// text box
+	// Text box
 	string s;
-	s += "ofxWindowApp         DEBUG\n";
+	s += "ofxWindowApp          DEBUG\n";
 	if (bFlagShowFeedbackDoneSaved)
 		s += "SAVE";
 	else
@@ -643,7 +646,7 @@ void ofxWindowApp::drawInfo() {
 	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 
 	// Fps
-	fpsRealStr = ofToString(fpsReal, 1);
+	fpsRealStr = ofToString(fpsReal, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 
 	str += strPad + strPad + "SIZE:" + screenStr;
@@ -677,7 +680,7 @@ void ofxWindowApp::drawInfo() {
 	str += strPad + "[D]_DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 	str += strPad;
 
-	// debug mods
+	// debug mod keys
 	//str += strPad + "  ";
 	//str += " " + ofToString(mod_ALT ? "ALT" : "   ");
 	//str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
@@ -730,7 +733,7 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 	bPreShow = (fpsReal < fpsTarget - 5); // below 5 fps starts showing bar
 	bAlert = (fpsReal < (fpsTarget - fpsThreshold)); // B. by absolute fps diff
 
-	//-
+	//--
 
 	// Bar
 
@@ -741,15 +744,14 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 
 		if (font.isLoaded()) {
 			fh = fontSize + previewPad - 4;
-			//fh = 10.f;
-			fPad = 4.f; //previewPad to border
+			fPad = 4.f;
 		} else {
 			fh = 10.f;
-			fPad = 5.f; //previewPad to border
+			fPad = 5.f;
 		}
 
 		fy = previewY - fh + 1.0f; // to the border
-		//fy = previewY - fh - 50.0f;// little air
+		//fy = previewY - fh - 50.0f; // little air
 
 		// position
 		fx = ofGetWindowWidth() - fwMax - fPad;
