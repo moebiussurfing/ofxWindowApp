@@ -355,7 +355,7 @@ void ofxWindowApp::doGetWindowSettings() {
 	else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE)) //TODO
 		bIsFullScreen = false;
 
-	logSettings();
+	//logSettings();
 }
 
 //--------------------------------------------------------------
@@ -388,7 +388,6 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofJson jApp;
 	ofJson jExtra;
 
-	logSettings();
 	ofLogNotice("ofxWindowApp:saveSettings()") << "Ready to save `windowSettings`...";
 
 	ofxSerializer::ofxWindowApp::to_json(jApp, windowSettings);
@@ -405,6 +404,9 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	// Check if we need to create data folder first
 	folderCheckAndCreate(path_folder);
+
+	// log
+	logSettings();
 
 	// Save file
 	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << data.dump(4);
@@ -512,10 +514,11 @@ void ofxWindowApp::loadSettings() {
 		windowSettings.setPosition(glm::vec2(jx, jy));
 		windowSettings.setSize(jw, jh);
 
-		logSettings();
-
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "-------------------";
+
+		// log
+		logSettings();
 
 		//--
 
@@ -523,6 +526,9 @@ void ofxWindowApp::loadSettings() {
 		doApplyWindowSettings();
 		doApplyWindowExtraSettings();
 		bDisableCallback_windowMovedOrResized = false;
+
+		// log
+		logSettings();
 
 		//--
 
@@ -602,7 +608,7 @@ void ofxWindowApp::drawDebug() {
 		ofPushStyle();
 		ofFill();
 		int x = 4;
-		int y = 18;
+		int y = 17;
 		x += SURFING__PAD_TO_WINDOW_BORDERS;
 		y += SURFING__PAD_TO_WINDOW_BORDERS;
 		auto bb = font.getStringBoundingBox(s, x, y);
@@ -940,7 +946,7 @@ void ofxWindowApp::doApplyWindowExtraSettings() {
 	ofSetFrameRate(int(fpsTarget.get()));
 	ofSetVerticalSync(vSync.get());
 
-	logSettings();
+	//logSettings();
 }
 
 //--------------------------------------------------------------
@@ -960,7 +966,7 @@ void ofxWindowApp::doApplyWindowSettings() {
 		ofSetFullscreen(false);
 	}
 
-	logSettings();
+	//logSettings();
 }
 
 //--------------------------------------------------------------
