@@ -62,7 +62,7 @@ public:
 #ifdef SURFING_WINDOW_APP__USE_STATIC
 public:
 	void setup(ofxWindowApp * app) {
-		ofLogNotice("ofxWindowApp::setup(ofxWindowApp * app)") << "at frame num: " << ofGetFrameNum();
+		ofLogNotice("ofxWindowApp::setup(ofxWindowApp * app)") << "at frameNum: " << ofGetFrameNum();
 		this->setInstance(app);
 		setup();
 	}
@@ -489,10 +489,11 @@ private:
 		ofLogNotice("ofxWindowApp") << "Window Width: " << ofToString(ofGetWindowWidth());
 		ofLogNotice("ofxWindowApp") << "Window Height: " << ofToString(ofGetWindowHeight());
 		ofLogNotice("ofxWindowApp") << "> windowSettings:";
-		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
 		ofLogNotice("ofxWindowApp") << "OF_WINDOW/OF_FULLSCREEN/OF_GAME_MODE";
+		ofLogNotice("ofxWindowApp") << "WindowMode:" << ofToString(windowSettings.windowMode);
 		ofLogNotice("ofxWindowApp") << "Position: " << ofToString(windowSettings.getPosition());
 		ofLogNotice("ofxWindowApp") << "Width: " << ofToString(windowSettings.getWidth());
 		ofLogNotice("ofxWindowApp") << "Height: " << ofToString(windowSettings.getHeight());
+		ofLogNotice("ofxWindowApp") << "----------------------";
 	}
 };

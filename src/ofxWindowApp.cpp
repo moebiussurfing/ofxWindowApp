@@ -14,7 +14,7 @@ void ofxWindowApp::setInstance(ofxWindowApp * app) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-	ofLogVerbose("ofxWindowApp:windowMovedd(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
+	ofLogNotice("ofxWindowApp:windowMovedd(GLFWwindow * window..)") << ofToString(xpos) << ", " << ofToString(ypos);
 
 	//// Ignore if pos not changed
 	//static int xpos_ = -1;
@@ -57,7 +57,7 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
-	ofLogNotice("ofxWindowApp::ofxWindowApp()") << "at frame num: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:ofxWindowApp()") << "at frameNum: " << ofGetFrameNum();
 
 	doResetWindow();
 
@@ -92,10 +92,10 @@ ofxWindowApp::~ofxWindowApp() {
 //--------------------------------------------------------------
 void ofxWindowApp::startup() {
 	if (bDoneStartup) {
-		ofLogWarning("ofxWindowApp::startup()") << "Skip! at frame num: " << ofGetFrameNum();
+		ofLogWarning("ofxWindowApp::startup()") << "Skip! at frameNum: " << ofGetFrameNum();
 		return;
 	}
-	ofLogNotice("ofxWindowApp::startup()") << "at frame num: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp::startup()") << "at frameNum: " << ofGetFrameNum();
 
 	//--
 
@@ -135,7 +135,7 @@ void ofxWindowApp::startup() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::exit() {
-	ofLogNotice("ofxWindowApp::exit()");
+	ofLogNotice("ofxWindowApp:exit()");
 
 #ifdef SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT
 	if (bAutoSaveLoad && !bDisableAutoSave) {
@@ -147,11 +147,11 @@ void ofxWindowApp::exit() {
 //--------------------------------------------------------------
 void ofxWindowApp::setup() {
 	if (bDoneSetup) {
-		ofLogWarning("ofxWindowApp::setup()") << "Skip! at frame num: " << ofGetFrameNum();
+		ofLogWarning("ofxWindowApp:setup()") << "Skip! at frameNum: " << ofGetFrameNum();
 		return;
 	}
 
-	ofLogNotice("ofxWindowApp::setup()") << "at frame num: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:setup()") << "at frameNum: " << ofGetFrameNum();
 
 	//--
 
@@ -348,7 +348,6 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 void ofxWindowApp::doRefreshGetWindowSettings() {
 	ofLogNotice("ofxWindowApp") << "doRefreshGetWindowSettings()";
 
-	// Big
 	windowSettings.setPosition(glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY()));
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
@@ -558,8 +557,8 @@ void ofxWindowApp::drawDebug() {
 
 	s += "\n";
 	s += "PRESETS\n";
-	s += "q : 800x800\n";
-	s += "Q : w x w\n";
+	s += "q : 800 x 800\n";
+	s += "Q : W x W\n";
 	s += "1 : IGTV Cover Photo\n";
 	s += "2 : IG Landscape Photo\n";
 	s += "3 : IG Portrait\n";
@@ -797,11 +796,13 @@ void ofxWindowApp::drawDebugInfoPerformanceWidget() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h) {
+	ofLogNotice("ofxWindowApp:windowResized(w,h)") << ofToString(w) << ", " << ofToString(h);
+	ofLogNotice("ofxWindowApp:windowResized(w,h)") << "at frameNum: " << ofGetFrameNum();
+
 	window_W = w;
 	window_H = h;
 	window_X = ofGetWindowPositionX();
 	window_Y = ofGetWindowPositionY();
-	ofLogNotice("ofxWindowApp::windowResized") << ofToString(w) << ", " << ofToString(h);
 
 	doRefreshGetWindowSettings();
 
@@ -814,18 +815,23 @@ void ofxWindowApp::windowResized(int w, int h) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
-	static int w = -1;
-	static int h = -1;
-	bool bChanged = 0;
-	if (w != resize.width) {
-		bChanged = 1;
-		w = resize.width;
-	}
-	if (h != resize.height) {
-		bChanged = 1;
-		h = resize.height;
-	}
-	if (bChanged) windowResized(w, h);
+	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
+	ofLogNotice("ofxWindowApp:windowResized(ofResizeEventArgs & resize)") << "at frameNum: " << ofGetFrameNum();
+
+	windowResized(resize.width, resize.height);
+
+	//static int w = -1;
+	//static int h = -1;
+	//bool bChanged = 0;
+	//if (w != resize.width) {
+	//	bChanged = 1;
+	//	w = resize.width;
+	//}
+	//if (h != resize.height) {
+	//	bChanged = 1;
+	//	h = resize.height;
+	//}
+	//if (bChanged) windowResized(w, h);
 }
 
 //--------------------------------------------------------------
