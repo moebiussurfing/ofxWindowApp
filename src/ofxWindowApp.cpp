@@ -650,7 +650,7 @@ void ofxWindowApp::drawDebugInfo() {
 	str += strPad + "FPS:" + fpsRealStr;
 	str += "[" + fpsTargetStr + "]";
 
-	str += strPad + "| ALT + [W]_INFO";
+	str += strPad + "|" + strPad + "ALT + [W]_INFO";
 
 	vSyncStr = ofToString(vSync ? "ON " : "OFF");
 	str += strPad + "[V]_VSYNC_" + vSyncStr;
