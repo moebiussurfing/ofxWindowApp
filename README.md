@@ -1,7 +1,7 @@
 # ofxWindowApp
 
 > [!IMPORTANT] 
-> WIP. Currently partially broken!
+> WIP. Currently focused on Windows dev.
 
 ## Screencast
 ![screenshot](ofxWindowApp.gif)
@@ -10,24 +10,23 @@
 ![screenshot](Capture.png)
 
 ## OVERVIEW
-
 **openFrameworks** addon to **auto store** and **recall** the basic app **window state/settings**:
 
 > [!WARNING] 
-> I have noticed many problems when reloading the window size and position settings to the window application. This problem often occurs when using multiple monitors and resolutions. Usually using the application on the main monitor works fine, but on other monitors the window settings may differ from session to session. This seems to be due to problems in `GLFW` or `OF`, maybe related to the size of the window bar (?)
+> _I have noticed many problems when reloading the window size and position settings to the window application. This problem often occurs when using multiple monitors and resolutions. Usually using the application on the main monitor works fine, but on other monitors the window settings may differ from session to session. This seems to be due to problems in `GLFW` or `OF`, maybe related to the size of the window bar (?)_
 
 ## FEATURES
 
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
-* Window **Mode** (window/full screen).
-* Window target **FPS** settings (vs real current **framerate**).
+* Window **Mode** (Windowed / Fullscreen).
+* Window target **FPS** (vs real current **framerate**).
 * Window **vSync** state. 
-* "**Alert**" with a **performance** red bar when **low FPS drops** too much under the expected target frame rate.
-* Easy change the app settings just by editing the **JSON file**, instead of the app code.
-* Optional `custom TTF font` for debug display.
-* `Stay on top` mode, easy console window disabler. (**WIN32** only)
-* Window shape presets with `key commands` for squared and common `Instagram` sizes.
+* **Alert display**" with a **performance** red bar when **low FPS drops** too much under the expected target frame rate.
+* Easy change the app settings just by editing the **JSON file**, instead of requiring edit the app code.
+* Optional **custom TTF font** for debug display.
+* **Stay on top** mode, easy console window disabler. (**Windows** only)
+* Window shape **presets** with `key commands` for squared and common `Instagram` sizes.
 
 ## KEY COMMANDS
 
@@ -55,13 +54,15 @@ BACKSPACE : Reset default
 
 ## WHY?
 
-It can be useful to **auto-maintain** window settings between your **app sessions**.  
+It can be useful to have persistent `window settings` between your **App sessions**.  
 
-_Not only for the final user but also for the coder. Usually when you start a clean ```OF project``` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times..._  
+_Not only for the `final user` but also for the `coder`. Usually when you start a clean `OF project` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times..._  
 
 _Using this add-on you can forget about this "annoying behaviour", as the **App Window will be opened in the same position** and with the **same size and settings**._  
 
 ## USAGE
+Nothing more is required on `update()` or `draw()`!  
+Some settings can be configured using `key commands`.  
 
 #### ofApp.h
 ```.c++
@@ -70,8 +71,7 @@ _Using this add-on you can forget about this "annoying behaviour", as the **App 
 ```
 
 #### ofApp.cpp
-Nothing more is required on ```update()``` or ```draw()```!  
-Some settings can be configured using key commands.  
+
 ```.cpp 
 ofApp::setup()
 {
@@ -80,7 +80,7 @@ ofApp::setup()
     //----
 
     // NOTE:
-    // First time opening app:
+    // First time opening an app:
     // Default FPS is 60 fps
     // Default vSync is disabled
 
@@ -93,7 +93,7 @@ ofApp::setup()
 }
 ```
 
-The add-on will **auto-load** the settings when your **app starts** and **auto stores** too on **App exit**.  
+The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any change**.  
 
 **Nothing more it's required!**  
 
@@ -128,7 +128,7 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 ```
 ### TODO
 
-* Merge with another addon to handle more window settings borderless, put in-front, half screen, send to 2nd monitor... etc
+* Merge with other addons to handle more window settings: borderless, staty on top (macOS), half/quarter screen, centered, send to another monitor... etc
 
 ## TESTED SYSTEMS
 - **Windows 10/11** / **VS 2022** / **OF ~0.11** /  **OF 0.12+**
