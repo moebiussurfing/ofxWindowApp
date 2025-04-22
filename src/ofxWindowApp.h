@@ -3,7 +3,8 @@
 /*
 	BUGS:
 	- many logs to verbose
-	- fix backspace requires multiple takes
+	- add timer mode to reduce writes
+	- test macOS
 
 	TODO:
 	- check listen when file changes. allowing edit json externally and auto update the app window.
