@@ -1,13 +1,19 @@
 #pragma once
 
 /*
+	BUGS:
+	- many logs to verbose
+	- fix backspace requires multiple takes
+
 	TODO:
+	- check listen when file changes. allowing edit json externally and auto update the app window.
+	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart.
 	- add vars/ofRectangle for aux window pos/sz to avoid startup moves...
+	- add unlock full fps / fps=0 toggle.
 	- fps plot graph.
 	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features.
-	- add unlock full fps / fps=0 toggle.
 	- add fullscreen/window and other bool ofParams to expose to a control ui.
-	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart.
+	- 
  */
 
 //----
@@ -39,8 +45,8 @@
 	#endif
 #endif
 
-#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
 #define OFX_WINDOW_APP_BAR_HEIGHT 45 // probably fits on Win32 only.
+//#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
 
 //#define SURFING_USE_STAY_ON_TOP
 
@@ -392,7 +398,7 @@ private:
 private:
 	//--------------------------------------------------------------
 	void doResetWindowExtraSettings() {
-		ofLogNotice("ofxWindowApp") << "doResetWindowExtraSettings()";
+		ofLogNotice("ofxWindowApp:doResetWindowExtraSettings()");
 
 		// Default settings
 		vSync = false;
@@ -405,10 +411,11 @@ private:
 private:
 	//--------------------------------------------------------------
 	void doResetWindowSettings() {
-		ofLogNotice("ofxWindowApp") << "doResetWindowSettings()";
+		ofLogNotice("ofxWindowApp:doResetWindowSettings()");
 
 		// window mode
 		windowSettings.windowMode = ofWindowMode(0);
+		bIsFullScreen = false;
 
 		// shape
 		int w = 1280;
@@ -422,7 +429,7 @@ private:
 	void drawDebug();
 
 	void windowChanged();
-	bool bFlagWindowChanged = false;
+	//bool bFlagWindowChanged = false;
 
 	//--------------------------------------------------------------
 

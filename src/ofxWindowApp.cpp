@@ -18,8 +18,8 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 	if (!instance) return;
 	ofLogNotice("ofxWindowApp:windowMoved(window, xpos, ypos)") << ofToString(xpos) << ", " << ofToString(ypos);
 
-	//instance->windowChanged();
-	instance->bFlagWindowChanged = true;
+	instance->windowChanged();
+	//instance->bFlagWindowChanged = true;
 }
 
 	#endif
@@ -29,24 +29,25 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
 	ofLogNotice("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
 
-	//this->windowChanged();
-	bFlagWindowChanged = true;
+	this->windowChanged();
+	//bFlagWindowChanged = true;
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h) {
 	ofLogNotice("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
 
-	//this->windowChanged();
-	bFlagWindowChanged = true;
+	this->windowChanged();
+	//bFlagWindowChanged = true;
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to this method!
-	if (bDisableAutoSaveLock) {
-		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
-		return;
-	}
+	//if (bDisableAutoSaveLock) {
+	//	ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
+	//	return;
+	//}
+	
 	// ignored changes when not ended setup, startup processes or is forced flagged to bypass callbacks
 	if (!bDoneSetup) {
 		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneSetup) > FrameNum: " << ofGetFrameNum();
@@ -56,6 +57,7 @@ void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to th
 		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneStartup) > FrameNum: " << ofGetFrameNum();
 		return;
 	}
+
 	if (bDisableCallback_windowMovedOrResized) {
 		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableCallback_windowMovedOrResized) > FrameNum: " << ofGetFrameNum();
 		return;
@@ -124,6 +126,8 @@ void ofxWindowApp::exit() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::setup() {
+	ofLogNotice("ofxWindowApp:setup()") << "----------------------setup() <--BEGIN";
+
 	if (bDoneSetup) {
 		ofLogWarning("ofxWindowApp:setup()") << "SKIP! FrameNum: " << ofGetFrameNum();
 		return;
@@ -183,6 +187,7 @@ void ofxWindowApp::setup() {
 	//--
 
 	bDoneSetup = true;
+	ofLogNotice("ofxWindowApp:setup()") << "----------------------setup()--> END";
 }
 
 //--------------------------------------------------------------
@@ -210,6 +215,8 @@ void ofxWindowApp::setupParams() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::startup() {
+	ofLogNotice("ofxWindowApp:startup()") << "----------------------startup() <--BEGIN";
+
 	if (bDoneStartup) {
 		ofLogWarning("ofxWindowApp:startup()") << "SKIP! FrameNum: " << ofGetFrameNum();
 		return;
@@ -219,11 +226,15 @@ void ofxWindowApp::startup() {
 	//--
 
 	// Load
-	if (bAutoLoad) loadSettings();
+	if (bAutoLoad) {
+		loadSettings();
+		loadSettings();// redo trick workaround bc sometimes first
+	}
 
 	//--
 
 	bDoneStartup = true;
+	ofLogNotice("ofxWindowApp:startup()") << "----------------------startup()--> END";
 }
 
 //----
@@ -235,6 +246,10 @@ void ofxWindowApp::update(ofEventArgs & args) {
 		if (ofGetFrameNum() >= 0) {
 			setup();
 		}
+	}
+
+	if (ofGetFrameNum() == 1) {
+		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
 	}
 
 	// Auto call startup but after setup is done if required.
@@ -338,12 +353,12 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	//--
 
-	//TODO: trying to fix som glfw/OF windows management problems...
-	// https://forum.openframeworks.cc/t/timing-of-windowresized/44492
-	if (bFlagWindowChanged) {
-		bFlagWindowChanged = false;
-		this->windowChanged();
-	}
+	////TODO: trying to fix som glfw/OF windows management problems...
+	//// https://forum.openframeworks.cc/t/timing-of-windowresized/44492
+	//if (bFlagWindowChanged) {
+	//	bFlagWindowChanged = false;
+	//	this->windowChanged();
+	//}
 }
 
 //--------------------------------------------------------------
@@ -516,8 +531,9 @@ void ofxWindowApp::loadSettings() {
 
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
 
-		//// log
-		//logSettings();
+		// log
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "PRE";
+		logSettings();
 
 		//--
 
@@ -528,7 +544,10 @@ void ofxWindowApp::loadSettings() {
 		bDisableCallback_windowMovedOrResized = false;
 
 		// log
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "POST";
 		logSettings();
+
+		//TODO: CHECK IF DIFFERS AND FORCE WINDOW TO JSON SETTINGS!
 
 		//--
 
@@ -837,8 +856,10 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	if (bShowDebug) {
 		// set a window shape
 		if (key == OF_KEY_F1) {
-			ofSetWindowPosition(-1111, 1111);
-			ofSetWindowShape(1000, 1000);
+			for (int i = 0; i < 2; i++) { //force repeat fix
+				ofSetWindowPosition(-1111, 1111);
+				ofSetWindowShape(1000, 1000);
+			}
 			logSettings();
 			return;
 		}
@@ -909,10 +930,12 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	}
 #endif
 
-	// Reset
+	// Reset default window
 	else if (key == OF_KEY_BACKSPACE) {
-		doResetWindowSettings();
-		doApplyWindowSettings();
+		for (int i = 0; i < 3; i++) {//force repeat fix
+			doResetWindowSettings();
+			doApplyWindowSettings();
+		}
 	}
 
 	// Layout pos
