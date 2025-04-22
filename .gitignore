@@ -1,4 +1,11 @@
 #########################
+# CURRENT PROJECT
+#########################
+
+# *.jpg
+
+
+#########################
 # general patterns
 #########################
 
@@ -6,10 +13,28 @@
 
 ## can exclude some sttings files
 
-#*.XML
-#*.xml
-#*.JSON
-#*.json
+## macOS files
+config.make
+Makefile
+openFrameworks-Info.plist
+Project.xcconfig
+icon.rc
+
+## vs
+*\addons\*
+enc_temp_folder\*
+*\enc_temp_folder\*
+
+## scripts
+# *.ps1
+# *.bat
+
+## settings
+*.ini
+*.XML
+*.xml
+*.JSON
+*.json
 
 #*/bin/*
 #!*/bin/data/
@@ -550,10 +575,3 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
-
-##-----------------------------------
-
-*/config.make
-*/enc_temp_folder/*
-ofxWindowApp.json
-Examples/2_example_Dev/config.make
