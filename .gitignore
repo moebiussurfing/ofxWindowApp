@@ -19,6 +19,8 @@ Makefile
 openFrameworks-Info.plist
 Project.xcconfig
 icon.rc
+of.entitlements
+.gitkeep
 
 ## vs
 *\addons\*
