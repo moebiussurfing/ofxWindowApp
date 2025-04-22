@@ -1,7 +1,7 @@
 # ofxWindowApp
 
 > [!IMPORTANT] 
-> WIP. Currently focused on Windows dev.
+> _WIP. Currently focused and tested under Windows._
 
 ## Screencast
 ![screenshot](ofxWindowApp.gif)
@@ -61,8 +61,6 @@ _Not only for the `final user` but also for the `coder`. Usually when you start 
 _Using this add-on you can forget about this "annoying behaviour", as the **App Window will be opened in the same position** and with the **same size and settings**._  
 
 ## USAGE
-Nothing more is required on `update()` or `draw()`!  
-Some settings can be configured using `key commands`.  
 
 #### ofApp.h
 ```.c++
@@ -92,10 +90,9 @@ ofApp::setup()
     w.setVerticalSync(true);
 }
 ```
-
-The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any change**.  
-
-**Nothing more it's required!**  
+Nothing more is required on `update()` or `draw()`!  
+Some settings can be configured using `key commands`.  
+The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any changes**.  
 
 The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like this:  
 ```.json
