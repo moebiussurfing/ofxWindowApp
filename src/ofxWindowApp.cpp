@@ -982,6 +982,11 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
 	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
 	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+	
+	if(ofGetKeyPressed(OF_KEY_CONTROL)){
+		
+	}	
+	
 	if(mod_ALT){
 		ofLogNotice("ofxWindowApp:keyReleased") << "mod_ALT (false)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_COMMAND){
