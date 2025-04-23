@@ -1,81 +1,5 @@
 #include "ofxWindowApp.h"
 
-#ifdef SURFING_WINDOW_APP__USE_STATIC
-	#if defined(TARGET_WIN32)
-
-ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointer
-
-//--------------------------------------------------------------
-void ofxWindowApp::setInstance(ofxWindowApp * app) {
-	ofLogNotice("ofxWindowApp:setInstance(ofxWindowApp * app)");
-	instance = app; // Set the instance
-}
-
-//--
-
-//--------------------------------------------------------------
-void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
-	if (!instance) return;
-	ofLogNotice("ofxWindowApp:windowMoved(window, xpos, ypos)") << ofToString(xpos) << ", " << ofToString(ypos);
-
-	instance->windowChanged();
-	//instance->bFlagWindowChanged = true;
-}
-
-	#endif
-#endif
-
-//--------------------------------------------------------------
-void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
-	ofLogNotice("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
-
-	this->windowChanged();
-	//bFlagWindowChanged = true;
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::windowResized(int w, int h) {
-	ofLogNotice("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
-
-	this->windowChanged();
-	//bFlagWindowChanged = true;
-}
-
-//--------------------------------------------------------------
-void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to this method!
-	//if (bDisableAutoSaveLock) {
-	//	ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
-	//	return;
-	//}
-	
-	// ignored changes when not ended setup, startup processes or is forced flagged to bypass callbacks
-	if (!bDoneSetup) {
-		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneSetup) > FrameNum: " << ofGetFrameNum();
-		return;
-	}
-	if (!bDoneStartup) {
-		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneStartup) > FrameNum: " << ofGetFrameNum();
-		return;
-	}
-
-	if (bDisableCallback_windowMovedOrResized) {
-		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableCallback_windowMovedOrResized) > FrameNum: " << ofGetFrameNum();
-		return;
-	}
-
-	ofLogNotice("ofxWindowApp:windowChanged()") << "FrameNum: " << ofGetFrameNum();
-
-	doSetWindowSettingsFromAppWindow(); // get raw values/states from the app window to windowSettings
-
-	bFlagToSave = true; // flag to save json on next frame
-
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
-	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
-#endif
-}
-
-//----
-
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
@@ -85,7 +9,7 @@ ofxWindowApp::ofxWindowApp() {
 	doResetWindowExtraSettings();
 	doResetWindowSettings();
 
-	bDisableCallback_windowMovedOrResized = true; // apply without saving json settings
+	bDisableCallback_windowMovedOrResized = true; // Apply without saving json settings
 	doApplyWindowSettings();
 	doApplyWindowExtraSettings();
 	bDisableCallback_windowMovedOrResized = false;
@@ -108,7 +32,7 @@ ofxWindowApp::~ofxWindowApp() {
 	}
 #endif
 
-	ofRemoveListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
+	ofRemoveListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::ChangedParamsExtra);
 }
 
 //--------------------------------------------------------------
@@ -162,7 +86,7 @@ void ofxWindowApp::setup() {
 	//--
 
 	// Custom font
-	if (1) { //disable to use bitmap OF fonts
+	if (1) { // Disable to use bitmap OF fonts instead of font files
 		fontSize = 10;
 		string _path = "assets/fonts/"; // assets fonts folder
 		bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
@@ -210,7 +134,7 @@ void ofxWindowApp::setupParams() {
 	paramsExtra.add(paramsWindow);
 	paramsExtra.add(paramsSession);
 
-	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::Changed_ParamsExtra);
+	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::ChangedParamsExtra);
 }
 
 //--------------------------------------------------------------
@@ -228,13 +152,91 @@ void ofxWindowApp::startup() {
 	// Load
 	if (bAutoLoad) {
 		loadSettings();
-		loadSettings();// redo trick workaround bc sometimes first
+		loadSettings(); // BUG: Redo trick workaround bc sometimes first one is not enough
 	}
 
 	//--
 
 	bDoneStartup = true;
 	ofLogNotice("ofxWindowApp:startup()") << "----------------------startup()--> END";
+}
+
+//----
+
+//#if defined(TARGET_WIN32)
+#ifdef SURFING_WINDOW_APP__USE_STATIC
+
+ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointer
+
+//--------------------------------------------------------------
+void ofxWindowApp::setInstance(ofxWindowApp * app) {
+	ofLogNotice("ofxWindowApp:setInstance(ofxWindowApp * app)");
+	instance = app; // Set the instance
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
+	if (!instance) return;
+	ofLogNotice("ofxWindowApp:windowMoved(window, xpos, ypos)") << ofToString(xpos) << ", " << ofToString(ypos);
+
+	instance->windowChanged();
+	//instance->bFlagWindowChanged = true;
+}
+
+#endif
+//#endif
+
+//----
+
+// Window changed callbacks
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
+	ofLogNotice("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
+
+	this->windowChanged();
+	//bFlagWindowChanged = true;
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowResized(int w, int h) {
+	ofLogNotice("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
+
+	this->windowChanged();
+	//bFlagWindowChanged = true;
+}
+
+//--------------------------------------------------------------
+void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to this method!
+	//if (bDisableAutoSaveLock) {
+	//	ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
+	//	return;
+	//}
+	
+	// ignored changes when not ended setup, startup processes or is forced flagged to bypass callbacks
+	if (!bDoneSetup) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneSetup) > FrameNum: " << ofGetFrameNum();
+		return;
+	}
+	if (!bDoneStartup) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneStartup) > FrameNum: " << ofGetFrameNum();
+		return;
+	}
+
+	if (bDisableCallback_windowMovedOrResized) {
+		ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableCallback_windowMovedOrResized) > FrameNum: " << ofGetFrameNum();
+		return;
+	}
+
+	ofLogNotice("ofxWindowApp:windowChanged()") << "FrameNum: " << ofGetFrameNum();
+
+	doSetWindowSettingsFromAppWindow(); // Get raw values/states from the app window to windowSettings
+
+	bFlagToSave = true; // Flag to save json on next frame
+
+#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+#endif
 }
 
 //----
@@ -287,9 +289,9 @@ void ofxWindowApp::update(ofEventArgs & args) {
 	//--
 
 #ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
-	// Auto saver timer
-	// is no required to resize the window or to close the app window to save.
-	// then the app can crash an window shape will be stored 1 time each 10 seconds by default.
+	// Auto saver timer mode:
+	// It's no required to resize the window or to close the app window to save.
+	// Then the app can crash an window shape will be stored 1 time each 10 seconds by default.
 	if (bAutoSaverTimed && !bDisableAutoSaveLock) {
 		auto t = ofGetElapsedTimeMillis() - timeLastAutoSaveCheck;
 		if (t > timePeriodToCheckIfSave) {
@@ -321,7 +323,7 @@ void ofxWindowApp::update(ofEventArgs & args) {
 void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
 
-	// layouts top/bottom
+	// Layouts top/bottom
 	if (positionLayout == DEBUG_POSITION_BOTTOM) {
 		if (font.isLoaded()) {
 			previewY = ofGetWindowHeight() - fontSize + 5;
@@ -353,7 +355,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	//--
 
-	////TODO: trying to fix som glfw/OF windows management problems...
+	////TODO:  Trying to fix som glfw/OF windows management problems...
 	//// https://forum.openframeworks.cc/t/timing-of-windowresized/44492
 	//if (bFlagWindowChanged) {
 	//	bFlagWindowChanged = false;
@@ -369,13 +371,6 @@ void ofxWindowApp::doSetWindowSettingsFromAppWindow() {
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
-
-	//if (windowSettings.windowMode == ofWindowMode(OF_WINDOW))
-	//	bIsFullScreen = false;
-	//else if (windowSettings.windowMode == ofWindowMode(OF_FULLSCREEN))
-	//	bIsFullScreen = true;
-	//else if (windowSettings.windowMode == ofWindowMode(OF_GAME_MODE)) //TODO
-	//	bIsFullScreen = false;
 
 	//logSettings();
 }
@@ -422,7 +417,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	// Check if we need to create data folder first
 	folderCheckAndCreate(path_folder);
 
-	// log
+	// Log
 	logSettings();
 
 	// Save file
@@ -462,7 +457,7 @@ void ofxWindowApp::loadSettings() {
 		ofJson jExtra;
 
 		if (data.size() >= 2) {
-			jWindowSettings = data[0]; //TODO: Ugly workaround wil break if differs json object format!
+			jWindowSettings = data[0]; //TODO: Ugly workaround wil break if differs the json object format!
 			jExtra = data[1];
 
 			// Recall both paramsExtra groups
@@ -488,7 +483,6 @@ void ofxWindowApp::loadSettings() {
 
 		//--
 
-		// Big
 		//TODO: no using ofxSerializer when loading... could remove and make new approach..
 		jx = jWindowSettings["position"]["x"];
 		jy = jWindowSettings["position"]["y"];
@@ -531,38 +525,40 @@ void ofxWindowApp::loadSettings() {
 
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
 
-		// log
+		// Log
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "PRE";
 		logSettings();
 
 		//--
 
-		// bypass windowChanged callbacks (to avoid save json file again)
+		// Bypass windowChanged callbacks (to avoid save json file again)
 		bDisableCallback_windowMovedOrResized = true;
 		doApplyWindowSettings();
 		doApplyWindowExtraSettings();
 		bDisableCallback_windowMovedOrResized = false;
 
-		// log
+		// Log
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "POST";
 		logSettings();
 
 		//TODO: CHECK IF DIFFERS AND FORCE WINDOW TO JSON SETTINGS!
+		// Then we can fixit here manually.
 
 		//--
-
+		
+#if defined(TARGET_WIN32)
 #ifdef SURFING_USE_STAY_ON_TOP
 		// On top
 		if (!bIsFullScreen) {
-			// Workaround
-			// Refresh
-	#if defined(TARGET_WIN32)
+			// Workaround refresh
+
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-	#endif
+	
 			// Re trig
 			bWindowStayOnTop = bWindowStayOnTop;
 		}
+#endif
 #endif
 	} else {
 		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path;
@@ -657,19 +653,18 @@ void ofxWindowApp::drawDebug() {
 void ofxWindowApp::drawInfo() {
 	// Debug overlay screen modes
 
-	string vSyncStr;
+	string str;
 	string fpsRealStr;
 	string fpsTargetStr;
 	string strPad = "  ";
-	string str;
-	string screenStr = "";
+	string screenSizeStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
 
 	// Size
-	screenStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
+	screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
+	screenSizeStr += "px";
 
-	screenStr += "px";
 	// Pos
 	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 
@@ -677,15 +672,14 @@ void ofxWindowApp::drawInfo() {
 	fpsRealStr = ofToString(fpsReal, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 
-	str += strPad + strPad + "SIZE:" + screenStr;
+	str += strPad + strPad + "SIZE:" + screenSizeStr;
 	str += strPad + "POS:" + screenPosStr;
 	str += strPad + "FPS:" + fpsRealStr;
 	str += "[" + fpsTargetStr + "]";
 
 	str += strPad + strPad + "|" + strPad + strPad + "ALT +" + strPad + "[W]_INFO";
 
-	vSyncStr = ofToString(vSync ? "ON " : "OFF");
-	str += strPad + "[V]_VSYNC_" + vSyncStr;
+	str += strPad + "[V]_VSYNC_" + ofToString(vSync ? "ON " : "OFF");
 
 	bool _bModeFullScreen = false;
 	if (ofGetWindowMode() == OF_WINDOW) // Is full screen
@@ -695,8 +689,7 @@ void ofxWindowApp::drawInfo() {
 	{
 		_bModeFullScreen = true;
 	}
-	screenMode = "[F]_";
-	screenMode += _bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE";
+	screenMode = "[F]_" + ofToString(_bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE");
 	str += strPad + screenMode;
 
 	str += strPad + "[L]_" + ofToString(bDisableAutoSaveLock ? "AUTO_SAVE_OFF" : "AUTO_SAVE_ON ");
@@ -719,7 +712,7 @@ void ofxWindowApp::drawInfo() {
 
 	if (font.isLoaded()) {
 #if 1
-		// A.tiny squared
+		// A. Tiny squared text box
 		ofPushStyle();
 		ofFill();
 		auto bb = font.getStringBoundingBox(str, previewX, previewY);
@@ -733,7 +726,7 @@ void ofxWindowApp::drawInfo() {
 		font.drawString(str, previewX, previewY);
 		ofPopStyle();
 #else
-		// B. rounded text box
+		// B. Big rounded text box
 		auto bb = ofxSurfingHelpersLite::ofxWindowApp::getBBBitmapStringBoxToLayout(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
 		ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(str, ofxSurfingHelpersLite::ofxWindowApp::SURFING_LAYOUT_BOTTOM_LEFT);
 #endif
@@ -763,9 +756,9 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 
 	//--
 
-	// Bar
+	// Value bar
 
-	if (bPreShow) // to draw only under pre threshold
+	if (bPreShow) // To draw only if fps performance is under threshold
 	{
 		float fx, fy, fw, fh, fwMax, fPad;
 		fwMax = 100.f; // max width
@@ -778,10 +771,10 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 			fPad = 5.f;
 		}
 
-		fy = previewY - fh + 1.0f; // to the border
-		//fy = previewY - fh - 50.0f; // little air
+		fy = previewY - fh + 1.0f; // Close to the border
+		//fy = previewY - fh - 50.0f; // A little air
 
-		// position
+		// Position
 		fx = ofGetWindowWidth() - fwMax - fPad;
 
 		fw = ofMap(fpsReal, 0.0f * fpsTarget, fpsTarget, 0, fwMax, true);
@@ -800,7 +793,7 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 		float _xx = fx - 68.f;
 		float _yy = previewY;
 
-		// fps label
+		// Fps label
 		string str = diff;
 		if (font.isLoaded()) {
 			ofPushStyle();
@@ -822,12 +815,12 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 			ofDrawBitmapStringHighlight(diff, fx - 68.f, previewY, cAlert, ofColor(255)); // text fps diff
 		}
 
-		// out-performance bar
+		// Drop down out-performance bar
 		ofFill();
 		ofSetColor(cAlert);
 		ofDrawRectangle(fx, fy, fw, fh);
 
-		// rect border
+		// Rect border
 		ofNoFill();
 		ofSetLineWidth(2.0f);
 		ofSetColor(cAlert);
@@ -845,10 +838,19 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	// Modifiers
 	mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
-	//mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
-	//mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
-	//mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
-
+	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
+	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
+	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+	if(mod_ALT){
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_ALT";
+	}if(mod_COMMAND){
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_COMMAND";
+	}if(mod_CONTROL){
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_CONTROL";
+	}if(mod_SHIFT){
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_SHIFT";
+	}
+	
 	//--
 
 	// Debug
@@ -888,22 +890,22 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	//--
 
-	if (!mod_ALT) return;
+	if (!mod_ALT) return; // Using ALT modifier only
 
 	//--
 
-	ofLogVerbose("ofxWindowApp::keyPressed") << "'" << (char)key << "' [" << key << "]";
+	ofLogVerbose("ofxWindowApp:keyPressed") << "ALT + '" << (char)key << "' [" << key << "]";
 
 	// Draw info
 	if (key == 'W') {
 		bShowInfo = !bShowInfo;
-		ofLogNotice("ofxWindowApp") << "changed draw info: " << (bShowInfo ? "ON" : "OFF");
+		ofLogNotice("ofxWindowApp:keyPressed") << "Changed draw info: " << (bShowInfo ? "ON" : "OFF");
 	}
 
 	// Draw debug
 	else if (key == 'D') {
 		bShowDebug = !bShowDebug;
-		ofLogNotice("ofxWindowApp") << "changed draw debug: " << (bShowInfo ? "ON" : "OFF");
+		ofLogNotice("ofxWindowApp:keyPressed") << "Changed draw debug: " << (bShowInfo ? "ON" : "OFF");
 	}
 
 	// Switch window mode
@@ -911,13 +913,13 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 		doApplyToggleWindowMode();
 	}
 
-	// Switch v-sync mode
+	// Switch vsync mode
 	else if (key == 'V') {
 		vSync = !vSync;
 		ofSetVerticalSync(vSync);
 	}
 
-	// Toggle disableSave
+	// Toggle disable auto save lock
 	else if (key == 'L') {
 		bDisableAutoSaveLock = !bDisableAutoSaveLock;
 		setDisableAutoSaveLock(bDisableAutoSaveLock);
@@ -938,7 +940,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 		}
 	}
 
-	// Layout pos
+	// Layout position top or bottom
 	else if (key == 'P') {
 		doTogglePositionDisplayInfo();
 	}
@@ -946,17 +948,17 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	else {
 		// Window presets
 		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
-		// set some custom common sizes:
-		// instagram, portrait, landscape, squared etc
-		//s += "PRESETS\n";
-		//s += "Q : Squared 800 x 800\n";
-		//s += "q : Squared W x W\n";
-		//s += "1 : IGTV Cover Photo\n";
-		//s += "2 : IG Landscape Photo\n";
-		//s += "3 : IG Portrait\n";
-		//s += "4 : IG Story\n";
-		//s += "5 : IG Square\n";
-		//s += "BKSP : Reset default\n";
+		// Set some custom common sizes:
+		// Instagram, portrait, landscape, squared etc
+		// "PRESETS\n";
+		// "Q : Squared 800 x 800\n";
+		// "q : Squared W x W\n";
+		// "1 : IGTV Cover Photo\n";
+		// "2 : IG Landscape Photo\n";
+		// "3 : IG Portrait\n";
+		// "4 : IG Story\n";
+		// "5 : IG Square\n";
+		// "BACKSPACE : Reset default\n";
 	}
 }
 
@@ -982,22 +984,22 @@ void ofxWindowApp::folderCheckAndCreate(string _path) {
 
 	// Check if target data folder exist
 	if (!dataDirectory.isDirectory()) {
-		ofLogError("ofxWindowApp") << "folderCheckAndCreate(). FOLDER DOES NOT EXIST!";
+		ofLogWarning("ofxWindowApp:folderCheckAndCreate()") << "FOLDER DOES NOT EXIST!";
 
 		// Create folder
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 
 		// Debug if creation has been succed
 		if (b)
-			ofLogNotice("ofxWindowApp") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+			ofLogNotice("ofxWindowApp:folderCheckAndCreate()") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
 		else
-			ofLogError("ofxWindowApp") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+			ofLogError("ofxWindowApp:folderCheckAndCreate()") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
 	}
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::doApplyToggleWindowMode() {
-	ofLogNotice("ofxWindowApp") << "doApplyToggleWindowMode()";
+	ofLogNotice("ofxWindowApp:doApplyToggleWindowMode()");
 
 	// Toggle Mode
 	if (ofGetWindowMode() == OF_WINDOW) {
@@ -1026,15 +1028,15 @@ void ofxWindowApp::doApplyWindowExtraSettings() {
 void ofxWindowApp::doApplyWindowSettings() {
 	ofLogNotice("ofxWindowApp:doApplyWindowSettings()");
 
-	// apply settings from windowSettings
+	// Apply settings from windowSettings
 	ofSetWindowPosition(windowSettings.getPosition().x, windowSettings.getPosition().y);
 	ofSetWindowShape(windowSettings.getWidth(), windowSettings.getHeight());
 
-	// full screen
+	// Full screen
 	if (bIsFullScreen) {
 		ofSetFullscreen(true);
 	}
-	// window mode
+	// Window mode
 	else {
 		ofSetFullscreen(false);
 	}
@@ -1043,14 +1045,14 @@ void ofxWindowApp::doApplyWindowSettings() {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
+void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 	if (!bDoneSetup) return;
 	if (!bDoneStartup) return;
 
 	//--
 
 	string name = e.getName();
-	ofLogNotice("ofxWindowApp::Changed") << " " << name << " : " << e;
+	ofLogNotice("ofxWindowApp::ChangedParamsExtra") << " " << name << " : " << e;
 
 #ifdef SURFING_USE_STAY_ON_TOP
 	if (name == bWindowStayOnTop.getName()) {
@@ -1068,6 +1070,9 @@ void ofxWindowApp::Changed_ParamsExtra(ofAbstractParameter & e) {
 			ofLogNotice("ofxWindowApp") << "Set on top Disabled";
 		}
 		bIsWindowStayOnTop = bWindowStayOnTop;
+	#elif defined(TARGET_OSX)
+		//TODO:
+		ofLogError("ofxWindowApp") << "Not implemented for OSX platform. Only TARGET_WIN32 yet!";
 	#else
 		ofLogError("ofxWindowApp") << "Not implemented for current platform. Only TARGET_WIN32 yet!";
 	#endif
@@ -1129,23 +1134,23 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 
 	int i = 0;
 	for (auto & monitorRect : monitorRects) {
-		//canvas rect
+		// Canvas rect
 		if (i == 0)
 			monitorsCanvasRect.set(monitorRect);
 		else
 			monitorsCanvasRect.growToInclude(monitorRect);
 
-		//monitor rect
-		//check if pos is inside the ofRectangle
+		// Monitor rect
+		// Check if pos is inside the ofRectangle
 		if (monitorRect.inside(pos)) {
-			ofSetColor(255, 255, 0, a); //window app is on this monitor
+			ofSetColor(255, 255, 0, a); // Window app is on this monitor
 		} else {
 			ofSetColor(255, 255, 255, a);
 		}
 		ofNoFill();
 		ofDrawRectangle(monitorRect);
 
-		//label
+		// Label
 		ofPushMatrix();
 		ofFill();
 		ofTranslate(monitorRect.getX(), monitorRect.getY());
@@ -1159,7 +1164,7 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 		ofDrawBitmapString(s, 0, 0);
 		ofPopMatrix();
 
-		//label center num
+		// Label center num
 		ofPushMatrix();
 		ofTranslate(monitorRect.getCenter());
 		s = ofToString(i);
@@ -1169,7 +1174,7 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 		i++;
 	}
 
-	//app window
+	// App window
 	ofPushMatrix();
 	ofNoFill();
 	ofSetColor(0, 255, 0, a);
@@ -1185,14 +1190,14 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	ofDrawBitmapString(s, 0, 0);
 	ofPopMatrix();
 
-	//label center name
+	// Label center name
 	ofPushMatrix();
 	ofTranslate(rw.getCenter());
 	s = "App\nWindow";
 	ofDrawBitmapString(s, 0, 0);
 	ofPopMatrix();
 
-	//canvas
+	// Canvas
 	ofNoFill();
 	//monitorsCanvasRect.scaleFromCenter(1.1f);
 	//ofSetColor(0, 0, 0, a);
@@ -1200,7 +1205,7 @@ void ofxWindowApp::drawDebugSystemMonitors() {
 	ofPushMatrix();
 	ofTranslate(monitorsCanvasRect.getBottomLeft());
 
-	//monitor names list
+	// Monitor/displays names list
 	s = "\n\n\nDISPLAYS\n\n";
 	i = 0;
 	for (auto & monitorName : monitorNames) {

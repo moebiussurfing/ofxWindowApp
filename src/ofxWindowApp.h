@@ -1,8 +1,9 @@
 #pragma once
+#include "ofMain.h"
 
 /*
 	BUGS:
-	- many logs to verbose
+	- swap many logs to verbose
 	- add timer mode to reduce writes
 	- test macOS
 
@@ -21,40 +22,53 @@
 
 #define SURFING_WINDOW_APP__USE_STATIC
 // <- Main directive
-// Uncomment (enable) to allow WIN32 platform for probably better windowMove callback.
+// Uncomment (enable) to allow WIN32 platform with probably better windowMove callback.
 
 //----
 
 //TODO: Fixing exceptions hen closing ofApp.
-//#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // to enable that ofApp exit will call exit and save settings.
-//#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // to enable auto save on exit.
+//#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // To enable that ofApp exit will call exit and save settings.
+//#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // To enable auto save on exit.
 
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER // would be force disabled on Windows platform in static mode.
+#define SURFING_WINDOW_APP__USE_TIMED_SAVER // Would be force disabled on Windows platform in static mode.
 
 //----
 
-#include "ofMain.h"
+#include <GLFW/glfw3.h> // Required for displays debug and window callbacks.
 
-#if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
-	#include <GLFW/glfw3.h>
+//#if defined(TARGET_WIN32)
+#if defined(SURFING_WINDOW_APP__USE_STATIC)
+//	#include <GLFW/glfw3.h>
 	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER //force disable
+		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER // Force disable
 	#endif
 #else
 	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
-		#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+		#define SURFING_WINDOW_APP__USE_TIMED_SAVER // Force enable
 	#endif
 #endif
+//#endif
 
-#define OFX_WINDOW_APP_BAR_HEIGHT 45 // probably fits on Win32 only.
-//#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // to avoid that window border it's outside screen monitor
+//#if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
+//	#include <GLFW/glfw3.h>
+//	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
+//		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER // force disable
+//	#endif
+//#else
+//	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
+//		#define SURFING_WINDOW_APP__USE_TIMED_SAVER
+//	#endif
+//#endif
+
+#define OFX_WINDOW_APP_BAR_HEIGHT 45 // Probably fits on Win32 only.
+//#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // To avoid that window border it's outside screen monitor
 
 //#define SURFING_USE_STAY_ON_TOP
 
 //--
 
-#include "ofxSerializer_ofxWindowApp.h" //for windows size/pos serialization
-#include "ofxSurfingHelpersLite_ofxWindowApp.h" //for some windows sizes keycommands presets
+#include "ofxSerializer_ofxWindowApp.h" // For windows size/pos serialization
+#include "ofxSurfingHelpersLite_ofxWindowApp.h" // For some windows sizes keycommands presets
 
 //TODO
 //#include "FileChangeChecker.h"
@@ -112,7 +126,7 @@ private:
 	//--
 
 private:
-	ofWindowSettings windowSettings; // main storage for window shape and window mode
+	ofWindowSettings windowSettings; // Main storage for window shape (Position/Size) and window mode
 
 	ofTrueTypeFont font;
 	int fontSize;
@@ -141,7 +155,7 @@ private:
 
 public:
 	// Setters
-	// required when used for first time into your project and no JSON file settings created yet.
+	// Required when used for first time into your project and no JSON file settings created yet.
 	// Default will be 60 fps if not defined!
 	//--------------------------------------------------------------
 	void setFrameRate(float f) {
@@ -199,7 +213,7 @@ private:
 	//--
 
 //public:
-//	//TODO
+//	//TODO: handle console terminal window
 //	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
 //	//--------------------------------------------------------------
 //	void setConsoleVisible(bool show) {
@@ -221,14 +235,14 @@ private:
 	void doApplyWindowExtraSettings();
 	void doApplyWindowSettings();
 
-	void saveSettings(bool bSlient = false); // main save method
+	void saveSettings(bool bSlient = false); // Main save method
 	void loadSettings(); // main save method
 
 public:
-	void save(); // alias and public API
+	void save(); // Alias method and public for API external usage
 
 private:
-	void saveSettingsAfterRefresh(); // refresh update before save
+	void saveSettingsAfterRefresh(); // Refresh update before save
 
 	//--
 
@@ -238,7 +252,7 @@ private:
 	string path_folder;
 	string path_filename;
 
-	void folderCheckAndCreate(string _path); // check if required create folder or already exist
+	void folderCheckAndCreate(string _path); // Check if required create folder or already exist
 
 //public:
 	////--------------------------------------------------------------
@@ -268,7 +282,7 @@ public:
 	//--
 
 	//--------------------------------------------------------------
-	void setShowPerformanceAlways(bool b = true) { //will display alert drop fps info ven when debug display disabled
+	void setShowPerformanceAlways(bool b = true) { // Will display alert drop fps info ven when debug display disabled
 		bShowInfoPerformanceAlways = b;
 		//saveSettings();//TODO
 	}
@@ -340,29 +354,29 @@ private:
 	//--
 
 private:
-	bool bAutoLoad = true; // load at startup
-	bool bKeys = true; // keys enabled by default
+	bool bAutoLoad = true; // Enables load settings at startup by default
+	bool bKeys = true; // Enable keys by default
 
-	bool bDoneSetup = false;
-	bool bDoneStartup = false;
+	bool bDoneSetup = false; // Flags that setup() is done
+	bool bDoneStartup = false; // Flags that startup() is done
 
 	bool bDisableCallback_windowMovedOrResized = false;
 
-	bool bFlagToSave = false; // listen in update to do the save
-	bool bFlagIsChanged = false; // feedback to check if window moved or resized
-	bool bFlagShowFeedbackDoneSaved = false; // feedback to know settings has been saved
+	bool bFlagToSave = false; // Flags and listen in update to do the save
+	bool bFlagIsChanged = false; // Flags for feedback to check if window moved or resized
+	bool bFlagShowFeedbackDoneSaved = false; // Flags for feedback to know that settings has been saved
 
-	bool bIsFullScreen = false; // only to feedback display info
+	bool bIsFullScreen = false; // Only to feedback display info
 
 	// Layout text boxes
 	int previewPad = 8;
 	int previewX = previewPad / 2;
 	int previewY = 0;
 
-	float fpsReal; // current fps to display debug only
+	float fpsReal; // Current readed fps to display debug only
 
 public:
-	bool bShowDebug = false; // show text debug box
+	bool bShowDebug = false; // Show debug text box
 
 	//----
 
@@ -394,7 +408,7 @@ private:
 	//----
 
 private:
-	void Changed_ParamsExtra(ofAbstractParameter & e);
+	void ChangedParamsExtra(ofAbstractParameter & e);
 
 private:
 	//--------------------------------------------------------------
@@ -414,42 +428,42 @@ private:
 	void doResetWindowSettings() {
 		ofLogNotice("ofxWindowApp:doResetWindowSettings()");
 
-		// window mode
+		// Window mode
 		windowSettings.windowMode = ofWindowMode(0);
 		bIsFullScreen = false;
 
-		// shape
+		// Shape
 		int w = 1280;
 		int h = w * (9.f / 16.f);
 		windowSettings.setSize(w, h);
 
-		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); // left top
-		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); // centered fails
+		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); // Left top
+		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); // Centered fails...
 	}
 
 	void drawDebug();
 
-	void windowChanged();
-	//bool bFlagWindowChanged = false;
+	void windowChanged(); // Group redirect all other callbacks related to window resized and window moved
+	//bool bFlagWindowChanged = false; // Flags workaround trying to call apply-settings to app window methods but delayed
 
 	//--------------------------------------------------------------
 
 	// Debug system monitors
 private:
-	void checkMonitors();
-	void drawDebugSystemMonitors();
+	void checkMonitors(); // Scan
+	void drawDebugSystemMonitors(); // Display info
 	vector<ofRectangle> monitorRects;
 	vector<std::string> monitorNames;
 	ofRectangle monitorsCanvasRect;
 
 	//----
 
-	// debug
+	// Debug
 	void logSettings() {
 		ofLogNotice("ofxWindowApp:logSettings()") << "----------------------logSettings() <--BEGIN";
 		ofLogNotice("ofxWindowApp:logSettings()") << "FrameNum: " << ofGetFrameNum();
 		ofLogNotice("ofxWindowApp:logSettings()");
-		ofLogNotice("ofxWindowApp:logSettings()") << "> ofGetWindow()";
+		ofLogNotice("ofxWindowApp:logSettings()") << "> ofGetWindow()"; // Window itself
 		ofLogNotice("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(ofGetWindowMode());
 		ofLogNotice("ofxWindowApp:logSettings()") << "Position:   "
 												  << ofToString(ofGetWindowPositionX()) << ","
@@ -458,7 +472,7 @@ private:
 												  << ofToString(ofGetWindowWidth()) << "x"
 												  << ofToString(ofGetWindowHeight());
 		ofLogNotice("ofxWindowApp:logSettings()");
-		ofLogNotice("ofxWindowApp:logSettings()") << "> windowSettings";
+		ofLogNotice("ofxWindowApp:logSettings()") << "> windowSettings"; // Stored settings
 		ofLogNotice("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(windowSettings.windowMode);
 		ofLogNotice("ofxWindowApp:logSettings()") << "Position:   " << ofToString(windowSettings.getPosition());
 		ofLogNotice("ofxWindowApp:logSettings()") << "Size:       "
