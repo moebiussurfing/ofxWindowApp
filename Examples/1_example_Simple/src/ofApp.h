@@ -3,7 +3,7 @@
 
 #include "ofxWindowApp.h"
 
-// NOTE: Press "Alt + D" to toggle show debug!
+// NOTE: Press "d" to toggle show debug!
 
 class ofApp : public ofBaseApp {
 public:

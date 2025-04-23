@@ -96,8 +96,8 @@ inline string setWindowShapeForInstagram(size_t i = 0, bool bForcePos = false) {
 inline string keyPressedToSetWindowShape(int key) {
 	//s += "\n";
 	//s += "PRESETS\n";
-	//s += "Q : Squared 800 x 800\n";
-	//s += "q : Squared W x W\n";
+	//s += "q : Squared 800 x 800\n";
+	//s += "w : Squared W x W\n";
 	//s += "1 : IGTV Cover Photo\n";
 	//s += "2 : IG Landscape Photo\n";
 	//s += "3 : IG Portrait\n";
@@ -105,9 +105,9 @@ inline string keyPressedToSetWindowShape(int key) {
 	//s += "5 : IG Square\n";
 
 	string sWindowDimensions = "";
-	if (key == 'Q')
+	if (key == 'q')
 		sWindowDimensions = setWindowShapeSquared(); // Squared 800 x 800
-	else if (key == 'q')
+	else if (key == 'w')
 		sWindowDimensions = setWindowShapeSquared(ofGetWidth()); // Squared w x w
 	else if (key == '1')
 		sWindowDimensions = setWindowShapeForInstagram(4); // IGTV Cover Photo
@@ -120,6 +120,10 @@ inline string keyPressedToSetWindowShape(int key) {
 	else if (key == '5')
 		sWindowDimensions = setWindowShapeForInstagram(1); // IG Square
 	//else sWindowDimensions = ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight()) + " px";
+	
+	if(sWindowDimensions != ""){
+		ofLogNotice("ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape") << "IG presets";
+	}
 	return sWindowDimensions;
 }
 

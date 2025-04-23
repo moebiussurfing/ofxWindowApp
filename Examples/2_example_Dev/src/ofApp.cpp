@@ -5,16 +5,17 @@ void ofApp::setup()
 {
 	w.setup(&w);
 
-	// customize
-	w.setFrameRate(120);
+	// Customize
+//	w.setFrameRate(240);
+//	w.setFrameRate(0); // Max possible, to display refresh freq if VSYNC_ON, or unlocked if VSYNC_OFF.
 	
-	// force show debug
+	// Force show debug
 	w.bShowDebug = true;
 	
-	// force show info
+	// Force show info
 //	w.bShowInfo = true;
 
-	// log
+	// Log
 	ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
 }
 
@@ -23,10 +24,16 @@ void ofApp::draw()
 {
 	// debug feedback when changes
 	if (w.isChanged()) ofClear(ofColor::green);
-	else ofClear(64);
+	else ofClear(64, 255);
 }
 
 //--------------------------------------------------------------
 void ofApp::exit()
 {
+}
+
+//--------------------------------------------------------------
+void ofApp::keyPressed(int key)
+{
+	if (key == 'k') w.setToggleEnableKeys();
 }

@@ -2,52 +2,54 @@
 #include "ofMain.h"
 
 /*
-	BUGS:
-	- swap many logs to verbose
-	- add timer mode to reduce writes
-	- test macOS
-
 	TODO:
+	- add timer mode to reduce writes
 	- check listen when file changes. allowing edit json externally and auto update the app window.
-	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart.
-	- add vars/ofRectangle for aux window pos/sz to avoid startup moves...
-	- add unlock full fps / fps=0 toggle.
+	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart. set->save->apply
+	- add mode to unlock full fps / fps=0 toggle.
 	- fps plot graph.
 	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features.
 	- add fullscreen/window and other bool ofParams to expose to a control ui.
-	- 
  */
 
 //----
 
-#define SURFING_WINDOW_APP__USE_STATIC
-// Main directive. Uncomment (enable) to allow this new more secure approach using static.
+#define OFX_WINDOW_APP__USE_STATIC
+// Main directive. Uncomment/enable enables this new more secure approach using a static instance.
+//TODO: Can't be disabled now. Should check and implement other approaches.
 
 //----
 
-//#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // To enable auto save on exit.
+//#define OFX_WINDOW_APP__ENABLE_SAVE_ON_EXIT // To enable auto save on exit.
 // This approach, sometimes required fixing exceptions when closing ofApp.
 
-//#define SURFING_WINDOW_APP__USE_TIMED_SAVER // A super simple timed saver every second if changed.
+//#define OFX_WINDOW_APP__USE_TIMED_SAVER // A super simple timed saver every second if changed. TODO: Not recommended now.
 
-#define OFX_WINDOW_APP_BAR_HEIGHT 45 // Probably fits on Windows platform only.
-//#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // To avoid that window border it's outside screen monitor
+#define OFX_WINDOW_APP__BAR_HEIGHT 45 // Probably fits on Windows platform only.
 
-//#define SURFING_USE_STAY_ON_TOP
+//#define OFX_WINDOW_APP__SIZE_SECURE_GAP_INISDE_SCREEN 18 //TODO: To avoid that window border it's outside screen monitor.
+
+#define OFX_WINDOW_APP__USE_STAY_ON_TOP // Allow an extra OS mode.
+
+//#define OFX_WINDOW_APP__DEVELOP_DEBUG // Enable some more deep testing displaying info.
 
 //----
 
 #include <GLFW/glfw3.h> // Required for displays debug and window callbacks.
 
-#if defined(SURFING_WINDOW_APP__USE_STATIC)
-	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER // Force disable
-	#endif
-#else
-	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
-		#define SURFING_WINDOW_APP__USE_TIMED_SAVER // Force enable
-	#endif
-#endif
+//TODO: Should add more approaches if we find some problems:
+// - Too many files write during window changes (requires delayed saving)
+// - Destruction app exception qhen we save on exit.
+
+//#if defined(OFX_WINDOW_APP__USE_STATIC)
+//	#if defined(OFX_WINDOW_APP__USE_TIMED_SAVER)
+//		#undef OFX_WINDOW_APP__USE_TIMED_SAVER // Force disable
+//	#endif
+//#else
+//	#ifndef OFX_WINDOW_APP__USE_TIMED_SAVER
+//		#define OFX_WINDOW_APP__USE_TIMED_SAVER // Force enable
+//	#endif
+//#endif
 
 //--
 
@@ -71,7 +73,7 @@ public:
 
 	//----
 
-#ifdef SURFING_WINDOW_APP__USE_STATIC
+#ifdef OFX_WINDOW_APP__USE_STATIC
 public:
 	void setup(ofxWindowApp * app) {
 		ofLogNotice("ofxWindowApp:setup(ofxWindowApp * app)") << "FrameNum: " << ofGetFrameNum();
@@ -124,7 +126,7 @@ private:
 	bool mod_ALT = false;
 	bool mod_SHIFT = false;
 
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+#ifdef OFX_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
 #endif
 
@@ -145,14 +147,14 @@ public:
 	void setFrameRate(float f) {
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
-		//saveSettings();//TODO
+		saveSettings();
 	}
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
-		vSync = b;
-		ofSetVerticalSync(vSync);
-		//saveSettings();//TODO
+		bvSync = b;
+		ofSetVerticalSync(bvSync);
+		saveSettings();
 	}
 
 	//--------------------------------------------------------------
@@ -165,6 +167,22 @@ public:
 			bIsFullScreen = false;
 		}
 		doSetWindowSettingsFromAppWindow();
+		saveSettings();
+	}
+	
+	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
+	//--------------------------------------------------------------
+	void setDisableAutoSave(bool b) {
+		bDisableAutoSave = b;
+		saveSettings();
+	}
+
+	//--
+
+	//--------------------------------------------------------------
+	void setShowPerformanceAlways(bool b = true) { // Will display alert drop fps info ven when debug display disabled
+		bShowInfoPerformanceAlways = b;
+		saveSettings();
 	}
 
 	//--
@@ -177,7 +195,7 @@ public:
 
 	//--
 
-#ifdef SURFING_USE_STAY_ON_TOP
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	//--------------------------------------------------------------
 	void setToggleStayOnTop() {
 		ofLogNotice("ofxWindowApp:setToggleStayOnTop");
@@ -239,6 +257,7 @@ private:
 	void folderCheckAndCreate(string _path); // Check if required create folder or already exist
 
 //public:
+	//// Custom path
 	////--------------------------------------------------------------
 	//void setPathFolder(string s) {
 	//	path_folder = s;
@@ -252,20 +271,6 @@ private:
 	//--
 
 public:
-	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
-	//--------------------------------------------------------------
-	void setDisableAutoSaveLock(bool b) {
-		bDisableAutoSaveLock = b;
-		//saveSettings();//TODO
-	}
-
-	//--
-
-	//--------------------------------------------------------------
-	void setShowPerformanceAlways(bool b = true) { // Will display alert drop fps info ven when debug display disabled
-		bShowInfoPerformanceAlways = b;
-		//saveSettings();//TODO
-	}
 
 	//--
 
@@ -305,14 +310,20 @@ public:
 	void doTogglePositionDisplayInfo() {
 		setPositionDebugInfo((positionLayout == 1) ? 0 : 1);
 	}
-
+	
+	//--
+	
 	void setEnableKeys(bool b) {
 		bKeys = b;
+	}
+	
+	void setToggleEnableKeys() {
+		bKeys = !bKeys;
 	}
 
 	//--
 
-#ifdef SURFING_WINDOW_APP__USE_TIMED_SAVER
+#ifdef OFX_WINDOW_APP__USE_TIMED_SAVER
 public:
 	void setEnableTimerSaver(bool b = true) {
 		bAutoSaverTimed = b;
@@ -325,7 +336,6 @@ public:
 private:
 	//TODO:
 	bool bAutoSaverTimed = true;
-	//bool bAutoSaverTimed = false;
 
 	int timePeriodToCheckIfSave = 10000; //every 1000 ms
 	uint32_t timeLastAutoSaveCheck = 0;
@@ -370,15 +380,15 @@ public:
 	ofParameterGroup paramsWindow { "Window" };
 	ofParameterGroup paramsSession { "Session" };
 
-	ofParameter<bool> vSync { "vSync", false };
+	ofParameter<bool> bvSync { "vSync", false };
 	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
-	ofParameter<bool> bShowInfo { "ShowDebugInfo", true };
-	ofParameter<bool> bShowInfoPerformanceAlways { "ShowDebugPerformance", true };
-	ofParameter<bool> bDisableAutoSaveLock { "DisableAutoSaveLock", false };
+	ofParameter<bool> bShowInfo { "ShowInfo", true };
+	ofParameter<bool> bShowInfoPerformanceAlways { "ShowInfoPerformanceAlways", true };
+	ofParameter<bool> bDisableAutoSave { "DisableAutoSave", false };
 	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
 
-#ifdef SURFING_USE_STAY_ON_TOP
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 public:
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
 #endif
@@ -396,10 +406,10 @@ private:
 		ofLogNotice("ofxWindowApp:doResetWindowExtraSettings()");
 
 		// Default settings
-		vSync = false;
+		bvSync = false;
 		fpsTarget = 60;
 		bShowInfo = false;
-		bDisableAutoSaveLock = false;
+		bDisableAutoSave = false;
 		bShowInfoPerformanceAlways = true;
 	}
 
@@ -417,7 +427,7 @@ private:
 		int h = w * (9.f / 16.f);
 		windowSettings.setSize(w, h);
 
-		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP_BAR_HEIGHT)); // Left top
+		windowSettings.setPosition(glm::vec2(2, OFX_WINDOW_APP__BAR_HEIGHT)); // Left top
 		//windowSettings.setPosition(glm::vec2(ofGetWidth() / 2.f - w / 2.f, ofGetHeight() / 2.f - h / 2.f )); // Centered fails...
 	}
 
@@ -440,30 +450,31 @@ private:
 
 	// Debug
 	void logSettings() {
-		ofLogNotice("ofxWindowApp:logSettings()") << "----------------------logSettings() <--BEGIN";
-		ofLogNotice("ofxWindowApp:logSettings()") << "FrameNum: " << ofGetFrameNum();
-		ofLogNotice("ofxWindowApp:logSettings()");
-		ofLogNotice("ofxWindowApp:logSettings()") << "> ofGetWindow()"; // Window itself
-		ofLogNotice("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(ofGetWindowMode());
-		ofLogNotice("ofxWindowApp:logSettings()") << "Position:   "
+		ofLogVerbose("ofxWindowApp:logSettings()") << "----------------------logSettings() <--BEGIN";
+		ofLogVerbose("ofxWindowApp:logSettings()") << "FrameNum: " << ofGetFrameNum();
+		ofLogVerbose("ofxWindowApp:logSettings()");
+		ofLogVerbose("ofxWindowApp:logSettings()") << "> ofGetWindow()"; // Window itself
+		ofLogVerbose("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(ofGetWindowMode());
+		ofLogVerbose("ofxWindowApp:logSettings()") << "Position:   "
 												  << ofToString(ofGetWindowPositionX()) << ","
 												  << ofToString(ofGetWindowPositionY());
-		ofLogNotice("ofxWindowApp:logSettings()") << "Size:       "
+		ofLogVerbose("ofxWindowApp:logSettings()") << "Size:       "
 												  << ofToString(ofGetWindowWidth()) << "x"
 												  << ofToString(ofGetWindowHeight());
-		ofLogNotice("ofxWindowApp:logSettings()");
-		ofLogNotice("ofxWindowApp:logSettings()") << "> windowSettings"; // Stored settings
-		ofLogNotice("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(windowSettings.windowMode);
-		ofLogNotice("ofxWindowApp:logSettings()") << "Position:   " << ofToString(windowSettings.getPosition());
-		ofLogNotice("ofxWindowApp:logSettings()") << "Size:       "
+		ofLogVerbose("ofxWindowApp:logSettings()");
+		ofLogVerbose("ofxWindowApp:logSettings()") << "> windowSettings"; // Stored settings
+		ofLogVerbose("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(windowSettings.windowMode);
+		ofLogVerbose("ofxWindowApp:logSettings()") << "Position:   " << ofToString(windowSettings.getPosition());
+		ofLogVerbose("ofxWindowApp:logSettings()") << "Size:       "
 												  << ofToString(windowSettings.getWidth())
 												  << "x" << ofToString(windowSettings.getHeight());
-		ofLogNotice("ofxWindowApp:logSettings()") << "----------------------logSettings()--> END";
+		ofLogVerbose("ofxWindowApp:logSettings()") << "----------------------logSettings()--> END";
 	}
 };
 
 
 //------
+
 
 // NOTES
 
@@ -482,7 +493,7 @@ private:
 
 //--
 
-//#ifdef SURFING_USE_STAY_ON_TOP
+//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 //	// On top
 //	if (!bIsFullScreen) {
 //		// Workaround
