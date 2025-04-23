@@ -7,9 +7,12 @@ void ofApp::setup()
 
 	// customize
 	w.setFrameRate(120);
-
-	// force debug
+	
+	// force show debug
 	w.bShowDebug = true;
+	
+	// force show info
+//	w.bShowInfo = true;
 
 	// log
 	ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);

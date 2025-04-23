@@ -150,11 +150,9 @@ void ofxWindowApp::startup() {
 	//--
 
 	// Load
-	if (bAutoLoad) {
-		loadSettings();
-		loadSettings(); // BUG: Redo trick workaround bc sometimes first one is not enough
-	}
-
+	loadSettings();
+	loadSettings(); // BUG: Redo trick workaround bc sometimes first one is not enough
+	
 	//--
 
 	bDoneStartup = true;
@@ -249,15 +247,15 @@ void ofxWindowApp::update(ofEventArgs & args) {
 			setup();
 		}
 	}
-
-	if (ofGetFrameNum() == 1) {
-		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
-	}
+//  // Debug
+//	if (ofGetFrameNum() == 1) {
+//		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
+//	}
 
 	// Auto call startup but after setup is done if required.
 	if (bDoneSetup) {
 		if (!bDoneStartup) {
-			if (ofGetFrameNum() > 0) { // after framenum 0
+			if (ofGetFrameNum() >= 0) { // after or in framenum 0
 				startup();
 			}
 		}
@@ -371,7 +369,13 @@ void ofxWindowApp::doSetWindowSettingsFromAppWindow() {
 	windowSettings.setSize(ofGetWindowSize().x, ofGetWindowSize().y);
 
 	windowSettings.windowMode = ofGetCurrentWindow()->getWindowMode();
-
+	if(windowSettings.windowMode == ofWindowMode(0))
+	bIsFullScreen = false;
+	else if(windowSettings.windowMode == ofWindowMode(1))
+	bIsFullScreen = true;
+	else if(windowSettings.windowMode == ofWindowMode(2))
+	bIsFullScreen = true;
+	
 	//logSettings();
 }
 
@@ -518,7 +522,7 @@ void ofxWindowApp::loadSettings() {
 		else if (windowSettings.windowMode == ofWindowMode(1))
 			bIsFullScreen = true;
 		else if (windowSettings.windowMode == ofWindowMode(2))
-			bIsFullScreen = false;
+			bIsFullScreen = true;
 
 		windowSettings.setPosition(glm::vec2(jx, jy));
 		windowSettings.setSize(jw, jh);
@@ -571,7 +575,7 @@ void ofxWindowApp::drawDebug() {
 	// Window title
 	string tp = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string ts = ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-	string t = "ofxWindowApp    DEBUG            " + tp + "    " + ts;
+	string t = "ofxWindowApp    DEBUG                    " + tp + "    " + ts;
 	ofSetWindowTitle(t);
 
 	// Text box
@@ -771,9 +775,6 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 			fPad = 5.f;
 		}
 
-		fy = previewY - fh + 1.0f; // Close to the border
-		//fy = previewY - fh - 50.0f; // A little air
-
 		// Position
 		fx = ofGetWindowWidth() - fwMax - fPad;
 
@@ -809,9 +810,10 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 			font.drawString(str, _xx, _yy);
 			ofPopStyle();
 
-			fy = bb.getY();
+			fy = bb.getY()+1;
 			fh = bb.getHeight() - 2;
 		} else {
+			fy = previewY - fh + 1;
 			ofDrawBitmapStringHighlight(diff, fx - 68.f, previewY, cAlert, ofColor(255)); // text fps diff
 		}
 
@@ -842,13 +844,13 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
 	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 	if(mod_ALT){
-		ofLogNotice("ofxWindowApp:keyPressed") << "mod_ALT";
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_ALT (true)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_COMMAND){
-		ofLogNotice("ofxWindowApp:keyPressed") << "mod_COMMAND";
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_COMMAND (true)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_CONTROL){
-		ofLogNotice("ofxWindowApp:keyPressed") << "mod_CONTROL";
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_CONTROL (true)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_SHIFT){
-		ofLogNotice("ofxWindowApp:keyPressed") << "mod_SHIFT";
+		ofLogNotice("ofxWindowApp:keyPressed") << "mod_SHIFT (true)"<< " FrameNum: " << ofGetFrameNum();
 	}
 	
 	//--
@@ -858,31 +860,38 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	if (bShowDebug) {
 		// set a window shape
 		if (key == OF_KEY_F1) {
+			ofLogNotice("ofxWindowApp:keyPressed") << "F1";
 			for (int i = 0; i < 2; i++) { //force repeat fix
-				ofSetWindowPosition(-1111, 1111);
-				ofSetWindowShape(1000, 1000);
+//				ofSetWindowPosition(-1111, 1111);
+//				ofSetWindowShape(1000, 1000);
+				ofSetWindowPosition(500, 500);
+				ofSetWindowShape(500, 500);
 			}
 			logSettings();
 			return;
 		}
 		// log
 		if (key == OF_KEY_F2) {
+			ofLogNotice("ofxWindowApp:keyPressed") << "F2";
 			logSettings();
 			return;
 		}
 		// refresh + log
 		if (key == OF_KEY_F3) {
+			ofLogNotice("ofxWindowApp:keyPressed") << "F3";
 			doSetWindowSettingsFromAppWindow();
 			logSettings();
 			return;
 		}
 		// load
 		if (key == OF_KEY_F4) {
+			ofLogNotice("ofxWindowApp:keyPressed") << "F4";
 			loadSettings();
 			return;
 		}
 		// save
 		if (key == OF_KEY_F5) {
+			ofLogNotice("ofxWindowApp:keyPressed") << "F5";
 			saveSettings();
 			return;
 		}
@@ -894,18 +903,18 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	//--
 
-	ofLogVerbose("ofxWindowApp:keyPressed") << "ALT + '" << (char)key << "' [" << key << "]";
+	ofLogNotice("ofxWindowApp:keyPressed") << "ALT + '" << (char)key << "' [" << key << "]";
 
 	// Draw info
 	if (key == 'W') {
 		bShowInfo = !bShowInfo;
-		ofLogNotice("ofxWindowApp:keyPressed") << "Changed draw info: " << (bShowInfo ? "ON" : "OFF");
+		ofLogNotice("ofxWindowApp:keyPressed") << "W Changed draw info: " << (bShowInfo ? "ON" : "OFF");
 	}
 
 	// Draw debug
 	else if (key == 'D') {
 		bShowDebug = !bShowDebug;
-		ofLogNotice("ofxWindowApp:keyPressed") << "Changed draw debug: " << (bShowInfo ? "ON" : "OFF");
+		ofLogNotice("ofxWindowApp:keyPressed") << "D Changed draw debug: " << (bShowInfo ? "ON" : "OFF");
 	}
 
 	// Switch window mode
@@ -934,7 +943,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	// Reset default window
 	else if (key == OF_KEY_BACKSPACE) {
-		for (int i = 0; i < 3; i++) {//force repeat fix
+		for (int i = 0; i < 3; i++) {//TODO: force repeat fix
 			doResetWindowSettings();
 			doApplyWindowSettings();
 		}
@@ -968,11 +977,20 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 
 	const int & key = eventArgs.key;
 
-	// Release modifiers
-	mod_ALT = key == OF_KEY_ALT;
-	//mod_COMMAND = key == OF_KEY_COMMAND; // macOS
-	//mod_CONTROL = key == OF_KEY_CONTROL; // Windows. not working
-	//mod_SHIFT = key == OF_KEY_SHIFT;
+	// Modifiers
+	mod_ALT = eventArgs.hasModifier(OF_KEY_ALT);
+	mod_COMMAND = eventArgs.hasModifier(OF_KEY_COMMAND); // macOS
+	mod_CONTROL = eventArgs.hasModifier(OF_KEY_CONTROL); // Windows. not working
+	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
+	if(mod_ALT){
+		ofLogNotice("ofxWindowApp:keyReleased") << "mod_ALT (false)"<< " FrameNum: " << ofGetFrameNum();
+	}if(mod_COMMAND){
+		ofLogNotice("ofxWindowApp:keyReleased") << "mod_COMMAND (false)"<< " FrameNum: " << ofGetFrameNum();
+	}if(mod_CONTROL){
+		ofLogNotice("ofxWindowApp:keyReleased") << "mod_CONTROL (false)"<< " FrameNum: " << ofGetFrameNum();
+	}if(mod_SHIFT){
+		ofLogNotice("ofxWindowApp:keyReleased") << "mod_SHIFT (false)"<< " FrameNum: " << ofGetFrameNum();
+	}
 }
 
 //--------------------------------------------------------------
@@ -1004,8 +1022,10 @@ void ofxWindowApp::doApplyToggleWindowMode() {
 	// Toggle Mode
 	if (ofGetWindowMode() == OF_WINDOW) {
 		ofSetFullscreen(true);
+		bIsFullScreen = true;
 	} else if (ofGetWindowMode() == OF_FULLSCREEN) {
 		ofSetFullscreen(false);
+		bIsFullScreen = false;
 	}
 
 	doSetWindowSettingsFromAppWindow();

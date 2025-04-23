@@ -21,24 +21,25 @@
 //----
 
 #define SURFING_WINDOW_APP__USE_STATIC
-// <- Main directive
-// Uncomment (enable) to allow WIN32 platform with probably better windowMove callback.
+// Main directive. Uncomment (enable) to allow this new more secure approach using static.
 
 //----
 
-//TODO: Fixing exceptions hen closing ofApp.
-//#define SURFING_WINDOW_APP__CREATE_EXIT_LISTENER // To enable that ofApp exit will call exit and save settings.
 //#define SURFING_WINDOW_APP__ENABLE_SAVE_ON_EXIT // To enable auto save on exit.
+// This approach, sometimes required fixing exceptions when closing ofApp.
 
-#define SURFING_WINDOW_APP__USE_TIMED_SAVER // Would be force disabled on Windows platform in static mode.
+//#define SURFING_WINDOW_APP__USE_TIMED_SAVER // A super simple timed saver every second if changed.
+
+#define OFX_WINDOW_APP_BAR_HEIGHT 45 // Probably fits on Windows platform only.
+//#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // To avoid that window border it's outside screen monitor
+
+//#define SURFING_USE_STAY_ON_TOP
 
 //----
 
 #include <GLFW/glfw3.h> // Required for displays debug and window callbacks.
 
-//#if defined(TARGET_WIN32)
 #if defined(SURFING_WINDOW_APP__USE_STATIC)
-//	#include <GLFW/glfw3.h>
 	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
 		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER // Force disable
 	#endif
@@ -47,23 +48,6 @@
 		#define SURFING_WINDOW_APP__USE_TIMED_SAVER // Force enable
 	#endif
 #endif
-//#endif
-
-//#if defined(TARGET_WIN32) && defined(SURFING_WINDOW_APP__USE_STATIC)
-//	#include <GLFW/glfw3.h>
-//	#if defined(SURFING_WINDOW_APP__USE_TIMED_SAVER)
-//		#undef SURFING_WINDOW_APP__USE_TIMED_SAVER // force disable
-//	#endif
-//#else
-//	#ifndef SURFING_WINDOW_APP__USE_TIMED_SAVER
-//		#define SURFING_WINDOW_APP__USE_TIMED_SAVER
-//	#endif
-//#endif
-
-#define OFX_WINDOW_APP_BAR_HEIGHT 45 // Probably fits on Win32 only.
-//#define SIZE_SECURE_GAP_INISDE_SCREEN 18 // To avoid that window border it's outside screen monitor
-
-//#define SURFING_USE_STAY_ON_TOP
 
 //--
 
@@ -126,7 +110,7 @@ private:
 	//--
 
 private:
-	ofWindowSettings windowSettings; // Main storage for window shape (Position/Size) and window mode
+	ofWindowSettings windowSettings; // Main storage for window shape (Position/Size) and window mode (window/fullscreen)
 
 	ofTrueTypeFont font;
 	int fontSize;
@@ -269,14 +253,10 @@ private:
 
 public:
 	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
+	//--------------------------------------------------------------
 	void setDisableAutoSaveLock(bool b) {
 		bDisableAutoSaveLock = b;
 		//saveSettings();//TODO
-	}
-
-	//--------------------------------------------------------------
-	void setAutoLoad(bool b) {
-		bAutoLoad = b;
 	}
 
 	//--
@@ -347,14 +327,13 @@ private:
 	bool bAutoSaverTimed = true;
 	//bool bAutoSaverTimed = false;
 
-	int timePeriodToCheckIfSave = 10000; //every x/1000 seconds
+	int timePeriodToCheckIfSave = 10000; //every 1000 ms
 	uint32_t timeLastAutoSaveCheck = 0;
 #endif
 
 	//--
 
 private:
-	bool bAutoLoad = true; // Enables load settings at startup by default
 	bool bKeys = true; // Enable keys by default
 
 	bool bDoneSetup = false; // Flags that setup() is done
@@ -384,7 +363,8 @@ public:
 
 	void setupParams();
 
-	//ofParameterGroup params{ "ofxWindowApp" };//TODO: avoid ofxSerializer. use one only groupParam instead.
+	//ofParameterGroup params{ "ofxWindowApp" };
+	//TODO: To avoid ofxSerializer. Use one only groupParam instead.
 
 	ofParameterGroup paramsExtra { "Extra" };
 	ofParameterGroup paramsWindow { "Window" };
