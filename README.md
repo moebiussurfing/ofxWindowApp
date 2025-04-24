@@ -1,64 +1,50 @@
 # ofxWindowApp
 
-> [!IMPORTANT] 
-> _WIP. Currently focused and tested under Windows._
-
-## Screencast
-![screenshot](ofxWindowApp.gif)
-
 ## Screenshot
 ![screenshot](Capture.png)
 
 ## OVERVIEW
-**openFrameworks** addon to **auto store** and **recall** the basic app **window state/settings**:
-
-> [!WARNING] 
-> _I have noticed many problems when reloading the window size and position settings to the window application. This problem often occurs when using multiple monitors and resolutions. Usually using the application on the main monitor works fine, but on other monitors the window settings may differ from session to session. This seems to be due to problems in `GLFW` or `OF`, maybe related to the size of the window bar (?)_
+**openFrameworks** addon to **auto store** and **recall** the basic **App Window state/settings**:
 
 ## FEATURES
 
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
 * Window **Mode** (Windowed / Fullscreen).
-* Window target **FPS** (vs real current **framerate**).
+* Window **Target FPS** (vs real current **FPS**).
 * Window **vSync** state. 
-* **Alert display**" with a **performance** red bar when **low FPS drops** too much under the expected target frame rate.
+* **Alert display**" HUD with a **performance** red bar when **FPS drops** too low under the expected **Target Framerate**.
 * Easy change the app settings just by editing the **JSON file**, instead of requiring edit the app code.
 * Optional **custom TTF font** for debug display.
-* **Stay on top** mode, easy console window disabler. (**Windows** only)
-* Window shape **presets** with `key commands` for squared and common `Instagram` sizes.
+* **Stay on Top** mode, easy **Console Window** disabler. (**Windows** only)
+* Window shape **Presets** with **Key commands** for squared, default and common **Instagram** sizes.
 
 ## KEY COMMANDS
 
 ```
-ALT +  
-
-D: Show debug & monitors.  
-W: Show info & performance.  
-F: Full screen / Windowed.  
-V: vSync state (On/Off).  
-T: Stay-on-top (Windows only). 
-L: Lock / Disable autosave.
-(All uppercased, caps enabled or using SHIFT too)  
+d : Show debug & monitors.  
+i : Show info & performance.  
+f : Full screen / Windowed.  
+v : vSync state (On/Off).  
+t : Stay-on-top (Windows only). 
+l : Lock / Disable autosave.
 
 PRESETS
 q : Squared 800 x 800
-Q : Squared W x W
+w : Squared w x w
 1 : IGTV Cover Photo
 2 : IG Landscape Photo
 3 : IG Portrait
 4 : IG Story
 5 : IG Square
-BACKSPACE : Reset default
+BACKSPACE : Reset Default
 ```
 
 ## WHY?
 
-It can be useful to have persistent `window settings` between your **App sessions**.  
-
-_Not only for the `final user` but also for the `coder`. Usually when you start a clean `OF project` you want "to focus on your code", but you need to compile many times and move the app window out of your IDE window several times..._  
-
-_Using this add-on you can forget about this "annoying behaviour", as the **App Window will be opened in the same position** and with the **same size and settings**._  
+It can be useful to have persistent `Window Settings` between your **App sessions**.  
+_Not only for the `final user` but also for the `coder`. Usually when you start an `OF project` you want "to focus on your code updates", but you need to compile many times and move the app window out of your IDE window several times..._  
+_Using this **addon** you can forget about this "annoying behaviour", as the **App Window will be opened in the same position with the same size and settings**._  
 
 ## USAGE
 
@@ -79,19 +65,17 @@ ofApp::setup()
 
     // NOTE:
     // First time opening an app:
-    // Default FPS is 60 fps
-    // Default vSync is disabled
+    // Default FPS is 60 fps.
+    // Default vSync is disabled.
 
     // OPTIONAL: 
-    // Custom init
-    // Forced to overwrite JSON default settings.
-    // Will be aplied the next time the app starts.
+    // Custom init:
     w.setFrameRate(120);
     w.setVerticalSync(true);
 }
 ```
-Nothing more is required on `update()` or `draw()`!  
-Some settings can be configured using `key commands`.  
+Nothing more is required on `update()`,`draw()` or `exit()`!  
+All settings can be configured also using `Key Commands`.  
 The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any changes**.  
 
 The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like this:  
@@ -112,8 +96,8 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
         "Extra": {
             "Session": {
                 "DisableAutosave": "0",
-                "ShowDebugInfo": "1",
-                "ShowDebugPerformance": "1"
+                "ShowInfo": "1",
+                "ShowInfoPerformanceAlways": "1"
             },
             "Window": {
                 "FpsTarget": "60",
@@ -123,13 +107,10 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
     }
 ]
 ```
-### TODO
-
-* Merge with other addons to handle more window settings: borderless, staty on top (macOS), half/quarter screen, centered, send to another monitor... etc
 
 ## TESTED SYSTEMS
-- **Windows 10/11** / **VS 2022** / **OF ~0.11** /  **OF 0.12+**
-- **macOS High Sierra** / **Xcode 9/10** / **OF ~0.11** /  **OF 0.12+**
+- **Windows 11** / **VS 2022** / **OF 0.12.1**
+- **macOS Sequoia 15.4 (Silicon ARM)** / **Xcode 16.2** / **OF 0.12.1**
 
 ### AUTHOR
 Addon by **@moebiusSurfing**  
