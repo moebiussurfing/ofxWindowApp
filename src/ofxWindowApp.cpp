@@ -108,6 +108,10 @@ void ofxWindowApp::setup() {
 
 	bDoneSetup = true;
 	ofLogVerbose("ofxWindowApp:setup()") << "----------------------setup()--> END";
+	
+	//--
+	
+	startup();
 }
 
 //--------------------------------------------------------------
@@ -148,7 +152,10 @@ void ofxWindowApp::startup() {
 
 	// Load
 	loadSettings();
-	loadSettings(); // BUG: Redo trick workaround bc sometimes first one is not enough
+	
+	// BUG: Redo trick workaround bc sometimes first one is not enough
+	ofLogNotice("ofxWindowApp:startup()") << "Fix workaround: call again to avoid not correctly updated windows...";
+	loadSettings();
 	
 	//--
 
@@ -164,7 +171,7 @@ ofxWindowApp * ofxWindowApp::instance = nullptr; // Initialize the static pointe
 
 //--------------------------------------------------------------
 void ofxWindowApp::setInstance(ofxWindowApp * app) {
-	ofLogNotice("ofxWindowApp:setInstance(ofxWindowApp * app)");
+	ofLogVerbose("ofxWindowApp:setInstance(ofxWindowApp * app)");
 	instance = app; // Set the instance
 }
 
@@ -235,31 +242,25 @@ void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to th
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args) {
-	// Auto call setup on first frame (or before?) if required.
-	if (!bDoneSetup) {
-		if (ofGetFrameNum() >= 0) {
-			setup();
-		}
-	}
-//  // Debug
-//	if (ofGetFrameNum() == 1) {
-//		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
+//	// Auto call setup on first frame (or before?) if required.
+//	if (!bDoneSetup) {
+//		if (ofGetFrameNum() >= 0) {
+//			setup();
+//		}
 //	}
-
-	// Auto call startup but after setup is done if required.
-	if (bDoneSetup) {
-		if (!bDoneStartup) {
-			if (ofGetFrameNum() >= 0) { // after or in framenum 0
-				startup();
-			}
-		}
-	}
-
-	//TODO
-	//if (checker->hasFileChanged()) {
-	//	string path = path_folder + "/" + path_filename;
-	//	ofLogNotice("ofxWindowApp:update()") << "checker->hasFileChanged() File changed! "<<path;
-	//}
+////  // Debug
+////	if (ofGetFrameNum() == 1) {
+////		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
+////	}
+//
+//	// Auto call startup but after setup is done if required.
+//	if (bDoneSetup) {
+//		if (!bDoneStartup) {
+//			if (ofGetFrameNum() >= 0) { // after or in framenum 0
+//				startup();
+//			}
+//		}
+//	}
 
 	//--
 
@@ -438,15 +439,14 @@ void ofxWindowApp::loadSettings() {
 	ofFile file(path);
 	bool bFileExist = file.exists();
 	if (bFileExist) {
-		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File found: " << path;
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File: " << path;
 
 		//--
 
 		// Load settings in one file
 		ofJson data;
 		data = ofLoadJson(path);
-		ofLogNotice("ofxWindowApp:loadFileSettings()") << "JSON: \n"
-													   << data.dump(4);
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n" << data.dump(4);
 
 		//--
 
@@ -858,13 +858,13 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	mod_SHIFT = eventArgs.hasModifier(OF_KEY_SHIFT);
 	
 	if(mod_ALT){
-		ofLogVerbose("ofxWindowApp:keyPressed") << "mod_ALT (true)"<< " FrameNum: " << ofGetFrameNum();
+		ofLogVerbose("ofxWindowApp:keyPressed") << "mod_ALT     (true)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_COMMAND){
 		ofLogVerbose("ofxWindowApp:keyPressed") << "mod_COMMAND (true)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_CONTROL){
 		ofLogVerbose("ofxWindowApp:keyPressed") << "mod_CONTROL (true)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_SHIFT){
-		ofLogVerbose("ofxWindowApp:keyPressed") << "mod_SHIFT (true)"<< " FrameNum: " << ofGetFrameNum();
+		ofLogVerbose("ofxWindowApp:keyPressed") << "mod_SHIFT   (true)"<< " FrameNum: " << ofGetFrameNum();
 	}
 	
 	//https://blog.openframeworks.cc/post/173223240829/events
@@ -880,35 +880,37 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 		// set a window shape
 		if (key == OF_KEY_F1) {
 			ofLogNotice("ofxWindowApp:keyPressed") << "F1";
-			for (int i = 0; i < 2; i++) { //force repeat fix
+			for (int i = 0; i < 2; i++) { // Force repeat fix
+				// 1
 				ofSetWindowPosition(500, 500);
 				ofSetWindowShape(500, 500);
+//				// 2
 //				ofSetWindowPosition(-1111, 1111);
 //				ofSetWindowShape(1000, 1000);
 			}
 			logSettings();
 			return;
 		}
-		// log
+		// Log
 		if (key == OF_KEY_F2) {
 			ofLogNotice("ofxWindowApp:keyPressed") << "F2";
 			logSettings();
 			return;
 		}
-		// refresh + log
+		// Refresh + log
 		if (key == OF_KEY_F3) {
 			ofLogNotice("ofxWindowApp:keyPressed") << "F3";
 			doSetWindowSettingsFromAppWindow();
 			logSettings();
 			return;
 		}
-		// load
+		// Load
 		if (key == OF_KEY_F4) {
 			ofLogNotice("ofxWindowApp:keyPressed") << "F4";
 			loadSettings();
 			return;
 		}
-		// save
+		// Save
 		if (key == OF_KEY_F5) {
 			ofLogNotice("ofxWindowApp:keyPressed") << "F5";
 			saveSettings();
@@ -921,7 +923,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	//TODO: modifier keys are not working fine at least in macOS.
 	// So, we disable all keycommands combinations!
-//	if (!mod_ALT) return; // Using ALT modifier only
+	
+//	if (!mod_ALT) return; // Using ALT modifier
 
 	//--
 
@@ -930,49 +933,48 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	// Draw info
 	if (key == 'i') {
 		bShowInfo = !bShowInfo;
-		ofLogNotice("ofxWindowApp:keyPressed") << "i toggle bShowInfo: " << (bShowInfo ? "ON" : "OFF");
+		ofLogNotice("ofxWindowApp:keyPressed") << "i: Toggle bShowInfo: " << (bShowInfo ? "ON" : "OFF");
 		saveSettings();
 	}
 
 	// Draw debug
 	else if (key == 'd') {
 		bShowDebug = !bShowDebug;
-		ofLogNotice("ofxWindowApp:keyPressed") << "d toggle bShowDebug: " << (bShowDebug ? "ON" : "OFF");
+		ofLogNotice("ofxWindowApp:keyPressed") << "d: Toggle bShowDebug: " << (bShowDebug ? "ON" : "OFF");
 	}
 
 	// Switch window mode
 	else if (key == 'f') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "f toggle window mode";
+		ofLogNotice("ofxWindowApp:keyPressed") << "f: Toggle window mode";
 		doApplyToggleWindowMode();
 	}
 
 	// Switch vsync mode
 	else if (key == 'v') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "v toggle vsync";
+		ofLogNotice("ofxWindowApp:keyPressed") << "v: Toggle vsync";
 		bvSync = !bvSync;
 		ofSetVerticalSync(bvSync);
 	}
 
 	// Toggle disable auto save lock
 	else if (key == 'l') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "l toggle DisableAutoSave";
+		ofLogNotice("ofxWindowApp:keyPressed") << "l: Toggle DisableAutoSave";
 		setDisableAutoSave(!bDisableAutoSave);
 		saveSettings();
 	}
 	
-//#ifdef TARGET_WIN32
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	// Stay on top
 	else if (key == 't') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "t toggle bWindowStayOnTop";
+		ofLogNotice("ofxWindowApp:keyPressed") << "t: Toggle bWindowStayOnTop";
 		setToggleStayOnTop();
+		saveSettings();
 	}
 #endif
-//#endif
 	
 	// Reset default window
 	else if (key == OF_KEY_BACKSPACE) {
-		ofLogNotice("ofxWindowApp:keyPressed") << "BACKSPACE reset default";
+		ofLogNotice("ofxWindowApp:keyPressed") << "BACKSPACE: Reset default";
 		for (int i = 0; i < 3; i++) {//TODO: Force repeat fix
 			doResetWindowSettings();
 			doApplyWindowSettings();
@@ -981,14 +983,14 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	// Layout position top or bottom
 	else if (key == 'p') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "p toggle info layout";
+		ofLogNotice("ofxWindowApp:keyPressed") << "p: Toggle info layout";
 		doTogglePositionDisplayInfo();
 	}
 
 	else {
 		// Window presets
-		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
-		doSetWindowSettingsFromAppWindow();
+		ofLogNotice("ofxWindowApp:keyPressed") << ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
+//		doSetWindowSettingsFromAppWindow();
 		// Set some custom common sizes:
 		// Instagram, portrait, landscape, squared etc
 		// "PRESETS\n";
@@ -1026,13 +1028,13 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 //	}
 	
 	if(mod_ALT){
-		ofLogNotice("ofxWindowApp:keyReleased") << "mod_ALT (false)"<< " FrameNum: " << ofGetFrameNum();
+		ofLogNotice("ofxWindowApp:keyReleased") << "mod_ALT     (false)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_COMMAND){
 		ofLogNotice("ofxWindowApp:keyReleased") << "mod_COMMAND (false)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_CONTROL){
 		ofLogNotice("ofxWindowApp:keyReleased") << "mod_CONTROL (false)"<< " FrameNum: " << ofGetFrameNum();
 	}if(mod_SHIFT){
-		ofLogNotice("ofxWindowApp:keyReleased") << "mod_SHIFT (false)"<< " FrameNum: " << ofGetFrameNum();
+		ofLogNotice("ofxWindowApp:keyReleased") << "mod_SHIFT   (false)"<< " FrameNum: " << ofGetFrameNum();
 	}
 #endif
 }
@@ -1046,16 +1048,16 @@ void ofxWindowApp::folderCheckAndCreate(string _path) {
 
 	// Check if target data folder exist
 	if (!dataDirectory.isDirectory()) {
-		ofLogWarning("ofxWindowApp:folderCheckAndCreate()") << "FOLDER DOES NOT EXIST!";
+		ofLogWarning("ofxWindowApp:folderCheckAndCreate()") << "Folder does not exist!";
 
 		// Create folder
 		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
 
 		// Debug if creation has been succed
 		if (b)
-			ofLogNotice("ofxWindowApp:folderCheckAndCreate()") << "FOLDER '" << _path << "' CREATED SUCCESSFULLY!";
+			ofLogNotice("ofxWindowApp:folderCheckAndCreate()") << "Folder '" << _path << "' created successfully!";
 		else
-			ofLogError("ofxWindowApp:folderCheckAndCreate()") << "UNABLE TO CREATE '" << _path << "' FOLDER!";
+			ofLogError("ofxWindowApp:folderCheckAndCreate()") << "Unable to create '" << _path << "' folder!";
 	}
 }
 

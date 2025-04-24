@@ -6,8 +6,6 @@ void ofApp::setup()
 	w.setup(&w);
 
 	// Customize
-	//TODO: fix breaking settings bc called befor loading preset!
-	//TODO: should load preset in setup() not update flagged momments!
 //	w.setFrameRate(240);
 //	w.setFrameRate(0); // Max possible, to display refresh freq if VSYNC_ON, or unlocked if VSYNC_OFF.
 	
@@ -24,6 +22,7 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
+	// Flash bg 200ms when window changed
 	static bool bFlash=0;
 	if(w.isChanged()) {
 		bFlash=1;

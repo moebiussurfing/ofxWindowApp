@@ -68,10 +68,10 @@ inline string setWindowShapeForInstagram(size_t i = 0, bool bForcePos = false) {
 	//if (bForcePos) ofSetWindowPosition(0, 0);
 
 	if (i == 0) ofSetWindowShape(1080, 1920); // IG Story
-	if (i == 1) ofSetWindowShape(1080, 1080); // IG Square
-	if (i == 2) ofSetWindowShape(1080, 1350); // IG Portrait
-	if (i == 3) ofSetWindowShape(1080, 566); // IG Landscape
-	if (i == 4) ofSetWindowShape(420, 654); // IGTV Cover
+	else if (i == 1) ofSetWindowShape(1080, 1080); // IG Square
+	else if (i == 2) ofSetWindowShape(1080, 1350); // IG Portrait
+	else if (i == 3) ofSetWindowShape(1080, 566); // IG Landscape
+	else if (i == 4) ofSetWindowShape(420, 654); // IGTV Cover
 
 	if (bForcePos) ofSetWindowPosition(0, 0); //fix force
 
@@ -108,7 +108,7 @@ inline string keyPressedToSetWindowShape(int key) {
 	if (key == 'q')
 		sWindowDimensions = setWindowShapeSquared(); // Squared 800 x 800
 	else if (key == 'w')
-		sWindowDimensions = setWindowShapeSquared(ofGetWidth()); // Squared w x w
+		sWindowDimensions = setWindowShapeSquared(ofGetWindowWidth()); // Squared w x w
 	else if (key == '1')
 		sWindowDimensions = setWindowShapeForInstagram(4); // IGTV Cover Photo
 	else if (key == '2')

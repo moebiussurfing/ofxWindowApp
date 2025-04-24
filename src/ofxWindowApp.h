@@ -92,7 +92,7 @@ public:
 	//----
 
 private:
-	void startup();
+	void startup(); // Will load startup file settings here
 	void update(ofEventArgs & args);
 	void draw(ofEventArgs & args);
 	void exit();
@@ -140,21 +140,23 @@ public:
 	// Default will be 60 fps if not defined!
 	//--------------------------------------------------------------
 	void setFrameRate(float f) {
+		ofLogNotice("ofxWindowApp:setFrameRate")<<f;
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
-//		saveSettings();//TODO: Warning! will trig undesired save before loading the settings!
+		saveSettings();
 	}
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
+		ofLogNotice("ofxWindowApp:setVerticalSync")<<b;
 		bvSync = b;
 		ofSetVerticalSync(bvSync);
-//		saveSettings();//TODO: Warning! will trig undesired save before loading the settings!
+		saveSettings();
 	}
 	
-private://TODO: Warning! will trig undesired save before loading the settings!
 	//--------------------------------------------------------------
 	void setFullScreen(bool b) {
+		ofLogNotice("ofxWindowApp:setFullScreen")<<b;
 		if (b) {
 			ofSetFullscreen(true);
 			bIsFullScreen = true;
@@ -169,6 +171,7 @@ private://TODO: Warning! will trig undesired save before loading the settings!
 	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
 	//--------------------------------------------------------------
 	void setDisableAutoSave(bool b) {
+		ofLogNotice("ofxWindowApp:setDisableAutoSave")<<b;
 		bDisableAutoSave = b;
 		saveSettings();
 	}
@@ -177,16 +180,17 @@ private://TODO: Warning! will trig undesired save before loading the settings!
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) { // Will display alert drop fps info ven when debug display disabled
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey")<<b;
 		bShowInfoPerformanceAlways = b;
 		saveSettings();
 	}
 
-	//--
+	//----
 	
 public:
 	//--------------------------------------------------------------
 	void setEnableAllowQuitAppUsingEscapeKey(bool b) {
-		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey");
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey")<<b;
 		ofSetEscapeQuitsApp(b);
 	}
 
@@ -402,7 +406,7 @@ private:
 private:
 	//--------------------------------------------------------------
 	void doResetWindowExtraSettings() {
-		ofLogNotice("ofxWindowApp:doResetWindowExtraSettings()");
+		ofLogVerbose("ofxWindowApp:doResetWindowExtraSettings()");
 
 		// Default settings
 		bvSync = false;
@@ -415,7 +419,7 @@ private:
 private:
 	//--------------------------------------------------------------
 	void doResetWindowSettings() {
-		ofLogNotice("ofxWindowApp:doResetWindowSettings()");
+		ofLogVerbose("ofxWindowApp:doResetWindowSettings()");
 
 		// Window mode
 		windowSettings.windowMode = ofWindowMode(0);
@@ -470,44 +474,3 @@ private:
 		ofLogVerbose("ofxWindowApp:logSettings()") << "----------------------logSettings()--> END";
 	}
 };
-
-
-//------
-
-
-// NOTES
-
-//--
-
-//// workaround:
-//// to fit window and his bar visible into the screen
-//float windowBar_h = 25;
-
-//// workaround
-//// it's window mode..
-//// kick a little down to avoid hidden window title barF
-//window_Y = MAX(ofGetWindowPositionY(), windowBar_h); //avoid negative out of screen. minimal h is 25
-//window_X = ofGetWindowPositionX();
-//ofSetWindowPosition(window_X, window_Y);
-
-//--
-
-//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-//	// On top
-//	if (!bIsFullScreen) {
-//		// Workaround
-//		// Refresh
-//	#if defined(TARGET_WIN32)
-//		HWND W = GetActiveWindow();
-//		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-//	#endif
-//		// Re trig
-//		bWindowStayOnTop = bWindowStayOnTop;
-//	}
-//#endif
-
-//float windowBar_h = 25;
-//		//window_Y = MAX(ofGetWindowPositionY(), windowBar_h);
-//		//// avoid negative out of screen. minimal h is 25
-//		//window_X = ofGetWindowPositionX();
-//		//ofSetWindowPosition(window_X, window_Y);
