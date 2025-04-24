@@ -22,8 +22,16 @@ void ofApp::setup()
 //--------------------------------------------------------------
 void ofApp::draw()
 {
+	static bool bFlash=0;
+	if(w.isChanged()) {
+		bFlash=1;
+		tLast=ofGetElapsedTimeMillis();}
+	if(bFlash&&ofGetElapsedTimeMillis()-tLast>200){
+		bFlash=0;
+	}
+	
 	// debug feedback when changes
-	if (w.isChanged()) ofClear(ofColor::green);
+	if (bFlash) ofClear(ofColor::green);
 	else ofClear(64, 255);
 }
 

@@ -79,10 +79,6 @@ void ofxWindowApp::setup() {
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
 
-	////TODO
-	//string path = path_folder + "/" + path_filename;
-	//checker = std::make_unique<FileChangeChecker>(path);
-
 	//--
 
 	// Custom font
@@ -666,17 +662,17 @@ void ofxWindowApp::drawDebug() {
 void ofxWindowApp::drawInfo() {
 	// Debug overlay screen modes
 
-	string str;
-	string fpsRealStr;
-	string fpsTargetStr;
-	string strPad = "  ";
+	string str = "";
+	string fpsRealStr = "";
+	string fpsTargetStr = "";
 	string screenSizeStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
+	string strPad = "  ";
 
 	// Size
 	screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
-	screenSizeStr += "px";
+	screenSizeStr += " px";
 
 	// Pos
 	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -685,8 +681,8 @@ void ofxWindowApp::drawInfo() {
 	fpsRealStr = ofToString(fpsReal, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 
-	str += strPad + strPad + "SIZE:" + screenSizeStr;
-	str += strPad + "POS:" + screenPosStr;
+	str += strPad + strPad + "Size:" + screenSizeStr;
+	str += strPad + "Pos:" + screenPosStr;
 	str += strPad + "FPS:" + fpsRealStr;
 	str += "[" + fpsTargetStr + "]";
 
@@ -694,7 +690,7 @@ void ofxWindowApp::drawInfo() {
 	
 //	str += strPad + "ALT +";
 	
-	str += strPad + (bKeys?"[w]_":"")+"INFO";
+	str += strPad + (bKeys?"[i]_":"")+"INFO";
 
 	str += strPad + (bKeys?"[v]_":"")+"VSYNC_" + ofToString(bvSync ? "ON " : "OFF");
 
@@ -756,9 +752,9 @@ void ofxWindowApp::drawInfo() {
 void ofxWindowApp::drawInfoPerformanceWidget() {
 	// Monitor fps performance alert
 
-	bool bPreShow; // starts draw black
-	bool bAlert; // draws red
-	float fpsThreshold;
+	bool bAlertPre; // Starts drawing black
+	bool bAlert; // Draws red
+	float fpsThreshold; // Abs amount of frames drop down to trig alert!
 
 	//// A. Thresholds by factor fps between target and real fps
 	//fpsThreshold = 0.9f; // below this trigs alert red state
@@ -767,15 +763,15 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 
 	// B. Thresholds by absolute fps difference between desired target and real fps
 	// monitor fps performance
-	fpsThreshold = 10.f; // num frames below this trigs alert red state
-	bPreShow = (fpsReal < fpsTarget - 5); // below 5 fps starts showing bar
+	fpsThreshold = 10.f; // Set num frames here! below this value, will trig the alert in red state
+	bAlertPre = (fpsReal < fpsTarget - (fpsThreshold/2.f)); // below 5 fps starts showing bar
 	bAlert = (fpsReal < (fpsTarget - fpsThreshold)); // B. by absolute fps diff
 
 	//--
 
 	// Value bar
 
-	if (bPreShow) // To draw only if fps performance is under threshold
+	if (bAlertPre) // To draw only if fps performance is under threshold
 	{
 		float fx, fy, fw, fh, fwMax, fPad;
 		fwMax = 100.f; // max width

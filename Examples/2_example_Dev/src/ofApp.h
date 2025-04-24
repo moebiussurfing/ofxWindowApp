@@ -16,4 +16,6 @@ public:
 	void keyPressed(int key);
 			
 	ofxWindowApp w;
+	
+	uint64_t tLast=0;
 };

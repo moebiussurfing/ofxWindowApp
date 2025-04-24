@@ -4,7 +4,7 @@
 /*
 	TODO:
 	- add timer mode to reduce writes
-	- check listen when file changes. allowing edit json externally and auto update the app window.
+	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatchFile
 	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart. set->save->apply
 	- add mode to unlock full fps / fps=0 toggle.
 	- fps plot graph.
@@ -56,9 +56,6 @@
 #include "ofxSerializer_ofxWindowApp.h" // For windows size/pos serialization
 #include "ofxSurfingHelpersLite_ofxWindowApp.h" // For some windows sizes keycommands presets
 
-//TODO
-//#include "FileChangeChecker.h"
-
 //--------
 
 #define USING__OFX_WINDOW_APP
@@ -92,9 +89,6 @@ public:
 #endif
 
 	//----
-
-//private:
-//	std::unique_ptr<FileChangeChecker> checker;
 
 private:
 	void startup();
