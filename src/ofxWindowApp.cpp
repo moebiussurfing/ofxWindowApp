@@ -592,7 +592,6 @@ void ofxWindowApp::drawDebug() {
 		s += "SHOW\n";
 		s += "d : DEBUG & DISPLAYS\n";
 		s += "i : INFO & PERFORMANCE\n";
-
 		s += "\n";
 		s += "PRESETS\n";
 		s += "c : Centered\n";
