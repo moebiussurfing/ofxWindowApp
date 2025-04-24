@@ -3,6 +3,7 @@
 
 /*
 	TODO:
+	- 
 	- add timer mode to reduce writes
 	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatchFile
 	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart. set->save->apply
@@ -141,16 +142,17 @@ public:
 	void setFrameRate(float f) {
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
-		saveSettings();
+//		saveSettings();//TODO: Warning! will trig undesired save before loading the settings!
 	}
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
 		bvSync = b;
 		ofSetVerticalSync(bvSync);
-		saveSettings();
+//		saveSettings();//TODO: Warning! will trig undesired save before loading the settings!
 	}
-
+	
+private://TODO: Warning! will trig undesired save before loading the settings!
 	//--------------------------------------------------------------
 	void setFullScreen(bool b) {
 		if (b) {
@@ -180,7 +182,8 @@ public:
 	}
 
 	//--
-
+	
+public:
 	//--------------------------------------------------------------
 	void setEnableAllowQuitAppUsingEscapeKey(bool b) {
 		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey");
@@ -193,7 +196,7 @@ public:
 	//--------------------------------------------------------------
 	void setToggleStayOnTop() {
 		ofLogNotice("ofxWindowApp:setToggleStayOnTop");
-		setStayOnTop(!bIsWindowStayOnTop);
+		setStayOnTop(!bWindowStayOnTop);
 	}
 
 	//--------------------------------------------------------------
@@ -383,10 +386,12 @@ public:
 	// Kind of hardcoded position that will maintain on next app load.
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+//#ifdef TARGET_WIN32
 public:
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
+//#endif
 #endif
-
+	
 private:
 
 	//----

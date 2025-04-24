@@ -6,6 +6,8 @@ void ofApp::setup()
 	w.setup(&w);
 
 	// Customize
+	//TODO: fix breaking settings bc called befor loading preset!
+	//TODO: should load preset in setup() not update flagged momments!
 //	w.setFrameRate(240);
 //	w.setFrameRate(0); // Max possible, to display refresh freq if VSYNC_ON, or unlocked if VSYNC_OFF.
 	
@@ -13,7 +15,7 @@ void ofApp::setup()
 	w.bShowDebug = true;
 	
 	// Force show info
-//	w.bShowInfo = true;
+	w.bShowInfo = true;
 
 	// Log
 	ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);

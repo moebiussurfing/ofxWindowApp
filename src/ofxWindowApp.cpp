@@ -122,9 +122,10 @@ void ofxWindowApp::setupParams() {
 	paramsSession.add(bShowInfo);
 	paramsSession.add(bShowInfoPerformanceAlways);
 	paramsSession.add(bDisableAutoSave);
-#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+	
+//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
-#endif
+//#endif
 
 	// Extra
 	paramsExtra.add(paramsWindow);
@@ -418,8 +419,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	logSettings();
 
 	// Save file
-	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << endl
-															 << data.dump(4);
+	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << endl << data.dump(4);
 	ofSavePrettyJson(path, data);
 
 	//--
@@ -460,18 +460,14 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n"
-														   << jWindowSettings.dump(4);
-			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n"
-														   << ofToString(paramsExtra);
+			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n" << jWindowSettings.dump(4);
+			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n" << ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n"
-														<< jWindowSettings;
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
-														<< jExtra;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n" << jWindowSettings;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n" << jExtra;
 
 		//--
 
@@ -706,11 +702,13 @@ void ofxWindowApp::drawInfo() {
 	str += strPad + screenMode;
 
 	str += strPad + (bKeys?"[l]_":"") + ofToString(bDisableAutoSave ? "AUTO_SAVE_OFF" : "AUTO_SAVE_ON ");
-
+	
+#ifdef TARGET_WIN32
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	str += strPad + (bKeys?"[t]_":"") + ofToString(bWindowStayOnTop ? "ON_TOP_TRUE " : "ON_TOP_FALSE");
 #endif
-
+#endif
+	
 	str += strPad + (bKeys?"[d]_":"")+"DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 	str += strPad;
 
@@ -933,6 +931,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	if (key == 'i') {
 		bShowInfo = !bShowInfo;
 		ofLogNotice("ofxWindowApp:keyPressed") << "i toggle bShowInfo: " << (bShowInfo ? "ON" : "OFF");
+		saveSettings();
 	}
 
 	// Draw debug
@@ -958,16 +957,19 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	else if (key == 'l') {
 		ofLogNotice("ofxWindowApp:keyPressed") << "l toggle DisableAutoSave";
 		setDisableAutoSave(!bDisableAutoSave);
+		saveSettings();
 	}
-
+	
+//#ifdef TARGET_WIN32
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	// Stay on top
 	else if (key == 't') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "t toggle bIsWindowStayOnTop";
+		ofLogNotice("ofxWindowApp:keyPressed") << "t toggle bWindowStayOnTop";
 		setToggleStayOnTop();
 	}
 #endif
-
+//#endif
+	
 	// Reset default window
 	else if (key == OF_KEY_BACKSPACE) {
 		ofLogNotice("ofxWindowApp:keyPressed") << "BACKSPACE reset default";
@@ -1174,7 +1176,7 @@ void ofxWindowApp::checkMonitors() {
 		int height = 0;
 		glfwGetMonitorWorkarea(monitors[iC], &xpos, &ypos, &width, &height);
 		string s1 = " \t " + ofToString(xpos) + "," + ofToString(ypos);
-		s1 += "    \t\t  " + ofToString(width) + "x" + ofToString(height);
+		s1 += " \t\t " + ofToString(width) + "x" + ofToString(height);
 		monitorNames.push_back(s0 + " " + s1);
 	}
 }
