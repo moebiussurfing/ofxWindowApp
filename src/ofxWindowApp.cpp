@@ -569,7 +569,7 @@ void ofxWindowApp::drawDebug() {
 
 	// Text box
 	string s;
-	s += "ofxWindowApp          DEBUG\n";
+	s += "ofxWindowApp     DEBUG\n";
 	if (bFlagShowFeedbackDoneSaved)
 		s += "SAVE";
 	else
@@ -589,14 +589,15 @@ void ofxWindowApp::drawDebug() {
 
 	if (bKeys) {
 		s += "> PRESS KEY\n\n";
-		s += "d : SHOW DEBUG & DISPLAYS\n";
-		s += "i : SHOW INFO & PERFORMANCE\n";
+		s += "SHOW\n";
+		s += "d : DEBUG & DISPLAYS\n";
+		s += "i : INFO & PERFORMANCE\n";
 
 		s += "\n";
 		s += "PRESETS\n";
-		s += "q : Squared 800 x 800\n";
-		s += "w : Squared W x W\n";
 		s += "c : Centered\n";
+		s += "q : Squared 800x800 px\n";
+		s += "w : Squared WxW px\n";
 		s += "1 : IGTV Cover Photo\n";
 		s += "2 : IG Landscape Photo\n";
 		s += "3 : IG Portrait\n";

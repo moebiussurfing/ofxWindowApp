@@ -3,9 +3,9 @@
 
 /*
 	TODO:
-	- add timer mode to reduce writes
-	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatcher
-	- fps plot graph.
+	- add timer mode to reduce writes. ?
+	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatcher ?
+	- fps plot graph. ?
 	- add ofxScreenSetup/ofxNative addons to bundle other window/OS features.
 	- add fullscreen/window and other bool ofParams to expose to a control ui.
  */
