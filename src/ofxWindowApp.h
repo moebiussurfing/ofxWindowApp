@@ -12,24 +12,30 @@
 
 //----
 
+#define OFX_WINDOW_APP__DEVELOP_DEBUG // Enable some more deep testing displaying info.
+
+//----
+
 #define OFX_WINDOW_APP__USE_STATIC
 // Main directive. Uncomment/enable enables this new more secure approach using a static instance.
 //TODO: Can't be disabled now. Should check and implement other approaches.
 
 //----
 
-//#define OFX_WINDOW_APP__ENABLE_SAVE_ON_EXIT // To enable auto save on exit.
+//#define OFX_WINDOW_APP__ENABLE_SAVE_ON_EXIT
+// To enable force autosave on exit.
 // This approach, sometimes required fixing exceptions when closing ofApp.
 
-//#define OFX_WINDOW_APP__USE_TIMED_SAVER // A super simple timed saver every second if changed. TODO: Not recommended now.
+//#define OFX_WINDOW_APP__USE_TIMED_SAVER
+// A super simple timed saver every second if changed. TODO: Not recommended now.
+
+#define OFX_WINDOW_APP__USE_STAY_ON_TOP // Allows an extra OS mode.
+
+//--
 
 #define OFX_WINDOW_APP__BAR_HEIGHT 45 // Probably fits on Windows platform only.
 
 //#define OFX_WINDOW_APP__SIZE_SECURE_GAP_INISDE_SCREEN 18 //TODO: To avoid that window border it's outside screen monitor.
-
-#define OFX_WINDOW_APP__USE_STAY_ON_TOP // Allow an extra OS mode.
-
-//#define OFX_WINDOW_APP__DEVELOP_DEBUG // Enable some more deep testing displaying info.
 
 //----
 
@@ -440,11 +446,14 @@ private:
 
 	// Debug system monitors
 private:
-	void checkMonitors(); // Scan
+	void checkMonitors(); // Scan os displays at desktop canvas.
 	void drawDebugSystemMonitors(); // Display info
 	vector<ofRectangle> monitorRects;
 	vector<std::string> monitorNames;
 	ofRectangle monitorsCanvasRect;
+	int getDisplayIndexForWindow(); // Get in what display index is the window located
+	void setWindowCentered(); // Set current app window centered in the same display index
+	glm::vec2 getWindowPositionAtDisplay(); // Get window position related to current display, instead of the full canvas of OS displays.
 
 	//----
 

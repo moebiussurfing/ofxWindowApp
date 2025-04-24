@@ -47,6 +47,20 @@ inline string setWindowShapeSquared(int sz = 800) {
 	return s;
 }
 
+////--------------------------------------------------------------
+//inline string setWindowCentered() {
+//	int ww = ofGetWindowWidth();
+//	int hw = ofGetWindowHeight();
+//	int ws = ofGetScreenWidth();
+//	int hs = ofGetScreenHeight();
+//	glm::vec2 p = glm::vec2(ws/2-ww/2,hs/2-hw/2);
+//	ofSetWindowShape(p.x,p.y);
+//	ofSetWindowPosition(ww,hw);
+//
+//	string s = "Centered: " + ofToString(p.x) + "," + ofToString(p.y) + " " + ofToString(ww) + "x" + ofToString(hw) + " px";
+//	return s;
+//}
+
 //--------------------------------------------------------------
 inline string setWindowShapeForInstagram(size_t i = 0, bool bForcePos = false) {
 	/*
@@ -98,6 +112,7 @@ inline string keyPressedToSetWindowShape(int key) {
 	//s += "PRESETS\n";
 	//s += "q : Squared 800 x 800\n";
 	//s += "w : Squared W x W\n";
+	//s += "c : Center\n";
 	//s += "1 : IGTV Cover Photo\n";
 	//s += "2 : IG Landscape Photo\n";
 	//s += "3 : IG Portrait\n";
@@ -109,6 +124,8 @@ inline string keyPressedToSetWindowShape(int key) {
 		sWindowDimensions = setWindowShapeSquared(); // Squared 800 x 800
 	else if (key == 'w')
 		sWindowDimensions = setWindowShapeSquared(ofGetWindowWidth()); // Squared w x w
+	//else if (key == 'c')
+	//	sWindowDimensions = setWindowCentered(); // Centered
 	else if (key == '1')
 		sWindowDimensions = setWindowShapeForInstagram(4); // IGTV Cover Photo
 	else if (key == '2')

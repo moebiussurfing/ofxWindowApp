@@ -13,11 +13,11 @@
 * Window **Mode** (Windowed / Fullscreen).
 * Window **Target FPS** (vs real current **FPS**).
 * Window **vSync** state. 
-* **Alert display**" HUD with a **performance** red bar when **FPS drops** too low under the expected **Target Framerate**.
-* Easy change the app settings just by editing the **JSON file**, instead of requiring edit the app code.
-* Optional **custom TTF font** for debug display.
+* Easy change the app settings just by editing the **JSON file** (and restart app), instead of requiring edit the app code.
 * **Stay on Top** mode, easy **Console Window** disabler. (**Windows** only)
-* Window shape **Presets** with **Key commands** for squared, default and common **Instagram** sizes.
+* Window shape **Presets** with **Key commands** for squared, centered, default and common **Instagram** sizes.
+* **Alert display**" HUD with a **performance** red bar when **FPS drops** too low under the expected **Target Framerate**.
+* Optional **custom TTF font** for debug display.
 
 ## KEY COMMANDS
 
@@ -30,6 +30,7 @@ t : Stay-on-top (Windows only).
 l : Lock / Disable autosave.
 
 PRESETS
+c : Center Window.  
 q : Squared 800 x 800
 w : Squared w x w
 1 : IGTV Cover Photo
@@ -42,9 +43,8 @@ BACKSPACE : Reset Default
 
 ## WHY?
 
-It can be useful to have persistent `Window Settings` between your **App sessions**.  
-_Not only for the `final user` but also for the `coder`. Usually when you start an `OF project` you want "to focus on your code updates", but you need to compile many times and move the app window out of your IDE window several times..._  
-_Using this **addon** you can forget about this "annoying behaviour", as the **App Window will be opened in the same position with the same size and settings**._  
+_Not only for the `final user` but also for the `coder`. Usually when you work on an `OF project` you want "to focus on your code updates", but you need to compile many times and move manually the app window out of your IDE window several times..._  
+_Using this **addon** you can forget about this "annoying behaviour", as the **App Window will be opened in the same position, size and some settings too**._  
 
 ## USAGE
 
