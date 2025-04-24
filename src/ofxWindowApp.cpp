@@ -154,7 +154,7 @@ void ofxWindowApp::startup() {
 	loadSettings();
 	
 	// BUG: Redo trick workaround bc sometimes first one is not enough
-	ofLogNotice("ofxWindowApp:startup()") << "Fix workaround: call again to avoid not correctly updated windows...";
+	ofLogNotice("ofxWindowApp:startup()") << "Fix: call again to skip problems.";
 	loadSettings();
 	
 	//--
@@ -390,7 +390,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofLogVerbose("ofxWindowApp:saveSettings()") << "----------------------saveSettings() <--BEGIN";
 
 	string path = path_folder + "/" + path_filename;
-	ofLogVerbose("ofxWindowApp:saveSettings()") << path;
+	ofLogNotice("ofxWindowApp:saveSettings()") << path;
 
 	//--
 
@@ -420,7 +420,7 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	logSettings();
 
 	// Save file
-	if (!bSlient) ofLogNotice("ofxWindowApp:saveSettings()") << endl << data.dump(4);
+	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl << data.dump(4);
 	ofSavePrettyJson(path, data);
 
 	//--
@@ -648,7 +648,15 @@ void ofxWindowApp::drawDebug() {
 		font.drawString(s, x, y);
 		ofPopStyle();
 	} else {
-		ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
+		// fix space when using top layout
+		if (positionLayout == DEBUG_POSITION_TOP){
+			ofPushMatrix();
+			ofTranslate(0, 18);
+			ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
+			ofPopMatrix();
+		}
+		else {ofxSurfingHelpersLite::ofxWindowApp::ofDrawBitmapStringBox(s, 0);
+		}
 	}
 
 	if (bFlagShowFeedbackDoneSaved) bFlagShowFeedbackDoneSaved = 0;

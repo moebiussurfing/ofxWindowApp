@@ -3,13 +3,10 @@
 
 /*
 	TODO:
-	- 
 	- add timer mode to reduce writes
-	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatchFile
-	- fix force setFrameRate ofSetVerticalSync calls in setup workflow. currently requires app restart. set->save->apply
-	- add mode to unlock full fps / fps=0 toggle.
+	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatcher
 	- fps plot graph.
-	- add ofxScreenSetup / ofxNative addons to bundle other window/OS features.
+	- add ofxScreenSetup/ofxNative addons to bundle other window/OS features.
 	- add fullscreen/window and other bool ofParams to expose to a control ui.
  */
 
