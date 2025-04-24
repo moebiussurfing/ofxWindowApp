@@ -557,9 +557,9 @@ void ofxWindowApp::loadSettings() {
 void ofxWindowApp::drawDebug() {
 #ifdef OFX_WINDOW_APP__DEVELOP_DEBUG
 	// Window title
-	string ts = "wSize:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
-	string tp = "wPosDesktop:" + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
-	string tpd = "(wPosDisplay:" + ofToString(getWindowPositionAtDisplay().x) + "," + ofToString(getWindowPositionAtDisplay().y) + ")";
+	string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
+	string tp = "PosDesktop:" + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
+	string tpd = "(PosDisplay:" + ofToString(getWindowPositionAtDisplay().x) + "," + ofToString(getWindowPositionAtDisplay().y) + ")";
 	string t = "ofxWindowApp  DEBUG\t\t";
 	t += ts + "\t" + tp + "\t" + tpd;
 	ofSetWindowTitle(t);
