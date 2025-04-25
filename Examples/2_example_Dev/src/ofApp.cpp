@@ -8,9 +8,6 @@ void ofApp::setup() {
 	//	w.setFrameRate(240);
 	//	w.setFrameRate(0); // Max possible, to display refresh freq if VSYNC_ON, or unlocked if VSYNC_OFF.
 
-	// Force show debug
-	w.bShowDebug = true;
-
 	// Force show info
 	w.bShowInfo = true;
 }

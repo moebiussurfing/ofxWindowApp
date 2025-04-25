@@ -5,7 +5,7 @@
 
 // NOTE: Press "k" to toggle enable key commands!
 
-// NOTE: Enable full debug:
+// NOTE: Enable full Debug:
 // In ofxWindowApp.h enable directive.
 // #define OFX_WINDOW_APP__DEVELOP_DEBUG
 

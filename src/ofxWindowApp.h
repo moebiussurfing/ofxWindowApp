@@ -12,9 +12,9 @@
 
 //----
 
-#define OFX_WINDOW_APP__DEVELOP_DEBUG // Enable some more deep testing displaying info.
+#define OFX_WINDOW_APP__DEVELOP_DEBUG // <- (Optional) Enable some more deep testing displaying info.
 
-//#define OFX_WINDOW_APP__USE_OFX_WATCHER // Enable file watcher to reload JSON file when changed:
+#define OFX_WINDOW_APP__USE_OFX_WATCHER // <- (Optional) Enable file watcher to reload JSON file when changed:
 // Requires https://github.com/nariakiiwatani/ofxWatcher and to enable the above directive.
 
 //----
@@ -32,12 +32,12 @@
 //#define OFX_WINDOW_APP__USE_TIMED_SAVER
 // A super simple timed saver every second if changed. TODO: Not recommended now.
 
-#define OFX_WINDOW_APP__USE_STAY_ON_TOP // Allows an extra OS mode.
+#define OFX_WINDOW_APP__USE_STAY_ON_TOP // <- (Optional)  Allows an extra OS mode.
 
 //--
 
-#define OFX_WINDOW_APP__BAR_HEIGHT 45 // Probably fits on Windows platform only.
-
+#define OFX_WINDOW_APP__FORCE_RESET_WINDOW_IF_ITS_OUT_OF_DESKTOP_CANVAS
+#define OFX_WINDOW_APP__BAR_HEIGHT 45 // TODO: Probably fits on Windows platform only.
 //#define OFX_WINDOW_APP__SIZE_SECURE_GAP_INISDE_SCREEN 18 //TODO: To avoid that window border it's outside screen monitor.
 
 //----
@@ -130,17 +130,17 @@ private:
 #ifdef OFX_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
 #endif
-	
+
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
 	// Workaround trick:
 	// We need to ignore that file changed doing when saving.
 	// ie: when we move the window, a save will be trigged, and the file will change,
 	// but we will ignore that change.. We want to listen changes doing externally.
 	// So if fille changed during a manually window moving could produce unsync file settings.
-	bool bDisableCallback_FileChanged=false;
-	uint64_t tLastSave=0;
+	bool bDisableCallback_FileChanged = false;
+	uint64_t tLastSave = 0;
 #endif
-	
+
 	//--
 
 	void drawInfo();
@@ -156,7 +156,7 @@ public:
 	// Default will be 60 fps if not defined!
 	//--------------------------------------------------------------
 	void setFrameRate(float f) {
-		ofLogNotice("ofxWindowApp:setFrameRate")<<f;
+		ofLogNotice("ofxWindowApp:setFrameRate") << f;
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
 		saveSettings();
@@ -164,15 +164,15 @@ public:
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
-		ofLogNotice("ofxWindowApp:setVerticalSync")<<b;
+		ofLogNotice("ofxWindowApp:setVerticalSync") << b;
 		bvSync = b;
 		ofSetVerticalSync(bvSync);
 		saveSettings();
 	}
-	
+
 	//--------------------------------------------------------------
 	void setFullScreen(bool b) {
-		ofLogNotice("ofxWindowApp:setFullScreen")<<b;
+		ofLogNotice("ofxWindowApp:setFullScreen") << b;
 		if (b) {
 			ofSetFullscreen(true);
 			bIsFullScreen = true;
@@ -183,11 +183,11 @@ public:
 		doSetWindowSettingsFromAppWindow();
 		saveSettings();
 	}
-	
+
 	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
 	//--------------------------------------------------------------
 	void setDisableAutoSave(bool b) {
-		ofLogNotice("ofxWindowApp:setDisableAutoSave")<<b;
+		ofLogNotice("ofxWindowApp:setDisableAutoSave") << b;
 		bDisableAutoSave = b;
 		saveSettings();
 	}
@@ -196,17 +196,17 @@ public:
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) { // Will display alert drop fps info ven when debug display disabled
-		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey")<<b;
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey") << b;
 		bShowInfoPerformanceAlways = b;
 		saveSettings();
 	}
 
 	//----
-	
+
 public:
 	//--------------------------------------------------------------
 	void setEnableAllowQuitAppUsingEscapeKey(bool b) {
-		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey")<<b;
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey") << b;
 		ofSetEscapeQuitsApp(b);
 	}
 
@@ -231,19 +231,19 @@ private:
 
 	//--
 
-//public:
-//	//TODO: handle console terminal window
-//	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
-//	//--------------------------------------------------------------
-//	void setConsoleVisible(bool show) {
-//#if defined(TARGET_WIN32)
-//		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
-//#endif
-//	}
-//	//--------------------------------------------------------------
-//	bool getConsoleVisible() {
-//		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
-//	}
+	//public:
+	//	//TODO: handle console terminal window
+	//	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
+	//	//--------------------------------------------------------------
+	//	void setConsoleVisible(bool show) {
+	//#if defined(TARGET_WIN32)
+	//		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
+	//#endif
+	//	}
+	//	//--------------------------------------------------------------
+	//	bool getConsoleVisible() {
+	//		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
+	//	}
 
 	//--
 
@@ -271,10 +271,10 @@ private:
 	string path_folder; // Folder
 	string path_filename; // File
 	string path_settings; // Full path
-	
+
 	//--
 
-//public:
+	//public:
 	//TODO: Can't be used yet bc static instance mode must fix setting before setup(*) is called..
 	//// Custom path
 	////--------------------------------------------------------------
@@ -286,7 +286,7 @@ private:
 	//void setPathFilename(string s) {
 	//	path_filename = s;
 	//}
-	
+
 	//	void setPathSettings(string s) {
 	//		path_setttings = s;
 	//	}
@@ -294,7 +294,6 @@ private:
 	//--
 
 public:
-
 	//--
 
 	// Easy callback only to check from parent scope/ofApp if window shape has changed.
@@ -333,14 +332,14 @@ public:
 	void doTogglePositionDisplayInfo() {
 		setPositionDebugInfo((positionLayout == 1) ? 0 : 1);
 	}
-	
+
 	//--
-	
+
 	void setEnableKeys(bool b) {
 		bKeys = b;
 		saveSettings();
 	}
-	
+
 	void setToggleEnableKeys() {
 		bKeys = !bKeys;
 		saveSettings();
@@ -410,15 +409,14 @@ public:
 	ofParameter<bool> bDisableAutoSave { "DisableAutoSave", false };
 	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
-	ofParameter<bool> bKeys {"Keys",true}; // Enable keys by default
+	ofParameter<bool> bKeys { "Keys", true }; // Enable keys by default
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 public:
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
 #endif
-	
-private:
 
+private:
 	//----
 
 private:
@@ -435,6 +433,14 @@ private:
 		bShowInfo = false;
 		bDisableAutoSave = false;
 		bShowInfoPerformanceAlways = true;
+	}
+
+public:
+	//--------------------------------------------------------------
+	void doResetWindowDefault() {
+		ofLogNotice("ofxWindowApp:doResetWindowDefault()");
+		doResetWindowSettings();
+		doApplyWindowSettings();
 	}
 
 private:
@@ -459,13 +465,13 @@ private:
 
 	void windowChanged(); // Group redirect all other callbacks related to window resized and window moved
 	//bool bFlagWindowChanged = false; //TODO: workaround OF/GLFW window management bugs. Get/apply delayed...
-	
+
 	//--------------------------------------------------------------
 
 	// Debug system monitors
 private:
-	void checkMonitors(); // Scan os displays at desktop canvas.
-	void drawDebugSystemMonitors(); // Display info
+	void getDiplaysMonitorsDesktopCanvas(); // Scan os displays at desktop canvas.
+	void drawDebugDisplayMonitors(); // Display info
 	vector<ofRectangle> monitorRects;
 	vector<std::string> monitorNames;
 	ofRectangle monitorsCanvasRect;
@@ -483,18 +489,18 @@ private:
 		ofLogVerbose("ofxWindowApp:logSettings()") << "> ofGetWindow()"; // Window itself
 		ofLogVerbose("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(ofGetWindowMode());
 		ofLogVerbose("ofxWindowApp:logSettings()") << "Position:   "
-												  << ofToString(ofGetWindowPositionX()) << ","
-												  << ofToString(ofGetWindowPositionY());
+												   << ofToString(ofGetWindowPositionX()) << ","
+												   << ofToString(ofGetWindowPositionY());
 		ofLogVerbose("ofxWindowApp:logSettings()") << "Size:       "
-												  << ofToString(ofGetWindowWidth()) << "x"
-												  << ofToString(ofGetWindowHeight());
+												   << ofToString(ofGetWindowWidth()) << "x"
+												   << ofToString(ofGetWindowHeight());
 		ofLogVerbose("ofxWindowApp:logSettings()");
 		ofLogVerbose("ofxWindowApp:logSettings()") << "> windowSettings"; // Stored settings
 		ofLogVerbose("ofxWindowApp:logSettings()") << "WindowMode: " << ofToString(windowSettings.windowMode);
 		ofLogVerbose("ofxWindowApp:logSettings()") << "Position:   " << ofToString(windowSettings.getPosition());
 		ofLogVerbose("ofxWindowApp:logSettings()") << "Size:       "
-												  << ofToString(windowSettings.getWidth())
-												  << "x" << ofToString(windowSettings.getHeight());
+												   << ofToString(windowSettings.getWidth())
+												   << "x" << ofToString(windowSettings.getHeight());
 		ofLogVerbose("ofxWindowApp:logSettings()") << "----------------------logSettings()--> END";
 	}
 };

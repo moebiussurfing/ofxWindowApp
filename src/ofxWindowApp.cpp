@@ -1,7 +1,7 @@
 #include "ofxWindowApp.h"
 
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
-#include "ofxWatcher.h"
+	#include "ofxWatcher.h"
 #endif
 
 //--------------------------------------------------------------
@@ -10,6 +10,7 @@ ofxWindowApp::ofxWindowApp() {
 	// Log
 #ifdef OFX_WINDOW_APP__DEVELOP_DEBUG
 	ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
+	bShowDebug = true;
 #else
 	ofSetLogLevel("ofxWindowApp", OF_LOG_NOTICE);
 #endif
@@ -80,7 +81,7 @@ void ofxWindowApp::setup() {
 	//--
 
 	// Get rectanlges from os displays/monitors
-	checkMonitors();
+	getDiplaysMonitorsDesktopCanvas();
 
 	//--
 
@@ -89,7 +90,7 @@ void ofxWindowApp::setup() {
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
 	path_settings = path_folder + "/" + path_filename;
-	
+
 	//--
 
 	// Custom font
@@ -139,9 +140,9 @@ void ofxWindowApp::setupParams() {
 	paramsSession.add(bDisableAutoSave);
 	paramsSession.add(bKeys);
 
-	#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
-	#endif
+#endif
 
 	// Extra
 	paramsExtra.add(paramsWindow);
@@ -169,18 +170,18 @@ void ofxWindowApp::startup() {
 	// BUG: Redo trick workaround bc sometimes first one is not enough...
 	ofLogNotice("ofxWindowApp:startup()") << "Fix workaround: Call load again to fix problems.";
 	loadSettings();
-	
+
 	//--
-		
+
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
-		ofxWatchPath(path_settings, ofLoadJson, [this](const ofJson &json, const std::filesystem::path &path) {
-			if(bDisableCallback_FileChanged) return;
-			
-				ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: File changed: " << path;
-				//ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: "<< endl << json.dump(2) << endl;
-			
-			loadSettings();
-		});
+	ofxWatchPath(path_settings, ofLoadJson, [this](const ofJson & json, const std::filesystem::path & path) {
+		if (bDisableCallback_FileChanged) return;
+
+		ofLogNotice("ofxWindowApp:startup()") << "ofxWatchPath: File changed: " << path;
+		//ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: "<< endl << json.dump(2) << endl;
+
+		loadSettings();
+	});
 #endif
 
 	//--
@@ -337,13 +338,13 @@ void ofxWindowApp::update(ofEventArgs & args) {
 		}
 	}
 #endif
-	
+
 	//--
-	
+
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
 	// Workaround trick: 1000 is the checking default interval.
-	if(bDisableCallback_FileChanged && (ofGetElapsedTimeMillis() -tLastSave)>=1000){
-		bDisableCallback_FileChanged=false;
+	if (bDisableCallback_FileChanged && (ofGetElapsedTimeMillis() - tLastSave) >= 1000) {
+		bDisableCallback_FileChanged = false;
 	}
 #endif
 }
@@ -351,12 +352,11 @@ void ofxWindowApp::update(ofEventArgs & args) {
 //--------------------------------------------------------------
 void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
-	
+
 	//--
 
 	// Layouts Top/Bottom
-	if(bShowInfo||bShowInfoPerformanceAlways)
-	{
+	if (bShowInfo || bShowInfoPerformanceAlways) {
 		if (positionLayout == DEBUG_POSITION_BOTTOM) {
 			if (font.isLoaded()) {
 				previewY = ofGetWindowHeight() - fontSize + 5;
@@ -384,7 +384,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	if (bShowDebug) {
 		drawDebug();
-		drawDebugSystemMonitors();
+		drawDebugDisplayMonitors();
 	}
 
 	//--
@@ -427,7 +427,7 @@ void ofxWindowApp::saveSettingsAfterRefresh() {
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
 	ofLogVerbose("ofxWindowApp:saveSettings()") << "----------------------saveSettings() <--BEGIN";
-	
+
 	ofLogNotice("ofxWindowApp:saveSettings()") << path_settings;
 
 	//--
@@ -450,24 +450,25 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	data.push_back(jWindowSettings);
 	data.push_back(jExtra);
 
-//	// Check if we need to create data folder first
-//	folderCheckAndCreate(path_folder);
-////	folderCheckAndCreate(path_settings);//TODO: Should use path without filename?
+	//	// Check if we need to create data folder first
+	//	folderCheckAndCreate(path_folder);
+	////	folderCheckAndCreate(path_settings);//TODO: Should use path without filename?
 
 	// Log
 	logSettings();
 
 	// Save file
-	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl<< data.dump(4);
-	
+	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl
+															  << data.dump(4);
+
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
-	bDisableCallback_FileChanged=true;
-	tLastSave=ofGetElapsedTimeMillis();
+	bDisableCallback_FileChanged = true;
+	tLastSave = ofGetElapsedTimeMillis();
 	ofSavePrettyJson(path_settings, data);
 #else
 	ofSavePrettyJson(path_settings, data);
 #endif
-	
+
 	//--
 
 	bFlagShowFeedbackDoneSaved = true;
@@ -489,7 +490,8 @@ void ofxWindowApp::loadSettings() {
 		// Load settings in one file
 		ofJson data;
 		data = ofLoadJson(path_settings);
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n" << data.dump(4);
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n"
+														<< data.dump(4);
 
 		//--
 
@@ -503,14 +505,18 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n"<< jWindowSettings.dump(4);
-			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n"<< ofToString(paramsExtra);
+			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n"
+															<< jWindowSettings.dump(4);
+			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n"
+															<< ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n"<< jWindowSettings;
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"<< jExtra;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n"
+														<< jWindowSettings;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
+														<< jExtra;
 
 		//--
 
@@ -576,7 +582,7 @@ void ofxWindowApp::loadSettings() {
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	#if defined(TARGET_WIN32)
-		// On top
+		// Stay on top
 		if (!bIsFullScreen) {
 			// Workaround refresh
 
@@ -596,6 +602,11 @@ void ofxWindowApp::loadSettings() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawDebug() {
+	//TODO: Reset default shape. Kicks window inside main monitor.
+	#ifdef OFX_WINDOW_APP__FORCE_RESET_WINDOW_IF_ITS_OUT_OF_DESKTOP_CANVAS
+	if (getWindowPositionAtDisplay() == glm::vec2(-1, -1)) doResetWindowDefault();
+	#endif
+
 #ifdef OFX_WINDOW_APP__DEVELOP_DEBUG
 	// Window title
 	string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
@@ -617,8 +628,7 @@ void ofxWindowApp::drawDebug() {
 		s += "    ";
 	s += "\n";
 
-	string screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
-	screenSizeStr += "px";
+	string screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight())+ "px";
 	string screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string fpsRealStr = ofToString(fpsReal, 0);
 	string str = "";
@@ -637,7 +647,7 @@ void ofxWindowApp::drawDebug() {
 		s += "PRESETS\n";
 		s += "c : Centered\n";
 		s += "q : Squared 800x800 px\n";
-		s += "w : Squared WxW px\n";
+		s += "w : Squared width x width px\n";
 		s += "1 : IGTV Cover Photo\n";
 		s += "2 : IG Landscape Photo\n";
 		s += "3 : IG Portrait\n";
@@ -1007,7 +1017,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	else if (key == 'v') {
 		ofLogNotice("ofxWindowApp:keyPressed") << "v: Toggle vsync";
 		bvSync = !bvSync;
-//		ofSetVerticalSync(bvSync);
+		//		ofSetVerticalSync(bvSync);
 	}
 
 	// Toggle disable auto save lock
@@ -1036,8 +1046,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	else if (key == OF_KEY_BACKSPACE) {
 		ofLogNotice("ofxWindowApp:keyPressed") << "BACKSPACE: Reset default";
 		for (int i = 0; i < 3; i++) { //TODO: Force repeat fix
-			doResetWindowSettings();
-			doApplyWindowSettings();
+			doResetWindowDefault();
 		}
 	}
 
@@ -1150,13 +1159,13 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 	if (name == bWindowStayOnTop.getName()) {
 	#if defined(TARGET_WIN32)
 		if (bWindowStayOnTop.get()) {
-			// Make app always on top
+			// Make app always Stay on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 			ofLogNotice("ofxWindowApp") << "Set Stay on top: Enabled";
 
 		} else {
-			// Disable make app always on top
+			// Disable make app always Stay on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 			ofLogNotice("ofxWindowApp") << "Set Stay on top: Disabled";
@@ -1193,9 +1202,9 @@ glm::vec2 ofxWindowApp::getWindowPositionAtDisplay() {
 	glm::vec2 p(-1, -1);
 
 	int index = getDisplayIndexForWindow();
-	
+
 	if (index == -1) {
-		ofLogError("ofxWindowApp:getWindowPositionAtDisplay()") << "Display index not idetified";
+		ofLogVerbose("ofxWindowApp:getWindowPositionAtDisplay()") << "Display index not idetified around OS displays.";
 		return p;
 	} else {
 		//ofLogVerbose("ofxWindowApp:getWindowPositionAtDisplay()") << "Display index: " << index;
@@ -1217,7 +1226,9 @@ glm::vec2 ofxWindowApp::getWindowPositionAtDisplay() {
 //--------------------------------------------------------------
 int ofxWindowApp::getDisplayIndexForWindow() {
 	//ofLogVerbose("ofxWindowApp:getDisplayIndexForWindow()");
-	auto pos = glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY());
+
+	int gap = 1; // Tiny offset to fix 0,0 returns "out of canvas desktop"
+	auto pos = glm::vec2(ofGetWindowPositionX() + gap, ofGetWindowPositionY() + gap);
 	int index = -1;
 	int i = 0;
 	for (auto & monitorRect : monitorRects) {
@@ -1226,12 +1237,28 @@ int ofxWindowApp::getDisplayIndexForWindow() {
 		}
 		i++;
 	}
+
+	//TODO: Not working
+	if (index == -1 && int(ofGetElapsedTimef()) % 5 == 0) {
+		ofLogError("ofxWindowApp:getDisplayIndexForWindow()") << "Display index not idetified around OS displays.";
+		ofLogError("ofxWindowApp:getDisplayIndexForWindow()") << "Probably App Window (top main bar) is out of the desktop canvas!";
+		ofLogVerbose("ofxWindowApp:getDisplayIndexForWindow()") << "Check bottom right corner instead of main top window bar";
+		auto pos_ = glm::vec2(pos.x /*+ ofGetWindowWidth()*/, pos.y + ofGetWindowHeight());
+		int j = 0;
+		for (auto & monitorRect : monitorRects) {
+			if (monitorRect.inside(pos_)) {
+				index = j;
+			}
+			j++;
+		}
+	}
+
 	return index;
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::checkMonitors() {
-	ofLogNotice("ofxWindowApp:checkMonitors()");
+void ofxWindowApp::getDiplaysMonitorsDesktopCanvas() {
+	ofLogNotice("ofxWindowApp:getDiplaysMonitorsDesktopCanvas()");
 	int numberOfMonitors = 0;
 	GLFWmonitor ** monitors = glfwGetMonitors(&numberOfMonitors);
 	monitorRects.clear();
@@ -1253,13 +1280,13 @@ void ofxWindowApp::checkMonitors() {
 
 		string s1 = "";
 		s1 += "\t" + ofToString(xpos) + "," + ofToString(ypos);
-		s1 += "\t\t" + ofToString(width) + "x" + ofToString(height);
+		s1 += "     \t" + ofToString(width) + "x" + ofToString(height);
 		monitorNames.push_back(s0 + " " + s1);
 	}
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::drawDebugSystemMonitors() {
+void ofxWindowApp::drawDebugDisplayMonitors() {
 	auto pos = glm::vec2(ofGetWindowPositionX(), ofGetWindowPositionY());
 	ofPushMatrix();
 	ofPushStyle();
@@ -1368,7 +1395,10 @@ void ofxWindowApp::setWindowCentered() {
 	ofLogNotice("ofxWindowApp:setWindowCentered()");
 	int index = getDisplayIndexForWindow();
 	if (index == -1) {
-		ofLogError("ofxWindowApp:setWindowCentered()") << "Display index not idetified";
+		if ((int)ofGetElapsedTimef() % 5 == 0)
+			ofLogError("ofxWindowApp:setWindowCentered()") << "Display index not idetified around OS displays.";
+		ofLogError("ofxWindowApp:setWindowCentered()") << "Probably App Window (top main bar) is out of the desktop canvas!";
+		//TODO: Kick window inside main display ?
 		return;
 	} else {
 		ofLogVerbose("ofxWindowApp:setWindowCentered()") << "Display index: " << index;
