@@ -141,7 +141,7 @@ void ofxWindowApp::setupParams() {
 	paramsSession.add(bKeys);
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	paramsSession.add(bWindowStayOnTop);
+	paramsSession.add(bStayOnTop);
 #endif
 
 	// Extra
@@ -342,8 +342,9 @@ void ofxWindowApp::update(ofEventArgs & args) {
 	//--
 
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
-	// Workaround trick: 1000 is the checking default interval.
-	if (bDisableCallback_FileChanged && (ofGetElapsedTimeMillis() - tLastSave) >= 1000) {
+	// Workaround trick: 1000ms is the default time interval checking.
+	const int ti = 1000;
+	if (bDisableCallback_FileChanged && (ofGetElapsedTimeMillis() - tLastSave) >= ti) {
 		bDisableCallback_FileChanged = false;
 	}
 #endif
@@ -355,7 +356,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	//--
 
-	// Layouts Top/Bottom
+	// Calc layouts Top/Bottom
 	if (bShowInfo || bShowInfoPerformanceAlways) {
 		if (positionLayout == DEBUG_POSITION_BOTTOM) {
 			if (font.isLoaded()) {
@@ -375,6 +376,13 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 
 	//--
 
+	// Draw Debug
+	if (bShowDebug) {
+		drawDebug();
+		drawDebugDisplayMonitors();
+	}
+
+	// Draw Info
 	if (bShowInfo) {
 		drawInfo();
 		drawInfoPerformanceWidget();
@@ -382,12 +390,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		if (bShowInfoPerformanceAlways) drawInfoPerformanceWidget();
 	}
 
-	if (bShowDebug) {
-		drawDebug();
-		drawDebugDisplayMonitors();
-	}
-
-	//--
+	//----
 
 	////TODO:  Trying to fix som glfw/OF windows management problems...
 	//// https://forum.openframeworks.cc/t/timing-of-windowresized/44492
@@ -395,6 +398,20 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 	//	bFlagWindowChanged = false;
 	//	this->windowChanged();
 	//}
+
+	//--
+
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+	// Workaround trick bc we need startup did the loadSettings() call and windows is already updated!
+	if (bStayOnTop.get()) {
+		static bool bDoneStartupForceStayOnTop = 0;
+		if (bDoneStartup && !bDoneStartupForceStayOnTop) {
+			bDoneStartupForceStayOnTop = 1;
+			ofLogNotice("ofxWindowApp:draw()") << "Force doApplyStayOnTop()";
+			doApplyStayOnTop();
+		}
+	}
+#endif
 }
 
 //--------------------------------------------------------------
@@ -580,20 +597,9 @@ void ofxWindowApp::loadSettings() {
 
 		//--
 
-#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	#if defined(TARGET_WIN32)
-		// Stay on top
-		if (!bIsFullScreen) {
-			// Workaround refresh
-
-			HWND W = GetActiveWindow();
-			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-
-			// Re trig
-			bWindowStayOnTop = bWindowStayOnTop;
-		}
-	#endif
-#endif
+		//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+		//		doApplyStayOnTop();
+		//#endif
 	} else {
 		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path_settings;
 	}
@@ -602,10 +608,10 @@ void ofxWindowApp::loadSettings() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::drawDebug() {
-	//TODO: Reset default shape. Kicks window inside main monitor.
-	#ifdef OFX_WINDOW_APP__FORCE_RESET_WINDOW_IF_ITS_OUT_OF_DESKTOP_CANVAS
+//TODO: Reset default shape. Kicks window inside main monitor.
+#ifdef OFX_WINDOW_APP__FORCE_RESET_WINDOW_IF_ITS_OUT_OF_DESKTOP_CANVAS
 	if (getWindowPositionAtDisplay() == glm::vec2(-1, -1)) doResetWindowDefault();
-	#endif
+#endif
 
 #ifdef OFX_WINDOW_APP__DEVELOP_DEBUG
 	// Window title
@@ -628,32 +634,40 @@ void ofxWindowApp::drawDebug() {
 		s += "    ";
 	s += "\n";
 
-	string screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight())+ "px";
+	string screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight()) + " px";
 	string screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string fpsRealStr = ofToString(fpsReal, 0);
+	string fpsTargetStr = ofToString(fpsTarget);
 	string str = "";
 	str += "Size : " + screenSizeStr + "\n";
 	str += "Pos  : " + screenPosStr + "\n";
-	str += "FPS  : " + fpsRealStr + "\n";
+	str += "FPS  : " + fpsRealStr + " ";
+	str += "[" + fpsTargetStr + "]\n";
+
 	s += str;
 	s += "\n";
 
 	if (bKeys) {
 		s += "> PRESS KEY\n\n";
 		s += "SHOW\n";
-		s += "d : DEBUG & DISPLAYS\n";
-		s += "i : INFO & PERFORMANCE\n";
+		s += "d : DEBUG\n";
+		s += "    & DISPLAYS\n";
+		s += "i : INFO\n";
+		s += "    & PERFORMANCE\n";
 		s += "\n";
 		s += "PRESETS\n";
 		s += "c : Centered\n";
 		s += "q : Squared 800x800 px\n";
-		s += "w : Squared width x width px\n";
-		s += "1 : IGTV Cover Photo\n";
-		s += "2 : IG Landscape Photo\n";
-		s += "3 : IG Portrait\n";
-		s += "4 : IG Story\n";
-		s += "5 : IG Square\n";
-		s += "BCKSP : Reset Default\n";
+		s += "w : Squared w x w px\n";
+		s += "\n";
+		s += "INSTAGRAM\n";
+		s += "1 : Cover Photo IGTV\n";
+		s += "2 : Landscape Photo\n";
+		s += "3 : Portrait\n";
+		s += "4 : Story\n";
+		s += "5 : Square\n";
+		s += "\n";
+		s += "BACKSPACE : Reset \n";
 	} else {
 		s += "> KEYS ARE DISABLED!\n";
 		s += "\n";
@@ -763,7 +777,7 @@ void ofxWindowApp::drawInfo() {
 
 #ifdef TARGET_WIN32
 	#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	str += strPad + (bKeys ? "[t]_" : "") + ofToString(bWindowStayOnTop ? "ON_TOP_TRUE " : "ON_TOP_FALSE");
+	str += strPad + (bKeys ? "[t]_" : "") + ofToString(bStayOnTop ? "STAY_ON_TOP_ON " : "STAY_ON_TOP_OFF");
 	#endif
 #endif
 
@@ -1036,9 +1050,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	// Stay on top
 	else if (key == 't') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "t: Toggle bWindowStayOnTop";
+		ofLogNotice("ofxWindowApp:keyPressed") << "t: Toggle bStayOnTop";
 		setToggleStayOnTop();
-		saveSettings();
 	}
 #endif
 
@@ -1116,6 +1129,32 @@ void ofxWindowApp::doApplyToggleWindowMode() {
 	doSetWindowSettingsFromAppWindow();
 }
 
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+//--------------------------------------------------------------
+void ofxWindowApp::doApplyStayOnTop() {
+	ofLogVerbose("ofxWindowApp:doApplyStayOnTop()");
+
+	#if defined(TARGET_WIN32)
+	if (bStayOnTop.get()) {
+		// Make app always Stay on top
+		HWND W = GetActiveWindow();
+		SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+		ofLogNotice("ofxWindowApp") << "Set Stay on top: Enabled";
+	} else {
+		// Disable make app always Stay on top
+		HWND W = GetActiveWindow();
+		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+		ofLogNotice("ofxWindowApp") << "Set Stay on top: Disabled";
+	}
+	#elif defined(TARGET_OSX)
+	//TODO:
+	ofLogWarning("ofxWindowApp") << "(bStayOnTop) Not implemented for OSX platform. Only TARGET_WIN32 yet!";
+	#else
+	ofLogWarning("ofxWindowApp") << "(bStayOnTop) Not implemented for current platform. Only TARGET_WIN32 yet!";
+	#endif
+}
+#endif
+
 //--------------------------------------------------------------
 void ofxWindowApp::doApplyWindowExtraSettings() {
 	ofLogVerbose("ofxWindowApp:doApplyWindowExtraSettings()");
@@ -1125,6 +1164,8 @@ void ofxWindowApp::doApplyWindowExtraSettings() {
 
 	ofSetFrameRate(int(fpsTarget.get()));
 	ofSetVerticalSync(bvSync.get());
+
+	doApplyStayOnTop();
 }
 
 //--------------------------------------------------------------
@@ -1156,27 +1197,8 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 	ofLogVerbose("ofxWindowApp::ChangedParamsExtra") << " " << name << " : " << e;
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	if (name == bWindowStayOnTop.getName()) {
-	#if defined(TARGET_WIN32)
-		if (bWindowStayOnTop.get()) {
-			// Make app always Stay on top
-			HWND W = GetActiveWindow();
-			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-			ofLogNotice("ofxWindowApp") << "Set Stay on top: Enabled";
-
-		} else {
-			// Disable make app always Stay on top
-			HWND W = GetActiveWindow();
-			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-			ofLogNotice("ofxWindowApp") << "Set Stay on top: Disabled";
-		}
-		bIsWindowStayOnTop = bWindowStayOnTop;
-	#elif defined(TARGET_OSX)
-		//TODO:
-		ofLogWarning("ofxWindowApp") << "(bWindowStayOnTop) Not implemented for OSX platform. Only TARGET_WIN32 yet!";
-	#else
-		ofLogWarning("ofxWindowApp") << "(bWindowStayOnTop) Not implemented for current platform. Only TARGET_WIN32 yet!";
-	#endif
+	if (name == bStayOnTop.getName()) {
+		doApplyStayOnTop();
 		return;
 	}
 #endif
@@ -1343,7 +1365,11 @@ void ofxWindowApp::drawDebugDisplayMonitors() {
 	// App window
 	ofPushMatrix();
 	ofNoFill();
-	ofSetColor(0, 255, 0, a);
+	// Blink
+	int d = 1000;
+	int v = ofGetElapsedTimeMillis() % d;
+	int a_ = (v < d * 0.65) ? 255 : 0;
+	ofSetColor(0, 255, 0, a_);
 	ofRectangle rw = ofRectangle(pos.x, pos.y, ofGetWindowWidth(), ofGetWindowHeight());
 	ofDrawRectangle(rw);
 	string s = "";
@@ -1372,7 +1398,7 @@ void ofxWindowApp::drawDebugDisplayMonitors() {
 	ofTranslate(monitorsCanvasRect.getBottomLeft());
 
 	// Monitor/displays names list
-	s = "\n\n\nDISPLAYS\n\n";
+	s = "\n\n\nDISPLAYS (Desktop Canvas)\n\n";
 	i = 0;
 	for (auto & monitorName : monitorNames) {
 		if (index == i) // Mark current monitor

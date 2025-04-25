@@ -4,7 +4,6 @@
 /*
 	TODO:
 	- add timer mode to reduce writes. ?
-	- check listen when file changes. allowing edit json externally and auto update the app window. https://github.com/nariakiiwatani/ofxWatcher ?
 	- fps plot graph. ?
 	- add ofxScreenSetup/ofxNative addons to bundle other window/OS features.
 	- add fullscreen/window and other bool ofParams to expose to a control ui.
@@ -12,9 +11,9 @@
 
 //----
 
-#define OFX_WINDOW_APP__DEVELOP_DEBUG // <- (Optional) Enable some more deep testing displaying info.
+#define OFX_WINDOW_APP__DEVELOP_DEBUG // <- (OPTIONAL) Enable some more deep testing displaying info.
 
-#define OFX_WINDOW_APP__USE_OFX_WATCHER // <- (Optional) Enable file watcher to reload JSON file when changed:
+//#define OFX_WINDOW_APP__USE_OFX_WATCHER // <- (OPTIONAL) Enable file watcher to reload JSON file when changed:
 // Requires https://github.com/nariakiiwatani/ofxWatcher and to enable the above directive.
 
 //----
@@ -32,17 +31,19 @@
 //#define OFX_WINDOW_APP__USE_TIMED_SAVER
 // A super simple timed saver every second if changed. TODO: Not recommended now.
 
-#define OFX_WINDOW_APP__USE_STAY_ON_TOP // <- (Optional)  Allows an extra OS mode.
+#define OFX_WINDOW_APP__USE_STAY_ON_TOP // <- (OPTIONAL)  Allows an extra OS mode.
 
 //--
 
-#define OFX_WINDOW_APP__FORCE_RESET_WINDOW_IF_ITS_OUT_OF_DESKTOP_CANVAS
+//#define OFX_WINDOW_APP__FORCE_RESET_WINDOW_IF_ITS_OUT_OF_DESKTOP_CANVAS // TODO: Should be improved..
 #define OFX_WINDOW_APP__BAR_HEIGHT 45 // TODO: Probably fits on Windows platform only.
 //#define OFX_WINDOW_APP__SIZE_SECURE_GAP_INISDE_SCREEN 18 //TODO: To avoid that window border it's outside screen monitor.
 
 //----
 
 #include <GLFW/glfw3.h> // Required for displays debug and window callbacks.
+
+//--
 
 //TODO: Should add more approaches if we find some problems:
 // - Too many files write during window changes (requires delayed saving)
@@ -156,7 +157,7 @@ public:
 	// Default will be 60 fps if not defined!
 	//--------------------------------------------------------------
 	void setFrameRate(float f) {
-		ofLogNotice("ofxWindowApp:setFrameRate") << f;
+		ofLogNotice("ofxWindowApp:setFrameRate(f)") << f;
 		fpsTarget = f;
 		ofSetFrameRate(fpsTarget);
 		saveSettings();
@@ -164,7 +165,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setVerticalSync(bool b) {
-		ofLogNotice("ofxWindowApp:setVerticalSync") << b;
+		ofLogNotice("ofxWindowApp:setVerticalSync(b)") << b;
 		bvSync = b;
 		ofSetVerticalSync(bvSync);
 		saveSettings();
@@ -172,7 +173,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setFullScreen(bool b) {
-		ofLogNotice("ofxWindowApp:setFullScreen") << b;
+		ofLogNotice("ofxWindowApp:setFullScreen(b)") << b;
 		if (b) {
 			ofSetFullscreen(true);
 			bIsFullScreen = true;
@@ -187,7 +188,7 @@ public:
 	// Disables auto saving. So json file will not be overwritten and reloaded as is in the next app session.
 	//--------------------------------------------------------------
 	void setDisableAutoSave(bool b) {
-		ofLogNotice("ofxWindowApp:setDisableAutoSave") << b;
+		ofLogNotice("ofxWindowApp:setDisableAutoSave(b)") << b;
 		bDisableAutoSave = b;
 		saveSettings();
 	}
@@ -196,7 +197,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setShowPerformanceAlways(bool b = true) { // Will display alert drop fps info ven when debug display disabled
-		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey") << b;
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey(b)") << b;
 		bShowInfoPerformanceAlways = b;
 		saveSettings();
 	}
@@ -206,7 +207,7 @@ public:
 public:
 	//--------------------------------------------------------------
 	void setEnableAllowQuitAppUsingEscapeKey(bool b) {
-		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey") << b;
+		ofLogNotice("ofxWindowApp:setEnableAllowQuitAppUsingEscapeKey(b)") << b;
 		ofSetEscapeQuitsApp(b);
 	}
 
@@ -215,18 +216,15 @@ public:
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	//--------------------------------------------------------------
 	void setToggleStayOnTop() {
-		ofLogNotice("ofxWindowApp:setToggleStayOnTop");
-		setStayOnTop(!bWindowStayOnTop);
+		ofLogNotice("ofxWindowApp:setToggleStayOnTop()");
+		setStayOnTop(!bStayOnTop.get());
 	}
 
 	//--------------------------------------------------------------
 	void setStayOnTop(bool b) {
-		ofLogNotice("ofxWindowApp:setStayOnTop") << b;
-		bWindowStayOnTop = b;
+		ofLogNotice("ofxWindowApp:setStayOnTop(b)") << b;
+		bStayOnTop = b;
 	}
-
-private:
-	bool bIsWindowStayOnTop = false;
 #endif
 
 	//--
@@ -392,31 +390,36 @@ public:
 	//----
 
 	// Params
-
+private:
 	void setupParams();
 
-	//ofParameterGroup params{ "ofxWindowApp" };
 	//TODO: To avoid ofxSerializer. Use one only groupParam instead.
+//public:
+	//ofParameterGroup params{ "ofxWindowApp" };
 
+private:
 	ofParameterGroup paramsExtra { "Extra" };
 	ofParameterGroup paramsWindow { "Window" };
 	ofParameterGroup paramsSession { "Session" };
 
-	ofParameter<bool> bvSync { "vSync", false };
-	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 144.f };
-	ofParameter<bool> bShowInfo { "ShowInfo", true };
-	ofParameter<bool> bShowInfoPerformanceAlways { "ShowInfoPerformanceAlways", true };
+public:
 	ofParameter<bool> bDisableAutoSave { "DisableAutoSave", false };
 	// Ignores next window modification.
-	// Kind of hardcoded position that will maintain on next app load.
-	ofParameter<bool> bKeys { "Keys", true }; // Enable keys by default
+	// Kind of fixed window settings (JSON) that will be maintained on next app load.
+	ofParameter<bool> bKeys { "Keys", true }; // Enable key commands by default
+	ofParameter<bool> bShowInfo { "ShowInfo", true };
+	ofParameter<bool> bShowInfoPerformanceAlways { "ShowInfoPerformanceAlways", true };
+
+	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 180.f };
+	ofParameter<bool> bvSync { "vSync", false };
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 public:
-	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
+	ofParameter<bool> bStayOnTop { "StayOnTop", false };
+private:
+	void doApplyStayOnTop();
 #endif
 
-private:
 	//----
 
 private:

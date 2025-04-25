@@ -11,7 +11,7 @@
 * Window **Size** (w, h). 
 * Window **Mode** (Windowed / Fullscreen).
 * Window **Target FPS** (vs real current **FPS**).
-* Window **vSync** state. 
+* Window **Vertical Sync** state. 
 * Easy change the app settings just by editing the **JSON file** (and restart app), instead of requiring edit the app code.
 * **Stay on Top** mode, easy **Console Window** disabler. (**Windows** only)
 * Window shape **Presets** with **Key commands** for squared, centered, default and common **Instagram** sizes.
@@ -28,19 +28,20 @@ i : Info & performance.
 
 SETTINGS
 f : Full screen / Windowed.  
-v : vSync state (On/Off).  
-t : Stay-on-top (Windows only). 
-l : Lock / Disable autosave.
+v : Vertical Sync state (On/Off).  
+t : Stay-on-top (Windows only yet). 
+l : Disable autosave (Lock).
 
 PRESETS
 c : Center Window.  
 q : Squared 800 x 800 px
 w : Squared width x width px
-1 : IGTV Cover Photo
-2 : IG Landscape Photo
-3 : IG Portrait
-4 : IG Story
-5 : IG Square
+INSTAGRAM
+1 : Cover Photo IGTV
+2 : Landscape Photo
+3 : Portrait
+4 : Story
+5 : Square
 BACKSPACE : Reset Default
 ```
 
@@ -84,12 +85,12 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 [
     {
         "position": {
-            "x": 154.0,
-            "y": 394.0
+            "x": -919.0,
+            "y": 851.0
         },
         "size": {
-            "height": 400,
-            "width": 400
+            "height": 800,
+            "width": 800
         },
         "window_mode": 0
     },
@@ -100,11 +101,11 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
                 "Keys": "1",
                 "ShowInfo": "1",
                 "ShowInfoPerformanceAlways": "1",
-                "WindowOnTop": "0"
+                "StayOnTop": "1"
             },
             "Window": {
-                "FpsTarget": "60",
-                "vSync": "0"
+                "FpsTarget": "144",
+                "vSync": "1"
             }
         }
     }

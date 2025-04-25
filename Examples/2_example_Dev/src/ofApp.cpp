@@ -5,8 +5,8 @@ void ofApp::setup() {
 	w.setup(&w);
 
 	// Customize
-	//	w.setFrameRate(240);
-	//	w.setFrameRate(0); // Max possible, to display refresh freq if VSYNC_ON, or unlocked if VSYNC_OFF.
+	w.setFrameRate(144);
+	//w.setFrameRate(0); // Max possible or unlocked if VSYNC_OFF, or up to display refresh freq if VSYNC_ON. 
 
 	// Force show info
 	w.bShowInfo = true;
@@ -14,7 +14,8 @@ void ofApp::setup() {
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	// Flash bg 200ms when window changed
+	// Debug feedback when window settings changes:
+	// Flash bg green during 200ms
 	static bool bFlash = 0;
 	if (w.isChanged()) {
 		bFlash = 1;
@@ -23,8 +24,6 @@ void ofApp::draw() {
 	if (bFlash && ofGetElapsedTimeMillis() - tLast > 200) {
 		bFlash = 0;
 	}
-
-	// debug feedback when changes
 	if (bFlash)
 		ofClear(ofColor::green);
 	else
