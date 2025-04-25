@@ -12,32 +12,32 @@ namespace ofxWindowApp {
 *	App window tools to handle position, settings or name.
 */
 
-// Get the OF project file path name and set to the window title.
-//--------------------------------------------------------------
-inline string getProjectName() {
-	of::filesystem::path path = ofToDataPath("", true);
-	string s = (path.parent_path().parent_path().filename()).string();
-	return s;
-}
-
-//--------------------------------------------------------------
-inline void setWindowTitleAsProjectName() {
-	ofSetWindowTitle(getProjectName());
-}
-//--------------------------------------------------------------
-inline void setWindowTitleAsProjectNameWithFPS() {
-	string s = "";
-	s = getProjectName();
-	string sfps = ofToString(ofGetFrameRate(), 1);
-	s = s + " - " + sfps + " FPS";
-	ofSetWindowTitle(s);
-}
-
-//--------------------------------------------------------------
-inline void setWindowMaxFrameRate() {
-	ofSetFrameRate(0);
-	ofSetVerticalSync(false);
-}
+//// Get the OF project file path name and set to the window title.
+////--------------------------------------------------------------
+//inline string getProjectName() {
+//	of::filesystem::path path = ofToDataPath("", true);
+//	string s = (path.parent_path().parent_path().filename()).string();
+//	return s;
+//}
+//
+////--------------------------------------------------------------
+//inline void setWindowTitleAsProjectName() {
+//	ofSetWindowTitle(getProjectName());
+//}
+////--------------------------------------------------------------
+//inline void setWindowTitleAsProjectNameWithFPS() {
+//	string s = "";
+//	s = getProjectName();
+//	string sfps = ofToString(ofGetFrameRate(), 1);
+//	s = s + " - " + sfps + " FPS";
+//	ofSetWindowTitle(s);
+//}
+//
+////--------------------------------------------------------------
+//inline void setWindowMaxFrameRate() {
+//	ofSetFrameRate(0);
+//	ofSetVerticalSync(false);
+//}
 
 //--------------------------------------------------------------
 inline string setWindowShapeSquared(int sz = 800) {
@@ -110,8 +110,8 @@ inline string setWindowShapeForInstagram(size_t i = 0, bool bForcePos = false) {
 inline string keyPressedToSetWindowShape(int key) {
 	//s += "\n";
 	//s += "PRESETS\n";
-	//s += "q : Squared 800 x 800\n";
-	//s += "w : Squared W x W\n";
+	//s += "q : Squared 800 x 800 px\n";
+	//s += "w : Squared Width x Width px\n";
 	//s += "c : Center\n";
 	//s += "1 : IGTV Cover Photo\n";
 	//s += "2 : IG Landscape Photo\n";
@@ -160,16 +160,16 @@ inline string keyPressedToSetWindowShape(int key) {
 
 enum SURFING_LAYOUT {
 	SURFING_LAYOUT_TOP_LEFT = 0,
-	SURFING_LAYOUT_TOP_CENTER,
-	SURFING_LAYOUT_TOP_RIGHT,
-
-	SURFING_LAYOUT_CENTER_LEFT,
-	SURFING_LAYOUT_CENTER,
-	SURFING_LAYOUT_CENTER_RIGHT,
-
-	SURFING_LAYOUT_BOTTOM_LEFT,
-	SURFING_LAYOUT_BOTTOM_CENTER,
-	SURFING_LAYOUT_BOTTOM_RIGHT,
+//	SURFING_LAYOUT_TOP_CENTER,
+//	SURFING_LAYOUT_TOP_RIGHT,
+//
+//	SURFING_LAYOUT_CENTER_LEFT,
+//	SURFING_LAYOUT_CENTER,
+//	SURFING_LAYOUT_CENTER_RIGHT,
+//
+//	SURFING_LAYOUT_BOTTOM_LEFT,
+//	SURFING_LAYOUT_BOTTOM_CENTER,
+//	SURFING_LAYOUT_BOTTOM_RIGHT,
 
 	SURFING_LAYOUT_AMOUNT
 };
@@ -297,41 +297,41 @@ inline ofRectangle getBBBitmapStringBox(string s, int x = 0, int y = 0) {
 	return bb2;
 }
 
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToCenterLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = xpad;
-	int y = ofGetHeight() / 2 - bb.getHeight() / 2;
-	glm::vec2 p { x, y };
-	return p;
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToCenter(string s) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = ofGetWidth() / 2 - bb.getWidth() / 2;
-	int y = ofGetHeight() / 2 - bb.getHeight() / 2;
-	glm::vec2 p { x, y };
-	return p;
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToCenterRight(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = ofGetWidth() - bb.getWidth() - xpad;
-	int y = ofGetHeight() / 2 - bb.getHeight() / 2;
-	glm::vec2 p { x, y };
-	return p;
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToTopCenter(string s, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = ofGetWidth() / 2 - bb.getWidth() / 2;
-	int y = ypad;
-	glm::vec2 p { x, y };
-	return p;
-}
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToCenterLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = xpad;
+//	int y = ofGetHeight() / 2 - bb.getHeight() / 2;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToCenter(string s) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = ofGetWidth() / 2 - bb.getWidth() / 2;
+//	int y = ofGetHeight() / 2 - bb.getHeight() / 2;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToCenterRight(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = ofGetWidth() - bb.getWidth() - xpad;
+//	int y = ofGetHeight() / 2 - bb.getHeight() / 2;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToTopCenter(string s, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = ofGetWidth() / 2 - bb.getWidth() / 2;
+//	int y = ypad;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
 
 //--------------------------------------------------------------
 inline glm::vec2 getBitmapStringBoxPosToTopLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
@@ -342,41 +342,41 @@ inline glm::vec2 getBitmapStringBoxPosToTopLeft(string s, int xpad = SURFING__PA
 	return p;
 }
 
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToTopRight(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = ofGetWidth() - bb.getWidth() - xpad;
-	int y = ypad;
-	glm::vec2 p { x, y };
-	return p;
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToBottomLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = xpad;
-	int y = ofGetHeight() - bb.getHeight() - ypad;
-	glm::vec2 p { x, y };
-	return p;
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToBottomCenter(string s, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = ofGetWidth() / 2 - bb.getWidth() / 2;
-	int y = ofGetHeight() - bb.getHeight() - ypad;
-	glm::vec2 p { x, y };
-	return p;
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToBottomRight(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
-	auto bb = getBBBitmapStringBox(s, 0, 0);
-	int x = ofGetWidth() - bb.getWidth() - xpad;
-	int y = ofGetHeight() - bb.getHeight() - ypad;
-	glm::vec2 p { x, y };
-	return p;
-}
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToTopRight(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = ofGetWidth() - bb.getWidth() - xpad;
+//	int y = ypad;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToBottomLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = xpad;
+//	int y = ofGetHeight() - bb.getHeight() - ypad;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToBottomCenter(string s, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = ofGetWidth() / 2 - bb.getWidth() / 2;
+//	int y = ofGetHeight() - bb.getHeight() - ypad;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToBottomRight(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
+//	auto bb = getBBBitmapStringBox(s, 0, 0);
+//	int x = ofGetWidth() - bb.getWidth() - xpad;
+//	int y = ofGetHeight() - bb.getHeight() - ypad;
+//	glm::vec2 p { x, y };
+//	return p;
+//}
 
 //--------------------------------------------------------------
 inline string getLayoutName(SURFING_LAYOUT layout) {
@@ -386,43 +386,43 @@ inline string getLayoutName(SURFING_LAYOUT layout) {
 	case SURFING_LAYOUT_TOP_LEFT:
 		s = "TOP LEFT";
 		break;
-	case SURFING_LAYOUT_TOP_CENTER:
-		s = "TOP CENTER";
-		break;
-	case SURFING_LAYOUT_TOP_RIGHT:
-		s = "TOP RIGHT";
-		break;
-
-	case SURFING_LAYOUT_CENTER_LEFT:
-		s = "CENTER LEFT";
-		break;
-	case SURFING_LAYOUT_CENTER:
-		s = "CENTER";
-		break;
-	case SURFING_LAYOUT_CENTER_RIGHT:
-		s = "CENTER RIGHT";
-		break;
-
-	case SURFING_LAYOUT_BOTTOM_LEFT:
-		s = "BOTTOM LEFT";
-		break;
-	case SURFING_LAYOUT_BOTTOM_CENTER:
-		s = "BOTTOM CENTER";
-		break;
-	case SURFING_LAYOUT_BOTTOM_RIGHT:
-		s = "BOTTOM RIGHT";
-		break;
-
-		//--
-
-#ifdef SURFING__STRING_BOX__INCLUDE_EXTRA_LAYOUTS
-	case SURFING_LAYOUT_MOUSE_POS:
-		s = "MOUSE POS";
-		break;
-	case SURFING_LAYOUT_MOUSE_POS_CENTER:
-		s = "MOUSE POS C";
-		break;
-#endif
+//	case SURFING_LAYOUT_TOP_CENTER:
+//		s = "TOP CENTER";
+//		break;
+//	case SURFING_LAYOUT_TOP_RIGHT:
+//		s = "TOP RIGHT";
+//		break;
+//
+//	case SURFING_LAYOUT_CENTER_LEFT:
+//		s = "CENTER LEFT";
+//		break;
+//	case SURFING_LAYOUT_CENTER:
+//		s = "CENTER";
+//		break;
+//	case SURFING_LAYOUT_CENTER_RIGHT:
+//		s = "CENTER RIGHT";
+//		break;
+//
+//	case SURFING_LAYOUT_BOTTOM_LEFT:
+//		s = "BOTTOM LEFT";
+//		break;
+//	case SURFING_LAYOUT_BOTTOM_CENTER:
+//		s = "BOTTOM CENTER";
+//		break;
+//	case SURFING_LAYOUT_BOTTOM_RIGHT:
+//		s = "BOTTOM RIGHT";
+//		break;
+//
+//		//--
+//
+//#ifdef SURFING__STRING_BOX__INCLUDE_EXTRA_LAYOUTS
+//	case SURFING_LAYOUT_MOUSE_POS:
+//		s = "MOUSE POS";
+//		break;
+//	case SURFING_LAYOUT_MOUSE_POS_CENTER:
+//		s = "MOUSE POS C";
+//		break;
+//#endif
 
 	default:
 		s = "NONE";
@@ -442,35 +442,36 @@ inline glm::vec2 getBitmapStringBoxPosToLayout(string s, SURFING_LAYOUT layout) 
 	if (layout == SURFING_LAYOUT_TOP_LEFT) {
 		// top-left
 		p = getBitmapStringBoxPosToTopLeft(s);
-	} else if (layout == SURFING_LAYOUT_TOP_CENTER) {
-		// top-center
-		p = getBitmapStringBoxPosToTopCenter(s);
-	} else if (layout == SURFING_LAYOUT_TOP_RIGHT) {
-		// top-right
-		p = getBitmapStringBoxPosToTopRight(s);
 	}
-
-	else if (layout == SURFING_LAYOUT_CENTER_LEFT) {
-		// center-left
-		p = getBitmapStringBoxPosToCenterLeft(s);
-	} else if (layout == SURFING_LAYOUT_CENTER) {
-		// center-center
-		p = getBitmapStringBoxPosToCenter(s);
-	} else if (layout == SURFING_LAYOUT_CENTER_RIGHT) {
-		// center-right
-		p = getBitmapStringBoxPosToCenterRight(s);
-	}
-
-	else if (layout == SURFING_LAYOUT_BOTTOM_LEFT) {
-		// bottom-left
-		p = getBitmapStringBoxPosToBottomLeft(s);
-	} else if (layout == SURFING_LAYOUT_BOTTOM_CENTER) {
-		// bottom-center
-		p = getBitmapStringBoxPosToBottomCenter(s);
-	} else if (layout == SURFING_LAYOUT_BOTTOM_RIGHT) {
-		// bottom-right
-		p = getBitmapStringBoxPosToBottomRight(s);
-	}
+//	else if (layout == SURFING_LAYOUT_TOP_CENTER) {
+//		// top-center
+//		p = getBitmapStringBoxPosToTopCenter(s);
+//	} else if (layout == SURFING_LAYOUT_TOP_RIGHT) {
+//		// top-right
+//		p = getBitmapStringBoxPosToTopRight(s);
+//	}
+//
+//	else if (layout == SURFING_LAYOUT_CENTER_LEFT) {
+//		// center-left
+//		p = getBitmapStringBoxPosToCenterLeft(s);
+//	} else if (layout == SURFING_LAYOUT_CENTER) {
+//		// center-center
+//		p = getBitmapStringBoxPosToCenter(s);
+//	} else if (layout == SURFING_LAYOUT_CENTER_RIGHT) {
+//		// center-right
+//		p = getBitmapStringBoxPosToCenterRight(s);
+//	}
+//
+//	else if (layout == SURFING_LAYOUT_BOTTOM_LEFT) {
+//		// bottom-left
+//		p = getBitmapStringBoxPosToBottomLeft(s);
+//	} else if (layout == SURFING_LAYOUT_BOTTOM_CENTER) {
+//		// bottom-center
+//		p = getBitmapStringBoxPosToBottomCenter(s);
+//	} else if (layout == SURFING_LAYOUT_BOTTOM_RIGHT) {
+//		// bottom-right
+//		p = getBitmapStringBoxPosToBottomRight(s);
+//	}
 
 	//--
 
@@ -502,21 +503,21 @@ inline ofRectangle getBBBitmapStringBoxToLayout(string s, SURFING_LAYOUT layout)
 	glm::vec2 p = getBitmapStringBoxPosToLayout(s, layout);
 	return getBBBitmapStringBox(s, p.x, p.y);
 }
-//--------------------------------------------------------------
-inline ofRectangle getBBBitmapStringBoxToLayout(string s, int layout) {
-	return getBBBitmapStringBoxToLayout(s, (SURFING_LAYOUT)layout);
-}
-
-//--------------------------------------------------------------
-inline glm::vec2 getBitmapStringBoxPosToLayout(string s, int layout) {
-	return getBitmapStringBoxPosToLayout(s, (SURFING_LAYOUT)layout);
-}
-
-//--------------------------------------------------------------
-inline void ofDrawBitmapStringBox(string s, SURFING_LAYOUT layout = SURFING_LAYOUT_TOP_LEFT) {
-	glm::vec2 p = getBitmapStringBoxPosToLayout(s, layout);
-	ofDrawBitmapStringBox(s, p.x, p.y);
-}
+////--------------------------------------------------------------
+//inline ofRectangle getBBBitmapStringBoxToLayout(string s, int layout) {
+//	return getBBBitmapStringBoxToLayout(s, (SURFING_LAYOUT)layout);
+//}
+//
+////--------------------------------------------------------------
+//inline glm::vec2 getBitmapStringBoxPosToLayout(string s, int layout) {
+//	return getBitmapStringBoxPosToLayout(s, (SURFING_LAYOUT)layout);
+//}
+//
+////--------------------------------------------------------------
+//inline void ofDrawBitmapStringBox(string s, SURFING_LAYOUT layout = SURFING_LAYOUT_TOP_LEFT) {
+//	glm::vec2 p = getBitmapStringBoxPosToLayout(s, layout);
+//	ofDrawBitmapStringBox(s, p.x, p.y);
+//}
 //--------------------------------------------------------------
 inline void ofDrawBitmapStringBox(string s, int layout /* = 0*/) {
 	ofDrawBitmapStringBox(s, (SURFING_LAYOUT)layout);

@@ -14,6 +14,9 @@
 
 #define OFX_WINDOW_APP__DEVELOP_DEBUG // Enable some more deep testing displaying info.
 
+//#define OFX_WINDOW_APP__USE_OFX_WATCHER // Enable file watcher to reload JSON file when changed:
+// Uses https://github.com/nariakiiwatani/ofxWatcher and requires enable the above directive.
+
 //----
 
 #define OFX_WINDOW_APP__USE_STATIC
@@ -127,7 +130,11 @@ private:
 #ifdef OFX_WINDOW_APP__USE_TIMED_SAVER
 	float timeWhenToSaveFlag;
 #endif
-
+	
+#ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
+	bool bDisableCallback_FileChanged=false;
+#endif
+	
 	//--
 
 	void drawInfo();
@@ -255,12 +262,16 @@ private:
 private:
 	// Path settings
 	// This is to folder all files to avoid mixing with other add-ons data
-	string path_folder;
-	string path_filename;
+	string path_folder; // Folder
+	string path_filename; // File
+	string path_settings; // Full path
 
 	void folderCheckAndCreate(string _path); // Check if required create folder or already exist
+	
+	//--
 
 //public:
+	//TODO: Can't be used yet bc static instance mode must fix setting before setup(*) is called..
 	//// Custom path
 	////--------------------------------------------------------------
 	//void setPathFolder(string s) {
@@ -271,6 +282,10 @@ private:
 	//void setPathFilename(string s) {
 	//	path_filename = s;
 	//}
+	
+	//	void setPathSettings(string s) {
+	//		path_setttings = s;
+	//	}
 
 	//--
 
@@ -319,10 +334,12 @@ public:
 	
 	void setEnableKeys(bool b) {
 		bKeys = b;
+		saveSettings();
 	}
 	
 	void setToggleEnableKeys() {
 		bKeys = !bKeys;
+		saveSettings();
 	}
 
 	//--
@@ -348,8 +365,6 @@ private:
 	//--
 
 private:
-	bool bKeys = true; // Enable keys by default
-
 	bool bDoneSetup = false; // Flags that setup() is done
 	bool bDoneStartup = false; // Flags that startup() is done
 
@@ -391,6 +406,7 @@ public:
 	ofParameter<bool> bDisableAutoSave { "DisableAutoSave", false };
 	// Ignores next window modification.
 	// Kind of hardcoded position that will maintain on next app load.
+	ofParameter<bool> bKeys {"Keys",true}; // Enable keys by default
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 //#ifdef TARGET_WIN32
@@ -440,8 +456,8 @@ private:
 	void drawDebug();
 
 	void windowChanged(); // Group redirect all other callbacks related to window resized and window moved
-	//bool bFlagWindowChanged = false; // Flags workaround trying to call apply-settings to app window methods but delayed
-
+	//bool bFlagWindowChanged = false; //TODO: workaround OF/GLFW window management bugs. Get/apply delayed...
+	
 	//--------------------------------------------------------------
 
 	// Debug system monitors

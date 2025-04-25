@@ -7,7 +7,6 @@
 **openFrameworks** addon to **auto store** and **recall** the basic **App Window state/settings**:
 
 ## FEATURES
-
 * Window **Position** (x, y). 
 * Window **Size** (w, h). 
 * Window **Mode** (Windowed / Fullscreen).
@@ -20,7 +19,6 @@
 * Optional **custom TTF font** for debug display.
 
 ## KEY COMMANDS
-
 ```
 d : Show debug & monitors.  
 i : Show info & performance.  
@@ -31,8 +29,8 @@ l : Lock / Disable autosave.
 
 PRESETS
 c : Center Window.  
-q : Squared 800 x 800
-w : Squared w x w
+q : Squared 800 x 800 px
+w : Squared width x width px
 1 : IGTV Cover Photo
 2 : IG Landscape Photo
 3 : IG Portrait
@@ -42,9 +40,7 @@ BACKSPACE : Reset Default
 ```
 
 ## WHY?
-
-_Not only for the `final user` but also for the `coder`. Usually when you work on an `OF project` you want "to focus on your code updates", but you need to compile many times and move manually the app window out of your IDE window several times..._  
-_Using this **addon** you can forget about this "annoying behaviour", as the **App Window will be opened in the same position, size and some settings too**._  
+_Not only for the `final user` but also for the `coder`. Usually when you work on an `OF project` you want "to focus on your code updates", but you need to compile many times and move manually the app window out of your IDE window several times... Using this **addon** you can forget about this "annoying behaviour", as the **App Window will be opened in the same position, size and some settings too**._  
 
 ## USAGE
 
@@ -76,7 +72,7 @@ ofApp::setup()
 ```
 Nothing more is required on `update()`,`draw()` or `exit()`!  
 All settings can be configured also using `Key Commands`.  
-The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any changes**.  
+The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any settings changes**.  
 
 The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like this:  
 ```.json

@@ -1,5 +1,9 @@
 #include "ofxWindowApp.h"
 
+#ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
+#include "ofxWatcher.h"
+#endif
+
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
 
@@ -84,7 +88,8 @@ void ofxWindowApp::setup() {
 	// bin/data/ofxWindowApp/ofxWindowApp.json
 	path_folder = "ofxWindowApp";
 	path_filename = "ofxWindowApp.json";
-
+	path_settings = path_folder + "/" + path_filename;
+	
 	//--
 
 	// Custom font
@@ -94,7 +99,7 @@ void ofxWindowApp::setup() {
 		bool b = font.load(_path + "GeistMono-Bold.ttf", fontSize);
 		if (!b) b = font.load(_path + "Geist-Bold.ttf", fontSize);
 		if (!b) b = font.load(_path + "JetBrainsMono-Bold.ttf", fontSize);
-		if (!b) ofLogError("ofxWindowApp:setup()") << "Error loading ttf font file";
+		if (!b) ofLogWarning("ofxWindowApp:setup()") << "Error loading ttf font file. Will use internal OF bitmap font.";
 	}
 
 	//--
@@ -132,6 +137,7 @@ void ofxWindowApp::setupParams() {
 	paramsSession.add(bShowInfo);
 	paramsSession.add(bShowInfoPerformanceAlways);
 	paramsSession.add(bDisableAutoSave);
+	paramsSession.add(bKeys);
 
 	//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
@@ -159,14 +165,40 @@ void ofxWindowApp::startup() {
 	// Load
 	loadSettings();
 
-	// BUG: Redo trick workaround bc sometimes first one is not enough
-	ofLogNotice("ofxWindowApp:startup()") << "Fix: call again to skip problems.";
+	//TODO: Workaround OF/GLFW window management bugs.
+	// BUG: Redo trick workaround bc sometimes first one is not enough...
+	ofLogNotice("ofxWindowApp:startup()") << "Fix workaround: Call load again to fix problems.";
 	loadSettings();
+	
+	//--
+		
+#ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
+//	// -------- loader --------
+//	{
+//		ofxWatchPath("path_settings", ofLoadJson, [](const ofJson &json, const std::filesystem::path &path) {
+//			ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: " << path << ":" << json.dump(2) << endl;
+//		});
+//	}
+	
+//	ofxWatchPath(path_settings, [](const std::filesystem::path &str) {
+//		if (!bDoneSetup) return;
+//		
+//		ofLogNotice("ofxWindowApp:startup()") << "ofxWatchPath:JSON settings file changed: " << str;
+////		if(bDisableCallback_FileChanged){
+////			ofLogNotice("ofxWindowApp:startup()") << "SKIP loading settings file.";
+////			return;
+////		}
+////		// Load
+////		bDisableCallback_FileChanged=true; // Flag bypass callback to avoid re load now after save (bc file will change).
+////		loadSettings();
+////		bDisableCallback_FileChanged=false;
+//	});
+#endif
 
 	//--
 
 	bDoneStartup = true;
-	ofLogVerbose("ofxWindowApp:startup()") << "----------------------startup()--> END";
+	ofLogNotice("ofxWindowApp:startup()") << "----------------------startup()--> END";
 }
 
 //----
@@ -197,32 +229,33 @@ void ofxWindowApp::windowMoved(GLFWwindow * window, int xpos, int ypos) {
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(ofResizeEventArgs & resize) {
-	ofLogNotice("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
+	ofLogVerbose("ofxWindowApp:windowMoved(resize)") << ofToString(resize.width) << ", " << ofToString(resize.height);
 
 	this->windowChanged();
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowResized(int w, int h) {
-	ofLogNotice("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
+	ofLogVerbose("ofxWindowApp:windowMoved(w, h)") << ofToString(w) << ", " << ofToString(h);
 
 	this->windowChanged();
 }
 
 //--------------------------------------------------------------
 void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to this method!
-	//if (bDisableAutoSave) {
-	//	ofLogNotice("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSaveLock) > FrameNum: " << ofGetFrameNum();
-	//	return;
-	//}
+	// Skip saving when auto save is disabled. Restart app will reload JSON unmodified.
+	if (bDisableAutoSave) {
+		ofLogVerbose("ofxWindowApp:windowChanged()") << "SKIP! (bDisableAutoSave)                       > FrameNum: " << ofGetFrameNum();
+		return;
+	}
 
-	// ignored changes when not ended setup, startup processes or is forced flagged to bypass callbacks
+	// Will gnores window changes when not ended setup or startup processes, or if its forced being flagged to bypass callbacks!
 	if (!bDoneSetup) {
-		ofLogVerbose("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneSetup) > FrameNum: " << ofGetFrameNum();
+		ofLogVerbose("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneSetup)                           > FrameNum: " << ofGetFrameNum();
 		return;
 	}
 	if (!bDoneStartup) {
-		ofLogVerbose("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneStartup) > FrameNum: " << ofGetFrameNum();
+		ofLogVerbose("ofxWindowApp:windowChanged()") << "SKIP! (!bDoneStartup)                         > FrameNum: " << ofGetFrameNum();
 		return;
 	}
 
@@ -231,13 +264,13 @@ void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to th
 		return;
 	}
 
-	ofLogNotice("ofxWindowApp:windowChanged()") << "FrameNum: " << ofGetFrameNum();
+	ofLogNotice("ofxWindowApp:windowChanged()");
 
 	doSetWindowSettingsFromAppWindow(); // Get raw values/states from the app window to windowSettings
 
 	bFlagToSave = true; // Flag to save json on next frame
 
-	//bFlagWindowChanged = true;
+	//bFlagWindowChanged = true; //TODO: Workaround OF/GLFW window management bugs. Get/apply delayed...
 
 #ifdef OFX_WINDOW_APP__USE_TIMED_SAVER
 	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
@@ -321,6 +354,26 @@ void ofxWindowApp::update(ofEventArgs & args) {
 //--------------------------------------------------------------
 void ofxWindowApp::draw(ofEventArgs & args) {
 	fpsReal = ofGetFrameRate();
+	
+	//--
+
+	// Layouts Top/Bottom
+	if(bShowInfo||bShowInfoPerformanceAlways){
+		if (positionLayout == DEBUG_POSITION_BOTTOM) {
+			if (font.isLoaded()) {
+				previewY = ofGetWindowHeight() - fontSize + 5;
+			} else {
+				previewX = 10;
+				previewY = ofGetWindowHeight() - 10;
+			}
+		} else if (positionLayout == DEBUG_POSITION_TOP) {
+			if (font.isLoaded()) {
+				previewY = fontSize + 4;
+			} else {
+				previewY = 15;
+			}
+		}
+	}
 
 	//--
 
@@ -376,9 +429,8 @@ void ofxWindowApp::saveSettingsAfterRefresh() {
 //--------------------------------------------------------------
 void ofxWindowApp::saveSettings(bool bSlient) {
 	ofLogVerbose("ofxWindowApp:saveSettings()") << "----------------------saveSettings() <--BEGIN";
-
-	string path = path_folder + "/" + path_filename;
-	ofLogNotice("ofxWindowApp:saveSettings()") << path;
+	
+	ofLogNotice("ofxWindowApp:saveSettings()") << path_settings;
 
 	//--
 
@@ -390,7 +442,6 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	ofLogVerbose("ofxWindowApp:saveSettings()") << "Ready to save `windowSettings`...";
 
 	ofxSerializer::ofxWindowApp::to_json(jWindowSettings, windowSettings);
-
 	ofSerialize(jExtra, paramsExtra);
 
 	//--
@@ -403,15 +454,17 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	// Check if we need to create data folder first
 	folderCheckAndCreate(path_folder);
+//	folderCheckAndCreate(path_settings);//TODO: Should use path without filename?
 
 	// Log
 	logSettings();
 
 	// Save file
-	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl
-															  << data.dump(4);
-	ofSavePrettyJson(path, data);
-
+	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl<< data.dump(4);
+	bDisableCallback_FileChanged=true; // Flag bypass callback to avoid re load now after save (bc file will change).
+	ofSavePrettyJson(path_settings, data);
+	bDisableCallback_FileChanged=false;
+	
 	//--
 
 	bFlagShowFeedbackDoneSaved = true;
@@ -423,20 +476,17 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 void ofxWindowApp::loadSettings() {
 	ofLogVerbose("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings() <--BEGIN";
 
-	string path = path_folder + "/" + path_filename;
-
-	ofFile file(path);
+	ofFile file(path_settings);
 	bool bFileExist = file.exists();
 	if (bFileExist) {
-		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File: " << path;
+		ofLogNotice("ofxWindowApp:loadFileSettings()") << "File: " << path_settings;
 
 		//--
 
 		// Load settings in one file
 		ofJson data;
-		data = ofLoadJson(path);
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n"
-														<< data.dump(4);
+		data = ofLoadJson(path_settings);
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n" << data.dump(4);
 
 		//--
 
@@ -450,18 +500,14 @@ void ofxWindowApp::loadSettings() {
 			// Recall both paramsExtra groups
 			ofDeserialize(jExtra, paramsExtra);
 
-			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n"
-															<< jWindowSettings.dump(4);
-			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n"
-															<< ofToString(paramsExtra);
+			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tSettings: \n"<< jWindowSettings.dump(4);
+			ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\n\tExtras: \n"<< ofToString(paramsExtra);
 		} else {
 			ofLogError("ofxWindowApp:loadFileSettings()") << "ERROR on data[] size = " << ofToString(data.size());
 		}
 
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n"
-														<< jWindowSettings;
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"
-														<< jExtra;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tWindow: \n"<< jWindowSettings;
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "\tExtras: \n"<< jExtra;
 
 		//--
 
@@ -512,10 +558,6 @@ void ofxWindowApp::loadSettings() {
 
 		ofLogNotice("ofxWindowApp:loadFileSettings()") << "Done load settings!";
 
-		//		// Log
-		//		ofLogNotice("ofxWindowApp:loadFileSettings()") << "PRE";
-		//		logSettings();
-
 		//--
 
 		// Bypass windowChanged callbacks (to avoid save json file again)
@@ -523,10 +565,6 @@ void ofxWindowApp::loadSettings() {
 		doApplyWindowSettings();
 		doApplyWindowExtraSettings();
 		bDisableCallback_windowMovedOrResized = false;
-
-		//		// Log
-		//		ofLogNotice("ofxWindowApp:loadFileSettings()") << "POST";
-		//		logSettings();
 
 		//TODO: CHECK IF DIFFERS AND FORCE WINDOW TO JSON SETTINGS!
 		// Then we can fixit here manually.
@@ -548,7 +586,7 @@ void ofxWindowApp::loadSettings() {
 	#endif
 #endif
 	} else {
-		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path;
+		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path_settings;
 	}
 	ofLogVerbose("ofxWindowApp:loadFileSettings()") << "----------------------loadSettings()--> END";
 }
@@ -725,24 +763,6 @@ void ofxWindowApp::drawInfo() {
 	//str += " " + ofToString(mod_CONTROL ? "CTRL" : "    ");
 	//str += " " + ofToString(mod_SHIFT ? "SHIFT" : "     ");
 	//str += " " + ofToString(mod_COMMAND ? "CMD" : "   ");
-
-	//--
-
-	// Layouts top/bottom
-	if (positionLayout == DEBUG_POSITION_BOTTOM) {
-		if (font.isLoaded()) {
-			previewY = ofGetWindowHeight() - fontSize + 5;
-		} else {
-			previewX = 10;
-			previewY = ofGetWindowHeight() - 10;
-		}
-	} else if (positionLayout == DEBUG_POSITION_TOP) {
-		if (font.isLoaded()) {
-			previewY = fontSize + 4;
-		} else {
-			previewY = 15;
-		}
-	}
 
 	//--
 
@@ -1152,20 +1172,20 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 			// Make app always on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-			ofLogNotice("ofxWindowApp") << "Set on top Enabled";
+			ofLogNotice("ofxWindowApp") << "Set Stay on top: Enabled";
 
 		} else {
 			// Disable make app always on top
 			HWND W = GetActiveWindow();
 			SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
-			ofLogNotice("ofxWindowApp") << "Set on top Disabled";
+			ofLogNotice("ofxWindowApp") << "Set Stay on top: Disabled";
 		}
 		bIsWindowStayOnTop = bWindowStayOnTop;
 	#elif defined(TARGET_OSX)
 		//TODO:
-		ofLogError("ofxWindowApp") << "Not implemented for OSX platform. Only TARGET_WIN32 yet!";
+		ofLogWarning("ofxWindowApp") << "(bWindowStayOnTop) Not implemented for OSX platform. Only TARGET_WIN32 yet!";
 	#else
-		ofLogError("ofxWindowApp") << "Not implemented for current platform. Only TARGET_WIN32 yet!";
+		ofLogWarning("ofxWindowApp") << "(bWindowStayOnTop) Not implemented for current platform. Only TARGET_WIN32 yet!";
 	#endif
 		return;
 	}
