@@ -264,7 +264,7 @@ void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to th
 		return;
 	}
 
-	ofLogNotice("ofxWindowApp:windowChanged()");
+	ofLogVerbose("ofxWindowApp:windowChanged()");
 
 	doSetWindowSettingsFromAppWindow(); // Get raw values/states from the app window to windowSettings
 
@@ -358,7 +358,8 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 	//--
 
 	// Layouts Top/Bottom
-	if(bShowInfo||bShowInfoPerformanceAlways){
+	if(bShowInfo||bShowInfoPerformanceAlways)
+	{
 		if (positionLayout == DEBUG_POSITION_BOTTOM) {
 			if (font.isLoaded()) {
 				previewY = ofGetWindowHeight() - fontSize + 5;
@@ -461,10 +462,15 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 
 	// Save file
 	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl<< data.dump(4);
+	
+#ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
 	bDisableCallback_FileChanged=true; // Flag bypass callback to avoid re load now after save (bc file will change).
 	ofSavePrettyJson(path_settings, data);
 	bDisableCallback_FileChanged=false;
-	
+#else
+	ofSavePrettyJson(path_settings, data);
+#endif
+
 	//--
 
 	bFlagShowFeedbackDoneSaved = true;
@@ -597,9 +603,9 @@ void ofxWindowApp::drawDebug() {
 	// Window title
 	string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
 	string tp = "PosDesktop:" + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
-	string tpd = "(PosDisplay:" + ofToString(getWindowPositionAtDisplay().x) + "," + ofToString(getWindowPositionAtDisplay().y) + ")";
-	string t = "ofxWindowApp  DEBUG\t\t";
-	t += ts + "\t" + tp + "\t" + tpd;
+	string tpd = "PosDisplay:" + ofToString(getWindowPositionAtDisplay().x) + "," + ofToString(getWindowPositionAtDisplay().y);
+	string t = "ofxWindowApp  DEBUG";
+	t = t + "\t\t " + ts + "\t " + tp + "\t " + tpd;
 	ofSetWindowTitle(t);
 #endif
 
@@ -1212,6 +1218,7 @@ glm::vec2 ofxWindowApp::getWindowPositionAtDisplay() {
 	glm::vec2 p(-1, -1);
 
 	int index = getDisplayIndexForWindow();
+	
 	if (index == -1) {
 		ofLogError("ofxWindowApp:getWindowPositionAtDisplay()") << "Display index not idetified";
 		return p;

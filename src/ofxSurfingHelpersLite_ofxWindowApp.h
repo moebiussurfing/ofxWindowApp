@@ -475,25 +475,25 @@ inline glm::vec2 getBitmapStringBoxPosToLayout(string s, SURFING_LAYOUT layout) 
 
 	//--
 
-#ifdef SURFING__STRING_BOX__INCLUDE_EXTRA_LAYOUTS
-	else if (layout == SURFING_LAYOUT_MOUSE_POS) {
-		// mouse pos clamped inside the window
-		auto bb = getBBBitmapStringBox(s);
-		int xm = ofGetMouseX();
-		int ym = ofGetMouseY();
-		int x = ofClamp(xm, 0, ofGetWidth() - bb.width);
-		int y = ofClamp(ym, 0, ofGetHeight() - bb.height);
-		p = { x, y };
-	} else if (layout == SURFING_LAYOUT_MOUSE_POS_CENTER) {
-		// mouse pos centered clamped inside the window
-		auto bb = getBBBitmapStringBox(s);
-		int xm = ofGetMouseX() - bb.width / 2;
-		int ym = ofGetMouseY() - bb.height / 2;
-		int x = ofClamp(xm, 0, ofGetWidth() - bb.width);
-		int y = ofClamp(ym, 0, ofGetHeight() - bb.height);
-		p = { x, y };
-	}
-#endif
+//#ifdef SURFING__STRING_BOX__INCLUDE_EXTRA_LAYOUTS
+//	else if (layout == SURFING_LAYOUT_MOUSE_POS) {
+//		// mouse pos clamped inside the window
+//		auto bb = getBBBitmapStringBox(s);
+//		int xm = ofGetMouseX();
+//		int ym = ofGetMouseY();
+//		int x = ofClamp(xm, 0, ofGetWidth() - bb.width);
+//		int y = ofClamp(ym, 0, ofGetHeight() - bb.height);
+//		p = { x, y };
+//	} else if (layout == SURFING_LAYOUT_MOUSE_POS_CENTER) {
+//		// mouse pos centered clamped inside the window
+//		auto bb = getBBBitmapStringBox(s);
+//		int xm = ofGetMouseX() - bb.width / 2;
+//		int ym = ofGetMouseY() - bb.height / 2;
+//		int x = ofClamp(xm, 0, ofGetWidth() - bb.width);
+//		int y = ofClamp(ym, 0, ofGetHeight() - bb.height);
+//		p = { x, y };
+//	}
+//#endif
 
 	return p;
 }
@@ -503,21 +503,21 @@ inline ofRectangle getBBBitmapStringBoxToLayout(string s, SURFING_LAYOUT layout)
 	glm::vec2 p = getBitmapStringBoxPosToLayout(s, layout);
 	return getBBBitmapStringBox(s, p.x, p.y);
 }
-////--------------------------------------------------------------
-//inline ofRectangle getBBBitmapStringBoxToLayout(string s, int layout) {
-//	return getBBBitmapStringBoxToLayout(s, (SURFING_LAYOUT)layout);
-//}
-//
-////--------------------------------------------------------------
-//inline glm::vec2 getBitmapStringBoxPosToLayout(string s, int layout) {
-//	return getBitmapStringBoxPosToLayout(s, (SURFING_LAYOUT)layout);
-//}
-//
-////--------------------------------------------------------------
-//inline void ofDrawBitmapStringBox(string s, SURFING_LAYOUT layout = SURFING_LAYOUT_TOP_LEFT) {
-//	glm::vec2 p = getBitmapStringBoxPosToLayout(s, layout);
-//	ofDrawBitmapStringBox(s, p.x, p.y);
-//}
+//--------------------------------------------------------------
+inline ofRectangle getBBBitmapStringBoxToLayout(string s, int layout) {
+	return getBBBitmapStringBoxToLayout(s, (SURFING_LAYOUT)layout);
+}
+
+//--------------------------------------------------------------
+inline glm::vec2 getBitmapStringBoxPosToLayout(string s, int layout) {
+	return getBitmapStringBoxPosToLayout(s, (SURFING_LAYOUT)layout);
+}
+
+//--------------------------------------------------------------
+inline void ofDrawBitmapStringBox(string s, SURFING_LAYOUT layout = SURFING_LAYOUT_TOP_LEFT) {
+	glm::vec2 p = getBitmapStringBoxPosToLayout(s, layout);
+	ofDrawBitmapStringBox(s, p.x, p.y);
+}
 //--------------------------------------------------------------
 inline void ofDrawBitmapStringBox(string s, int layout /* = 0*/) {
 	ofDrawBitmapStringBox(s, (SURFING_LAYOUT)layout);
