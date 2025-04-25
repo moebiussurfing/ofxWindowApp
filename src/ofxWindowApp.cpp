@@ -139,9 +139,9 @@ void ofxWindowApp::setupParams() {
 	paramsSession.add(bDisableAutoSave);
 	paramsSession.add(bKeys);
 
-	//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+	#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	paramsSession.add(bWindowStayOnTop);
-	//#endif
+	#endif
 
 	// Extra
 	paramsExtra.add(paramsWindow);
@@ -173,26 +173,14 @@ void ofxWindowApp::startup() {
 	//--
 		
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
-//	// -------- loader --------
-//	{
-//		ofxWatchPath("path_settings", ofLoadJson, [](const ofJson &json, const std::filesystem::path &path) {
-//			ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: " << path << ":" << json.dump(2) << endl;
-//		});
-//	}
-	
-//	ofxWatchPath(path_settings, [](const std::filesystem::path &str) {
-//		if (!bDoneSetup) return;
-//		
-//		ofLogNotice("ofxWindowApp:startup()") << "ofxWatchPath:JSON settings file changed: " << str;
-////		if(bDisableCallback_FileChanged){
-////			ofLogNotice("ofxWindowApp:startup()") << "SKIP loading settings file.";
-////			return;
-////		}
-////		// Load
-////		bDisableCallback_FileChanged=true; // Flag bypass callback to avoid re load now after save (bc file will change).
-////		loadSettings();
-////		bDisableCallback_FileChanged=false;
-//	});
+		ofxWatchPath(path_settings, ofLoadJson, [this](const ofJson &json, const std::filesystem::path &path) {
+			if(bDisableCallback_FileChanged) return;
+			
+				ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: File changed: " << path;
+				//ofLogNotice("ofxWindowApp:startup()")  << "ofxWatchPath: "<< endl << json.dump(2) << endl;
+			
+			loadSettings();
+		});
 #endif
 
 	//--
@@ -273,7 +261,7 @@ void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to th
 	//bFlagWindowChanged = true; //TODO: Workaround OF/GLFW window management bugs. Get/apply delayed...
 
 #ifdef OFX_WINDOW_APP__USE_TIMED_SAVER
-	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f;
+	timeWhenToSaveFlag = ofGetElapsedTimef() + 0.5f; // Wait 500ms and then save.
 #endif
 }
 
@@ -347,6 +335,15 @@ void ofxWindowApp::update(ofEventArgs & args) {
 
 			timeLastAutoSaveCheck = ofGetElapsedTimeMillis();
 		}
+	}
+#endif
+	
+	//--
+	
+#ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
+	// Workaround trick: 1000 is the checking default interval.
+	if(bDisableCallback_FileChanged && (ofGetElapsedTimeMillis() -tLastSave)>=1000){
+		bDisableCallback_FileChanged=false;
 	}
 #endif
 }
@@ -453,9 +450,9 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	data.push_back(jWindowSettings);
 	data.push_back(jExtra);
 
-	// Check if we need to create data folder first
-	folderCheckAndCreate(path_folder);
-//	folderCheckAndCreate(path_settings);//TODO: Should use path without filename?
+//	// Check if we need to create data folder first
+//	folderCheckAndCreate(path_folder);
+////	folderCheckAndCreate(path_settings);//TODO: Should use path without filename?
 
 	// Log
 	logSettings();
@@ -464,13 +461,13 @@ void ofxWindowApp::saveSettings(bool bSlient) {
 	if (!bSlient) ofLogVerbose("ofxWindowApp:saveSettings()") << endl<< data.dump(4);
 	
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
-	bDisableCallback_FileChanged=true; // Flag bypass callback to avoid re load now after save (bc file will change).
+	bDisableCallback_FileChanged=true;
+	tLastSave=ofGetElapsedTimeMillis();
 	ofSavePrettyJson(path_settings, data);
-	bDisableCallback_FileChanged=false;
 #else
 	ofSavePrettyJson(path_settings, data);
 #endif
-
+	
 	//--
 
 	bFlagShowFeedbackDoneSaved = true;
@@ -605,7 +602,7 @@ void ofxWindowApp::drawDebug() {
 	string tp = "PosDesktop:" + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string tpd = "PosDisplay:" + ofToString(getWindowPositionAtDisplay().x) + "," + ofToString(getWindowPositionAtDisplay().y);
 	string t = "ofxWindowApp  DEBUG";
-	t = t + "\t\t " + ts + "\t " + tp + "\t " + tpd;
+	t = t + "    " + ts + "  " + tp + "  " + tpd;
 	ofSetWindowTitle(t);
 #endif
 
@@ -621,7 +618,7 @@ void ofxWindowApp::drawDebug() {
 	s += "\n";
 
 	string screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
-	screenSizeStr += " px";
+	screenSizeStr += "px";
 	string screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string fpsRealStr = ofToString(fpsReal, 0);
 	string str = "";
@@ -719,7 +716,7 @@ void ofxWindowApp::drawInfo() {
 
 	// Size
 	screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
-	screenSizeStr += " px";
+	screenSizeStr += "px";
 
 	// Pos
 	screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
@@ -1010,7 +1007,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 	else if (key == 'v') {
 		ofLogNotice("ofxWindowApp:keyPressed") << "v: Toggle vsync";
 		bvSync = !bvSync;
-		ofSetVerticalSync(bvSync);
+//		ofSetVerticalSync(bvSync);
 	}
 
 	// Toggle disable auto save lock
@@ -1095,28 +1092,6 @@ void ofxWindowApp::keyReleased(ofKeyEventArgs & eventArgs) {
 }
 
 //--------------------------------------------------------------
-void ofxWindowApp::folderCheckAndCreate(string _path) {
-	ofLogVerbose("ofxWindowApp:folderCheckAndCreate()") << "Path: " << _path;
-	if (_path == "") return;
-
-	ofDirectory dataDirectory(ofToDataPath(_path, true));
-
-	// Check if target data folder exist
-	if (!dataDirectory.isDirectory()) {
-		ofLogWarning("ofxWindowApp:folderCheckAndCreate()") << "Folder does not exist!";
-
-		// Create folder
-		bool b = dataDirectory.createDirectory(ofToDataPath(_path, true));
-
-		// Debug if creation has been succed
-		if (b)
-			ofLogNotice("ofxWindowApp:folderCheckAndCreate()") << "Folder '" << _path << "' created successfully!";
-		else
-			ofLogError("ofxWindowApp:folderCheckAndCreate()") << "Unable to create '" << _path << "' folder!";
-	}
-}
-
-//--------------------------------------------------------------
 void ofxWindowApp::doApplyToggleWindowMode() {
 	ofLogVerbose("ofxWindowApp:doApplyToggleWindowMode()");
 
@@ -1198,14 +1173,14 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 #endif
 
 	if (name == bvSync.getName()) {
-		bFlagToSave = true;
 		ofSetVerticalSync(bvSync.get());
+		bFlagToSave = true;
 		return;
 	}
 
 	if (name == fpsTarget.getName()) {
-		bFlagToSave = true;
 		ofSetFrameRate(int(fpsTarget.get()));
+		bFlagToSave = true;
 		return;
 	}
 }

@@ -104,6 +104,9 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 ]
 ```
 
+## OPTIONAL DEPENDENCY
+- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher) -> Allows hot reload JSON file when changed externally. (See `3_example_Watcher`)
+
 ## TESTED SYSTEMS
 - **Windows 11** / **VS 2022** / **OF 0.12.1**
 - **macOS Sequoia 15.4 (Silicon ARM)** / **Xcode 16.2** / **OF 0.12.1**

@@ -15,7 +15,7 @@
 #define OFX_WINDOW_APP__DEVELOP_DEBUG // Enable some more deep testing displaying info.
 
 //#define OFX_WINDOW_APP__USE_OFX_WATCHER // Enable file watcher to reload JSON file when changed:
-// Uses https://github.com/nariakiiwatani/ofxWatcher and requires enable the above directive.
+// Requires https://github.com/nariakiiwatani/ofxWatcher and to enable the above directive.
 
 //----
 
@@ -132,7 +132,13 @@ private:
 #endif
 	
 #ifdef OFX_WINDOW_APP__USE_OFX_WATCHER
+	// Workaround trick:
+	// We need to ignore that file changed doing when saving.
+	// ie: when we move the window, a save will be trigged, and the file will change,
+	// but we will ignore that change.. We want to listen changes doing externally.
+	// So if fille changed during a manually window moving could produce unsync file settings.
 	bool bDisableCallback_FileChanged=false;
+	uint64_t tLastSave=0;
 #endif
 	
 	//--
@@ -265,8 +271,6 @@ private:
 	string path_folder; // Folder
 	string path_filename; // File
 	string path_settings; // Full path
-
-	void folderCheckAndCreate(string _path); // Check if required create folder or already exist
 	
 	//--
 
@@ -409,10 +413,8 @@ public:
 	ofParameter<bool> bKeys {"Keys",true}; // Enable keys by default
 
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-//#ifdef TARGET_WIN32
 public:
 	ofParameter<bool> bWindowStayOnTop { "WindowOnTop", false };
-//#endif
 #endif
 	
 private:
