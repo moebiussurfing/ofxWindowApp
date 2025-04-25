@@ -112,7 +112,7 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 ```
 
 ## OPTIONAL DEPENDENCY
-- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher): Allows hot reload THE JSON file. (See `3_example_Watcher`)
+- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher): Allows hot reloading the JSON file. (See `3_example_Watcher`)
 
 ## TESTED SYSTEMS
 - **Windows 11** / **VS 2022** / **OF 0.12.1**
