@@ -16,12 +16,17 @@
 * **Stay on Top** mode, easy **Console Window** disabler. (**Windows** only)
 * Window shape **Presets** with **Key commands** for squared, centered, default and common **Instagram** sizes.
 * **Alert display**" HUD with a **performance** red bar when **FPS drops** too low under the expected **Target Framerate**.
+* Preview a **Desktop Canvas** preview with connected **OS System displays** (monitors): indexes, name, size and position.
 * Optional **custom TTF font** for debug display.
+* Optional **hot reloading** the **JSON file** when changed externally, using `ofxWatcher`.
 
 ## KEY COMMANDS
 ```
-d : Show debug & monitors.  
-i : Show info & performance.  
+SHOW
+d : Debug & monitors.  
+i : Info & performance.  
+
+SETTINGS
 f : Full screen / Windowed.  
 v : vSync state (On/Off).  
 t : Stay-on-top (Windows only). 
@@ -79,25 +84,27 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 [
     {
         "position": {
-            "x": -2469.0,
-            "y": 1150.0
+            "x": 154.0,
+            "y": 394.0
         },
         "size": {
-            "height": 800,
-            "width": 1539
+            "height": 400,
+            "width": 400
         },
         "window_mode": 0
     },
     {
         "Extra": {
             "Session": {
-                "DisableAutosave": "0",
+                "DisableAutoSave": "0",
+                "Keys": "1",
                 "ShowInfo": "1",
-                "ShowInfoPerformanceAlways": "1"
+                "ShowInfoPerformanceAlways": "1",
+                "WindowOnTop": "0"
             },
             "Window": {
                 "FpsTarget": "60",
-                "vSync": "1"
+                "vSync": "0"
             }
         }
     }
@@ -105,7 +112,7 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 ```
 
 ## OPTIONAL DEPENDENCY
-- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher) -> Allows hot reload JSON file when changed externally. (See `3_example_Watcher`)
+- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher) -> Allows hot reload JSON file. (See `3_example_Watcher`)
 
 ## TESTED SYSTEMS
 - **Windows 11** / **VS 2022** / **OF 0.12.1**
