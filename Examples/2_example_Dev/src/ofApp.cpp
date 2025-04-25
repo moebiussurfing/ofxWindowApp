@@ -10,12 +10,16 @@ void ofApp::setup() {
 
 	// Force show info
 	w.bShowInfo = true;
+
+	gui.setup(w.params);
+	gui.setPosition(250, 10);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
 	// Debug feedback when window settings changes:
 	// Flash bg green during 200ms
+	static uint64_t tLast = 0;
 	static bool bFlash = 0;
 	if (w.isChanged()) {
 		bFlash = 1;
@@ -28,13 +32,15 @@ void ofApp::draw() {
 		ofClear(ofColor::green);
 	else
 		ofClear(64, 255);
-}
 
-//--------------------------------------------------------------
-void ofApp::exit() {
+	gui.draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
 	if (key == 'k') w.setToggleEnableKeys();
+}
+
+//--------------------------------------------------------------
+void ofApp::exit() {
 }

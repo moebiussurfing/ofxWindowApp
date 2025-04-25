@@ -7,6 +7,9 @@
 	- fps plot graph. ?
 	- add ofxScreenSetup/ofxNative addons to bundle other window/OS features.
 	- add fullscreen/window and other bool ofParams to expose to a control ui.
+	- Should add more approaches if we find some problems:
+	- Too many files write during window changes (requires delayed saving)
+	- Destruction app exception trigs exit then we save when closing app.
  */
 
 //----
@@ -32,6 +35,7 @@
 // A super simple timed saver every second if changed. TODO: Not recommended now.
 
 #define OFX_WINDOW_APP__USE_STAY_ON_TOP // <- (OPTIONAL)  Allows an extra OS mode.
+#define OFX_WINDOW_APP__USE_CONSOLE_WINDOW // <- (OPTIONAL)  Allows an extra OS mode.
 
 //--
 
@@ -42,22 +46,6 @@
 //----
 
 #include <GLFW/glfw3.h> // Required for displays debug and window callbacks.
-
-//--
-
-//TODO: Should add more approaches if we find some problems:
-// - Too many files write during window changes (requires delayed saving)
-// - Destruction app exception qhen we save on exit.
-
-//#if defined(OFX_WINDOW_APP__USE_STATIC)
-//	#if defined(OFX_WINDOW_APP__USE_TIMED_SAVER)
-//		#undef OFX_WINDOW_APP__USE_TIMED_SAVER // Force disable
-//	#endif
-//#else
-//	#ifndef OFX_WINDOW_APP__USE_TIMED_SAVER
-//		#define OFX_WINDOW_APP__USE_TIMED_SAVER // Force enable
-//	#endif
-//#endif
 
 //--
 
@@ -213,38 +201,6 @@ public:
 
 	//--
 
-#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	//--------------------------------------------------------------
-	void setToggleStayOnTop() {
-		ofLogNotice("ofxWindowApp:setToggleStayOnTop()");
-		setStayOnTop(!bStayOnTop.get());
-	}
-
-	//--------------------------------------------------------------
-	void setStayOnTop(bool b) {
-		ofLogNotice("ofxWindowApp:setStayOnTop(b)") << b;
-		bStayOnTop = b;
-	}
-#endif
-
-	//--
-
-	//public:
-	//	//TODO: handle console terminal window
-	//	// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
-	//	//--------------------------------------------------------------
-	//	void setConsoleVisible(bool show) {
-	//#if defined(TARGET_WIN32)
-	//		::ShowWindow(::GetConsoleWindow(), show ? SW_SHOW : SW_HIDE);
-	//#endif
-	//	}
-	//	//--------------------------------------------------------------
-	//	bool getConsoleVisible() {
-	//		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
-	//	}
-
-	//--
-
 private:
 	// Sync/apply states methods
 	void doSetWindowSettingsFromAppWindow();
@@ -384,9 +340,6 @@ private:
 
 	float fpsReal; // Current readed fps to display debug only
 
-public:
-	bool bShowDebug = false; // Show debug text box
-
 	//----
 
 	// Params
@@ -394,8 +347,8 @@ private:
 	void setupParams();
 
 	//TODO: To avoid ofxSerializer. Use one only groupParam instead.
-//public:
-	//ofParameterGroup params{ "ofxWindowApp" };
+public:
+	ofParameterGroup params { "ofxWindowApp" };
 
 private:
 	ofParameterGroup paramsExtra { "Extra" };
@@ -404,20 +357,69 @@ private:
 
 public:
 	ofParameter<bool> bDisableAutoSave { "DisableAutoSave", false };
-	// Ignores next window modification.
-	// Kind of fixed window settings (JSON) that will be maintained on next app load.
+	// Ignores next window modification. Locked window settings (JSON) that will be retained on next app load.
 	ofParameter<bool> bKeys { "Keys", true }; // Enable key commands by default
 	ofParameter<bool> bShowInfo { "ShowInfo", true };
 	ofParameter<bool> bShowInfoPerformanceAlways { "ShowInfoPerformanceAlways", true };
+	ofParameter<bool> bShowDebug { "ShowDebug", false }; // Show debug text box
 
 	ofParameter<float> fpsTarget { "FpsTarget", 60.f, 1.f, 180.f };
 	ofParameter<bool> bvSync { "vSync", false };
 
+	//--
+
+#ifdef OFX_WINDOW_APP__USE_CONSOLE_WINDOW
+public:
+	ofParameter<bool> bConsoleWindow { "ConsoleWindow", false };
+
+	//TODO: Handle console terminal window
+	//--------------------------------------------------------------
+	void setConsoleWindowVisible(bool b) {
+		ofLogVerbose("ofxWindowApp:setConsoleWindowVisible()") << b;
+
+	#if defined(TARGET_WIN32)
+		// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
+		::ShowWindow(::GetConsoleWindow(), b ? SW_SHOW : SW_HIDE);
+	#endif
+		bFlagToSave = true;
+	}
+
+	//--------------------------------------------------------------
+	bool getConsoleWindowVisible() {
+	#if defined(TARGET_WIN32)
+		return (::IsWindowVisible(::GetConsoleWindow()) != FALSE);
+	#else
+		return false; //TODO
+	#endif
+	}
+
+	//--------------------------------------------------------------
+	void doApplyConsoleWindowVisible() {
+		setConsoleWindowVisible(bConsoleWindow.get());
+	}
+#endif
+
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 public:
 	ofParameter<bool> bStayOnTop { "StayOnTop", false };
+
 private:
 	void doApplyStayOnTop();
+
+	//--------------------------------------------------------------
+	void setToggleStayOnTop() {
+		ofLogNotice("ofxWindowApp:setToggleStayOnTop()");
+
+		setStayOnTop(!bStayOnTop.get());
+	}
+
+	//--------------------------------------------------------------
+	void setStayOnTop(bool b) {
+		ofLogNotice("ofxWindowApp:setStayOnTop(b)") << b;
+
+		bStayOnTop = b;
+		bFlagToSave = true;
+	}
 #endif
 
 	//----

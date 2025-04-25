@@ -6,7 +6,6 @@
 
 //--------------------------------------------------------------
 ofxWindowApp::ofxWindowApp() {
-
 	// Log
 #ifdef OFX_WINDOW_APP__DEVELOP_DEBUG
 	ofSetLogLevel("ofxWindowApp", OF_LOG_VERBOSE);
@@ -135,6 +134,7 @@ void ofxWindowApp::setupParams() {
 	paramsWindow.add(fpsTarget);
 
 	// Session
+	paramsSession.add(bShowDebug);
 	paramsSession.add(bShowInfo);
 	paramsSession.add(bShowInfoPerformanceAlways);
 	paramsSession.add(bDisableAutoSave);
@@ -144,9 +144,15 @@ void ofxWindowApp::setupParams() {
 	paramsSession.add(bStayOnTop);
 #endif
 
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+	paramsSession.add(bConsoleWindow);
+#endif
 	// Extra
 	paramsExtra.add(paramsWindow);
 	paramsExtra.add(paramsSession);
+
+	// Group all
+	params.add(paramsExtra);
 
 	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::ChangedParamsExtra);
 }
@@ -404,11 +410,23 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	// Workaround trick bc we need startup did the loadSettings() call and windows is already updated!
 	if (bStayOnTop.get()) {
-		static bool bDoneStartupForceStayOnTop = 0;
-		if (bDoneStartup && !bDoneStartupForceStayOnTop) {
-			bDoneStartupForceStayOnTop = 1;
-			ofLogNotice("ofxWindowApp:draw()") << "Force doApplyStayOnTop()";
+		static bool bDoneStartupForce_bStayOnTop = 0;
+		if (bDoneStartup && !bDoneStartupForce_bStayOnTop) {
+			bDoneStartupForce_bStayOnTop = 1;
+			ofLogNotice("ofxWindowApp:draw()") << "StartupForce: doApplyStayOnTop()";
 			doApplyStayOnTop();
+		}
+	}
+#endif
+
+#ifdef OFX_WINDOW_APP__USE_CONSOLE_WINDOW
+	// Workaround trick bc we need startup did the loadSettings() call and windows is already updated!
+	if (!bConsoleWindow.get()) {
+		static bool bDoneStartupForce_bConsoleWindow = 0;
+		if (bDoneStartup && !bDoneStartupForce_bConsoleWindow) {
+			bDoneStartupForce_bConsoleWindow = 1;
+			ofLogNotice("ofxWindowApp:draw()") << "StartupForce: doApplyConsoleWindowVisible()";
+			doApplyConsoleWindowVisible();
 		}
 	}
 #endif
@@ -507,8 +525,7 @@ void ofxWindowApp::loadSettings() {
 		// Load settings in one file
 		ofJson data;
 		data = ofLoadJson(path_settings);
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n"
-														<< data.dump(4);
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n" << data.dump(4);
 
 		//--
 
@@ -591,15 +608,6 @@ void ofxWindowApp::loadSettings() {
 		doApplyWindowSettings();
 		doApplyWindowExtraSettings();
 		bDisableCallback_windowMovedOrResized = false;
-
-		//TODO: CHECK IF DIFFERS AND FORCE WINDOW TO JSON SETTINGS!
-		// Then we can fixit here manually.
-
-		//--
-
-		//#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-		//		doApplyStayOnTop();
-		//#endif
 	} else {
 		ofLogError("ofxWindowApp:loadFileSettings()") << "File settings NOT found: " << path_settings;
 	}
@@ -629,9 +637,9 @@ void ofxWindowApp::drawDebug() {
 	string s;
 	s += "ofxWindowApp     DEBUG\n";
 	if (bFlagShowFeedbackDoneSaved)
-		s += "SAVE";
+		s += "> SAVE";
 	else
-		s += "    ";
+		s += "      ";
 	s += "\n";
 
 	string screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight()) + " px";
@@ -778,6 +786,12 @@ void ofxWindowApp::drawInfo() {
 #ifdef TARGET_WIN32
 	#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	str += strPad + (bKeys ? "[t]_" : "") + ofToString(bStayOnTop ? "STAY_ON_TOP_ON " : "STAY_ON_TOP_OFF");
+	#endif
+#endif
+
+#ifdef TARGET_WIN32
+	#ifdef OFX_WINDOW_APP__USE_CONSOLE_WINDOW
+	str += strPad + (bKeys ? "[e]_" : "") + ofToString(bConsoleWindow ? "CONSOLE_ON " : "CONSOLE_OFF");
 	#endif
 #endif
 
@@ -1199,6 +1213,13 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	if (name == bStayOnTop.getName()) {
 		doApplyStayOnTop();
+		return;
+	}
+#endif
+
+#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
+	if (name == bConsoleWindow.getName()) {
+		setConsoleWindowVisible(bConsoleWindow.get());
 		return;
 	}
 #endif

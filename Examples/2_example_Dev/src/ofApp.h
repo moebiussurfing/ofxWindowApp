@@ -2,6 +2,7 @@
 #include "ofMain.h"
 
 #include "ofxWindowApp.h"
+#include "ofxGui.h"
 
 // NOTE: Press "k" to toggle enable key commands!
 
@@ -13,10 +14,10 @@ class ofApp : public ofBaseApp {
 public:
 	void setup();
 	void draw();
-	void exit();
 	void keyPressed(int key);
+	void exit();
 
 	ofxWindowApp w;
 
-	uint64_t tLast = 0;
+	ofxPanel gui;
 };

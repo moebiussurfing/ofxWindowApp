@@ -23,25 +23,28 @@
 ## KEY COMMANDS
 ```
 SHOW
-d : Debug & monitors.  
-i : Info & performance.  
+d : Debug (& monitors).  
+i : Info (& performance).  
 
 SETTINGS
 f : Full screen / Windowed.  
 v : Vertical Sync state (On/Off).  
-t : Stay-on-top (Windows only yet). 
 l : Disable autosave (Lock).
+t : Stay-on-top (Windows only yet). 
+e : Console Window (Windows only yet).
 
 PRESETS
 c : Center Window.  
 q : Squared 800 x 800 px
 w : Squared width x width px
+
 INSTAGRAM
 1 : Cover Photo IGTV
 2 : Landscape Photo
 3 : Portrait
 4 : Story
 5 : Square
+
 BACKSPACE : Reset Default
 ```
 
