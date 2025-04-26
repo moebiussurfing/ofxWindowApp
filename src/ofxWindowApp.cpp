@@ -628,11 +628,13 @@ void ofxWindowApp::drawDebug() {
 	string screenPosStr = ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string fpsRealStr = ofToString(fpsReal, 0);
 	string fpsTargetStr = ofToString(fpsTarget);
+	string vsyncStr = ofToString(bvSync ? "ON " : "OFF");
+
 	string str = "";
-	str += "Size : " + screenSizeStr + "\n";
-	str += "Pos  : " + screenPosStr + "\n";
-	str += "FPS  : " + fpsRealStr + " ";
-	str += "[" + fpsTargetStr + "]\n";
+	str += "Size  : " + screenSizeStr + "\n";
+	str += "Pos   : " + screenPosStr + "\n";
+	str += "FPS   : " + fpsRealStr + " [" + fpsTargetStr + "]\n";
+	str += "VSYNC : " + vsyncStr + "\n";
 
 	s += str;
 	s += "\n";
@@ -748,9 +750,9 @@ void ofxWindowApp::drawInfo() {
 
 	//	str += strPad + "ALT +";
 
-	str += strPad + (bKeys ? "[i]_" : "") + "INFO";
+	str += strPad + (bKeys ? "i : " : "") + "INFO";
 
-	str += strPad + (bKeys ? "[v]_" : "") + "VSYNC_" + ofToString(bvSync ? "ON " : "OFF");
+	str += strPad + (bKeys ? "v : " : "") + "VSYNC_" + ofToString(bvSync ? "ON " : "OFF");
 
 	bool _bModeFullScreen = false;
 	if (ofGetWindowMode() == OF_WINDOW) // Is full screen
@@ -760,24 +762,24 @@ void ofxWindowApp::drawInfo() {
 	{
 		_bModeFullScreen = true;
 	}
-	screenMode = (bKeys ? "[f]_" : "") + ofToString(_bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE");
+	screenMode = (bKeys ? "f : " : "") + ofToString(_bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE");
 	str += strPad + screenMode;
 
-	str += strPad + (bKeys ? "[l]_" : "") + ofToString(bDisableAutoSave ? "AUTO_SAVE_OFF" : "AUTO_SAVE_ON ");
+	str += strPad + (bKeys ? "l : " : "") + ofToString(bDisableAutoSave ? "AUTOSAVE_OFF" : "AUTOSAVE_ON ");
 
 #ifdef TARGET_WIN32
 	#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	str += strPad + (bKeys ? "[t]_" : "") + ofToString(bStayOnTop ? "STAY_ON_TOP_ON " : "STAY_ON_TOP_OFF");
+	str += strPad + (bKeys ? "t : " : "") + ofToString(bStayOnTop ? "STAY_ON_TOP_ON " : "STAY_ON_TOP_OFF");
 	#endif
 #endif
 
 #ifdef TARGET_WIN32
 	#ifdef OFX_WINDOW_APP__USE_CONSOLE_WINDOW
-	str += strPad + (bKeys ? "[e]_" : "") + ofToString(bConsoleWindow ? "CONSOLE_ON " : "CONSOLE_OFF");
+	str += strPad + (bKeys ? "e : " : "") + ofToString(bConsoleWindow ? "CONSOLE_ON " : "CONSOLE_OFF");
 	#endif
 #endif
 
-	str += strPad + (bKeys ? "[d]_" : "") + "DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
+	str += strPad + (bKeys ? "d : " : "") + "DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
 	str += strPad;
 
 	// Debug mod keys
@@ -1046,8 +1048,16 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	// Stay on top
 	else if (key == 't') {
-		ofLogNotice("ofxWindowApp:keyPressed") << "t: Toggle bStayOnTop";
+		ofLogNotice("ofxWindowApp:keyPressed") << "t: Toggle stay on top";
 		setToggleStayOnTop();
+	}
+#endif
+
+#ifdef OFX_WINDOW_APP__USE_CONSOLE_WINDOW
+	// Console Window
+	else if (key == 'e') {
+		ofLogNotice("ofxWindowApp:keyPressed") << "e: Toggle consolde window";
+		setToggleConsoleWindowVisible();
 	}
 #endif
 

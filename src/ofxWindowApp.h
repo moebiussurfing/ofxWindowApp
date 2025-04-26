@@ -68,6 +68,7 @@ public:
 
 #ifdef OFX_WINDOW_APP__USE_STATIC
 public:
+	//--------------------------------------------------------------
 	void setup(ofxWindowApp * app) {
 		ofLogNotice("ofxWindowApp:setup(ofxWindowApp * app)") << "FrameNum: " << ofGetFrameNum();
 		this->setInstance(app);
@@ -397,6 +398,12 @@ public:
 	}
 
 	//--------------------------------------------------------------
+	void setToggleConsoleWindowVisible() {
+		bConsoleWindow = bConsoleWindow.get();
+	}
+
+private:
+	//--------------------------------------------------------------
 	void doApplyConsoleWindowVisible() {
 		setConsoleWindowVisible(bConsoleWindow.get());
 	}
@@ -460,7 +467,7 @@ private:
 		bIsFullScreen = false;
 
 		// Shape
-		int w = 1280;
+		const int w = 1280; // Default width
 		int h = w * (9.f / 16.f);
 		windowSettings.setSize(w, h);
 
