@@ -12,13 +12,13 @@
 * Window **Mode** (Windowed / Fullscreen).
 * Window **Target FPS** (vs real current **FPS**).
 * Window **Vertical Sync** state. 
-* Easy change the app settings just by editing the **JSON file** (and restart app), instead of requiring edit the app code.
-* **Stay on Top** mode, easy **Console Window** disabler. (**Windows** only)
-* Window shape **Presets** with **Key commands** for squared, centered, default and common **Instagram** sizes.
+* Window **Stay on Top** mode, easy **Console Window** handler to show or hide. (**Windows** only yet)
+* Window **Presets** with **Key commands** for shapes, squared, centered, default position./shape and common **Instagram** sizes.
+* Easy change the app settings just by editing the **JSON file** (and restart app or even hot roloading), instead of requiring edit the app code.
 * **Alert display**" HUD with a **performance** red bar when **FPS drops** too low under the expected **Target Framerate**.
-* Preview a **Desktop Canvas** preview with connected **OS System displays** (monitors): indexes, name, size and position.
-* Optional **custom TTF font** for debug display.
-* Optional **hot reloading** the **JSON file** when changed externally, using `ofxWatcher`.
+* Preview a **Desktop Canvas** with all the connected **Displays** (OS monitors): indexes, name, size and position.
+* Optional: **custom TTF font** for text display.
+* Optional: **hot reloading** the **JSON file** when changed externally, using `ofxWatcher`.
 
 ## KEY COMMANDS
 ```
@@ -28,7 +28,7 @@ i : Info (& performance).
 
 SETTINGS
 f : Full screen / Windowed.  
-v : Vertical Sync state (On/Off).  
+v : Vertical Sync (On/Off).  
 l : Disable autosave (Lock).
 t : Stay-on-top (Windows only yet). 
 e : Console Window (Windows only yet).
@@ -81,7 +81,7 @@ ofApp::setup()
 ```
 Nothing more is required on `update()`,`draw()` or `exit()`!  
 All settings can be configured also using `Key Commands`.  
-The addon will **auto load** the settings when your **App starts** and **auto stores** too on **any settings changes**.  
+The addon will **auto load** previous session settings when your **App starts** again, and will **auto store** settings too on **any settings changes**.  
 
 The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like this:  
 ```.json
@@ -116,7 +116,7 @@ The **JSON file** (`bin/data/ofxWindowApp/ofxWindowApp.json`) will look like thi
 ```
 
 ## OPTIONAL DEPENDENCY
-- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher): Allows hot reloading the JSON file. (See `3_example_Watcher`)
+- [ofxWatcher](https://github.com/nariakiiwatani/ofxWatcher): Allows **hot reloading* the **JSON** file to edit file externally. (See `3_example_Watcher`)
 
 ## TESTED SYSTEMS
 - **Windows 11** / **VS 2022** / **OF 0.12.1**
