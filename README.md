@@ -27,7 +27,7 @@ d : Debug (& monitors).
 i : Info (& performance).  
 
 SETTINGS
-f : Full screen / Windowed.  
+f : Fullscreen / Windowed.  
 v : Vertical Sync (On/Off).  
 l : Disable autosave (Lock).
 t : Stay-on-top (Windows only yet). 
