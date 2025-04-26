@@ -194,6 +194,8 @@ void ofxWindowApp::startup() {
 
 	bDoneStartup = true;
 	ofLogNotice("ofxWindowApp:startup()") << "----------------------startup()--> END";
+	// When strtup() ends, we already have the JSON settings file loaded.
+	// We will un block saving callbacks again, to allow save changes since now.
 }
 
 //----
@@ -276,27 +278,6 @@ void ofxWindowApp::windowChanged() { // Merge/group/redirect all callbacks to th
 
 //--------------------------------------------------------------
 void ofxWindowApp::update(ofEventArgs & args) {
-	//	// Auto call setup on first frame (or before?) if required.
-	//	if (!bDoneSetup) {
-	//		if (ofGetFrameNum() >= 0) {
-	//			setup();
-	//		}
-	//	}
-	////  // Debug
-	////	if (ofGetFrameNum() == 1) {
-	////		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
-	////	}
-	//
-	//	// Auto call startup but after setup is done if required.
-	//	if (bDoneSetup) {
-	//		if (!bDoneStartup) {
-	//			if (ofGetFrameNum() >= 0) { // after or in framenum 0
-	//				startup();
-	//			}
-	//		}
-	//	}
-
-	//--
 
 	// Check if flagged to save
 	if (bFlagToSave) {
@@ -525,7 +506,8 @@ void ofxWindowApp::loadSettings() {
 		// Load settings in one file
 		ofJson data;
 		data = ofLoadJson(path_settings);
-		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n" << data.dump(4);
+		ofLogVerbose("ofxWindowApp:loadFileSettings()") << "JSON: \n"
+														<< data.dump(4);
 
 		//--
 
@@ -1149,19 +1131,21 @@ void ofxWindowApp::doApplyStayOnTop() {
 	ofLogVerbose("ofxWindowApp:doApplyStayOnTop()");
 
 	#if defined(TARGET_WIN32)
+	HWND hWndInsertAfter;
 	if (bStayOnTop.get()) {
-		// Make app always Stay on top
-		HWND W = GetActiveWindow();
-		SetWindowPos(W, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+		// Enable window Stay on top
+		hWndInsertAfter = HWND_TOPMOST;
 		ofLogNotice("ofxWindowApp") << "Set Stay on top: Enabled";
 	} else {
-		// Disable make app always Stay on top
-		HWND W = GetActiveWindow();
-		SetWindowPos(W, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+		// Disable window Stay on top
+		hWndInsertAfter = HWND_NOTOPMOST;
 		ofLogNotice("ofxWindowApp") << "Set Stay on top: Disabled";
 	}
-	#elif defined(TARGET_OSX)
+	HWND W = GetActiveWindow();
+	SetWindowPos(W, hWndInsertAfter, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+
 	//TODO:
+	#elif defined(TARGET_OSX)
 	ofLogWarning("ofxWindowApp") << "(bStayOnTop) Not implemented for OSX platform. Only TARGET_WIN32 yet!";
 	#else
 	ofLogWarning("ofxWindowApp") << "(bStayOnTop) Not implemented for current platform. Only TARGET_WIN32 yet!";
@@ -1210,9 +1194,16 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 	string name = e.getName();
 	ofLogVerbose("ofxWindowApp::ChangedParamsExtra") << " " << name << " : " << e;
 
+	if (name == bDisableAutoSave.getName()) {
+		bFlagToSave = true;
+		return;
+	}
+
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	if (name == bStayOnTop.getName()) {
 		doApplyStayOnTop();
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
 		return;
 	}
 #endif
@@ -1220,19 +1211,47 @@ void ofxWindowApp::ChangedParamsExtra(ofAbstractParameter & e) {
 #ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
 	if (name == bConsoleWindow.getName()) {
 		setConsoleWindowVisible(bConsoleWindow.get());
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
 		return;
 	}
 #endif
 
 	if (name == bvSync.getName()) {
 		ofSetVerticalSync(bvSync.get());
-		bFlagToSave = true;
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
 		return;
 	}
 
 	if (name == fpsTarget.getName()) {
 		ofSetFrameRate(int(fpsTarget.get()));
-		bFlagToSave = true;
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
+		return;
+	}
+
+	if (name == bKeys.getName()) {
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
+		return;
+	}
+
+	if (name == bShowDebug.getName()) {
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
+		return;
+	}
+
+	if (name == bShowInfo.getName()) {
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
+		return;
+	}
+
+	if (name == bShowInfoPerformanceAlways.getName()) {
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
 		return;
 	}
 }
@@ -1468,6 +1487,32 @@ void ofxWindowApp::setWindowCentered() {
 	int y = spy + sh / 2 - wh / 2;
 	ofSetWindowPosition(x, y);
 
+	//--
+
 	//string s = "Centered: " + ofToString(x) + "," + ofToString(y) + " " + ofToString(ww) + "x" + ofToString(wh) + " px";
 	//return s;
 }
+
+//--
+
+//	// Auto call setup on first frame (or before?) if required.
+//	if (!bDoneSetup) {
+//		if (ofGetFrameNum() >= 0) {
+//			setup();
+//		}
+//	}
+////  // Debug
+////	if (ofGetFrameNum() == 1) {
+////		ofLogNotice("ofxWindowApp:update()") << "FrameNum: " << ofGetFrameNum();
+////	}
+//
+//	// Auto call startup but after setup is done if required.
+//	if (bDoneSetup) {
+//		if (!bDoneStartup) {
+//			if (ofGetFrameNum() >= 0) { // after or in framenum 0
+//				startup();
+//			}
+//		}
+//	}
+
+//--

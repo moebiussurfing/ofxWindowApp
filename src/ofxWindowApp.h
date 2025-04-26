@@ -28,7 +28,7 @@
 //----
 
 //#define OFX_WINDOW_APP__ENABLE_SAVE_ON_EXIT
-// To enable force autosave on exit.
+// To enable force autosave on app exit.
 // This approach, sometimes required fixing exceptions when closing ofApp.
 
 //#define OFX_WINDOW_APP__USE_TIMED_SAVER
@@ -376,12 +376,15 @@ public:
 	//--------------------------------------------------------------
 	void setConsoleWindowVisible(bool b) {
 		ofLogVerbose("ofxWindowApp:setConsoleWindowVisible()") << b;
+		//if (bConsoleWindow != b) bConsoleWindow.setWithoutEventNotifications(b);
 
 	#if defined(TARGET_WIN32)
 		// Taken from https://github.com/kritzikratzi/ofxNative/blob/master/src/ofxNative_win.cpp
 		::ShowWindow(::GetConsoleWindow(), b ? SW_SHOW : SW_HIDE);
 	#endif
-		bFlagToSave = true;
+
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
 	}
 
 	//--------------------------------------------------------------
@@ -409,16 +412,15 @@ private:
 	//--------------------------------------------------------------
 	void setToggleStayOnTop() {
 		ofLogNotice("ofxWindowApp:setToggleStayOnTop()");
-
 		setStayOnTop(!bStayOnTop.get());
 	}
 
 	//--------------------------------------------------------------
 	void setStayOnTop(bool b) {
 		ofLogNotice("ofxWindowApp:setStayOnTop(b)") << b;
-
 		bStayOnTop = b;
-		bFlagToSave = true;
+		if (!bDisableAutoSave)
+			bFlagToSave = true;
 	}
 #endif
 

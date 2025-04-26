@@ -4,7 +4,8 @@
 #include "ofxWindowApp.h"
 #include "ofxGui.h"
 
-// NOTE: Press "k" to toggle enable key commands!
+// NOTE: Press "k" to toggle enable key commands
+// NOTE: Press "g" to toggle show gui
 
 // NOTE: Enable full Debug:
 // In ofxWindowApp.h enable directive.
@@ -20,4 +21,5 @@ public:
 	ofxWindowApp w;
 
 	ofxPanel gui;
+	bool bGui = 0;
 };
