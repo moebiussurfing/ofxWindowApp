@@ -5,8 +5,8 @@ void ofApp::setup() {
 	w.setup(&w);
 
 	// Customize
-	w.setFrameRate(144);
-	//w.setFrameRate(0); // Max possible or unlocked if VSYNC_OFF, or up to display refresh freq if VSYNC_ON.
+	//w.setFrameRate(144); // When VSYNC_ON, max framerate will be your display refresh frequency.
+	//w.setFrameRate(0); // Max possible or unlocked if VSYNC_OFF, or up to display refresh frequency if VSYNC_ON.
 
 	//--
 	
@@ -23,6 +23,7 @@ void ofApp::draw() {
 	// Debug feedback when window settings changes and JSON file is saved:
 	// Flash bg green during 100ms
 	{
+		const int d = 100;
 		static bool bFlash = 0;
 		static uint64_t tLast = 0;
 		{
@@ -30,7 +31,7 @@ void ofApp::draw() {
 				bFlash = 1;
 				tLast = ofGetElapsedTimeMillis();
 			}
-			if (bFlash && ofGetElapsedTimeMillis() - tLast > 100) {
+			if (bFlash && ofGetElapsedTimeMillis() - tLast > d) {
 				bFlash = 0;
 			}
 		}

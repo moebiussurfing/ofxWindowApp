@@ -193,9 +193,11 @@ void ofxWindowApp::startup() {
 	//--
 
 	bDoneStartup = true;
-	ofLogNotice("ofxWindowApp:startup()") << "----------------------startup()--> END";
+	ofLogVerbose("ofxWindowApp:startup()") << "----------------------startup()--> END";
 	// When strtup() ends, we already have the JSON settings file loaded.
 	// We will un block saving callbacks again, to allow save changes since now.
+	
+	ofLogNotice("ofxWindowApp:startup()")<<"Done.";
 }
 
 //----
@@ -394,7 +396,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		static bool bDoneStartupForce_bStayOnTop = 0;
 		if (bDoneStartup && !bDoneStartupForce_bStayOnTop) {
 			bDoneStartupForce_bStayOnTop = 1;
-			ofLogNotice("ofxWindowApp:draw()") << "StartupForce: doApplyStayOnTop()";
+			ofLogVerbose("ofxWindowApp:draw()") << "StartupForce: doApplyStayOnTop()";
 			doApplyStayOnTop();
 		}
 	}
@@ -406,7 +408,7 @@ void ofxWindowApp::draw(ofEventArgs & args) {
 		static bool bDoneStartupForce_bConsoleWindow = 0;
 		if (bDoneStartup && !bDoneStartupForce_bConsoleWindow) {
 			bDoneStartupForce_bConsoleWindow = 1;
-			ofLogNotice("ofxWindowApp:draw()") << "StartupForce: doApplyConsoleWindowVisible()";
+			ofLogVerbose("ofxWindowApp:draw()") << "StartupForce: doApplyConsoleWindowVisible()";
 			doApplyConsoleWindowVisible();
 		}
 	}
@@ -605,10 +607,10 @@ void ofxWindowApp::drawDebug() {
 
 #ifdef OFX_WINDOW_APP__DEVELOP_DEBUG
 	// Window title
+	string t = "ofxWindowApp  DEVELOP_DEBUG |";
 	string ts = "Size:" + ofToString(ofGetWindowSize().x) + "x" + ofToString(ofGetWindowSize().y);
 	string tp = "PosDesktop:" + ofToString(ofGetWindowPositionX()) + "," + ofToString(ofGetWindowPositionY());
 	string tpd = "PosDisplay:" + ofToString(getWindowPositionAtDisplay().x) + "," + ofToString(getWindowPositionAtDisplay().y);
-	string t = "ofxWindowApp  DEBUG";
 	t = t + "    " + ts + "  " + tp + "  " + tpd;
 	ofSetWindowTitle(t);
 #endif
@@ -617,7 +619,7 @@ void ofxWindowApp::drawDebug() {
 
 	// Text box
 	string s;
-	s += "ofxWindowApp     DEBUG\n";
+	s += "ofxWindowApp | DEBUG\n";
 	if (bFlagShowFeedbackDoneSaved)
 		s += "> SAVE";
 	else
@@ -723,12 +725,12 @@ void ofxWindowApp::drawInfo() {
 	// Debug overlay screen modes
 
 	string str = "";
+	string strPad = "  ";
 	string fpsRealStr = "";
 	string fpsTargetStr = "";
 	string screenSizeStr = "";
 	string screenPosStr = "";
 	string screenMode = "";
-	string strPad = "  ";
 
 	// Size
 	screenSizeStr = ofToString(ofGetWindowWidth()) + "x" + ofToString(ofGetWindowHeight());
@@ -741,18 +743,23 @@ void ofxWindowApp::drawInfo() {
 	fpsRealStr = ofToString(fpsReal, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 
-	str += strPad + strPad + "Size:" + screenSizeStr;
+	str += + "ofxWindowApp | "+ofToString(bKeys ? "i:" : "  ")+"INFO";
+	
+	str += strPad + (bKeys ? "d:" : "") + "DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
+	str +=  strPad + "|" ;
+	
+	str += strPad + "Size:" + screenSizeStr;
 	str += strPad + "Pos:" + screenPosStr;
+	str += strPad + "|";
+	
 	str += strPad + "FPS:" + fpsRealStr;
 	str += " [" + fpsTargetStr + "]";
 
-	str += strPad + strPad + "|" + strPad;
-
+	//TODO: Modifier keys are not working fine at least in macOS.
+	// So, we disable all keycommands combinations!
 	//	str += strPad + "ALT +";
 
-	str += strPad + (bKeys ? "i : " : "") + "INFO";
-
-	str += strPad + (bKeys ? "v : " : "") + "VSYNC_" + ofToString(bvSync ? "ON " : "OFF");
+	str += strPad + (bKeys ? "v:" : "") + "VSYNC_" + ofToString(bvSync ? "ON " : "OFF");
 
 	bool _bModeFullScreen = false;
 	if (ofGetWindowMode() == OF_WINDOW) // Is full screen
@@ -762,25 +769,24 @@ void ofxWindowApp::drawInfo() {
 	{
 		_bModeFullScreen = true;
 	}
-	screenMode = (bKeys ? "f : " : "") + ofToString(_bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE");
+	screenMode = (bKeys ? "f:" : "") + ofToString(_bModeFullScreen ? "FULLSCREEN_MODE" : "WINDOW_MODE");
 	str += strPad + screenMode;
 
-	str += strPad + (bKeys ? "l : " : "") + ofToString(bDisableAutoSave ? "AUTOSAVE_OFF" : "AUTOSAVE_ON ");
+	str += strPad + (bKeys ? "l:" : "") + ofToString(bDisableAutoSave ? "AUTOSAVE_OFF" : "AUTOSAVE_ON ");
 
 #ifdef TARGET_WIN32
 	#ifdef OFX_WINDOW_APP__USE_STAY_ON_TOP
-	str += strPad + (bKeys ? "t : " : "") + ofToString(bStayOnTop ? "STAY_ON_TOP_ON " : "STAY_ON_TOP_OFF");
+	str += strPad + (bKeys ? "t:" : "") + ofToString(bStayOnTop ? "STAY_ON_TOP_ON " : "STAY_ON_TOP_OFF");
 	#endif
 #endif
 
 #ifdef TARGET_WIN32
 	#ifdef OFX_WINDOW_APP__USE_CONSOLE_WINDOW
-	str += strPad + (bKeys ? "e : " : "") + ofToString(bConsoleWindow ? "CONSOLE_ON " : "CONSOLE_OFF");
+	str += strPad + (bKeys ? "e:" : "") + ofToString(bConsoleWindow ? "CONSOLE_ON " : "CONSOLE_OFF");
 	#endif
 #endif
 
-	str += strPad + (bKeys ? "d : " : "") + "DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
-	str += strPad;
+//	str += strPad;
 
 	// Debug mod keys
 	//str += strPad + "  ";
@@ -849,8 +855,8 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 			fh = fontSize + previewPad - 4;
 			fPad = 4.f;
 		} else {
-			fh = 10.f;
-			fPad = 5.f;
+			fh = 16.f;
+			fPad = 8.f;
 		}
 
 		// Position
@@ -861,7 +867,10 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 		int iDiff = (int)fpsTarget - fpsReal;
 		string diff;
 		diff += "-";
+		if(iDiff<100)diff += " ";
 		diff += ofToString(iDiff, 0);
+		
+		// Threshold alert
 		if (iDiff < 10) diff = " " + diff;
 		diff += " FPS";
 
@@ -872,7 +881,7 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 		// Fps label
 		string str = diff;
 		if (font.isLoaded()) {
-			float _xx = fx - 68.f;
+			float _xx = fx - 84;
 			float _yy = previewY;
 
 			ofPushStyle();
@@ -888,14 +897,21 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 			font.drawString(str, _xx, _yy);
 			ofPopStyle();
 
+			// Offset bar widget
 			fy = bb.getY() + 1;
 			fh = bb.getHeight() - 2;
+			fx -= 5;
 		} else {
-			fy = previewY - fh + 1;
-			ofDrawBitmapStringHighlight(diff, fx - 68.f, previewY, cAlert, ofColor(255)); // text fps diff
+			float _xx = fx - 75;
+			float _yy = previewY;
+			
+			ofDrawBitmapStringHighlight(diff, _xx, _yy, cAlert, ofColor(255)); // text fps diff
+			
+			// Offset bar widget
+			fy = previewY - fh + 4;
+			fx += 3;
 		}
 
-		fx += 3; // offset
 
 		// Drop down out-performance bar
 		ofFill();
@@ -997,9 +1013,8 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	//--
 
-	//TODO: modifier keys are not working fine at least in macOS.
+	//TODO: Modifier keys are not working fine at least in macOS.
 	// So, we disable all keycommands combinations!
-
 	//	if (!mod_ALT) return; // Using ALT modifier
 
 	//--
@@ -1077,8 +1092,7 @@ void ofxWindowApp::keyPressed(ofKeyEventArgs & eventArgs) {
 
 	else {
 		// Window presets
-		ofLogNotice("ofxWindowApp:keyPressed") << ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
-		//doSetWindowSettingsFromAppWindow();
+		ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape(key);
 	}
 }
 
@@ -1156,9 +1170,9 @@ void ofxWindowApp::doApplyStayOnTop() {
 
 	//TODO:
 	#elif defined(TARGET_OSX)
-	ofLogWarning("ofxWindowApp") << "(bStayOnTop) Not implemented for OSX platform. Only TARGET_WIN32 yet!";
+	ofLogVerbose("ofxWindowApp") << "Stay On Top not implemented for OSX platform. Only TARGET_WIN32 yet!";
 	#else
-	ofLogWarning("ofxWindowApp") << "(bStayOnTop) Not implemented for current platform. Only TARGET_WIN32 yet!";
+	ofLogVerbose("ofxWindowApp") << "Stay On Top not implemented for current platform. Only TARGET_WIN32 yet!";
 	#endif
 }
 #endif
@@ -1330,7 +1344,7 @@ int ofxWindowApp::getDisplayIndexForWindow() {
 
 //--------------------------------------------------------------
 void ofxWindowApp::getDiplaysMonitorsDesktopCanvas() {
-	ofLogNotice("ofxWindowApp:getDiplaysMonitorsDesktopCanvas()");
+	ofLogVerbose("ofxWindowApp:getDiplaysMonitorsDesktopCanvas()");
 	int numberOfMonitors = 0;
 	GLFWmonitor ** monitors = glfwGetMonitors(&numberOfMonitors);
 	monitorRects.clear();

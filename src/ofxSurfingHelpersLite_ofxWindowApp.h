@@ -70,11 +70,11 @@ inline string setWindowShapeForInstagram(size_t i = 0, bool bForcePos = false) {
 	*/
 
 	vector<string> names = {
-		"1080x1920 9:16\nIG Story",
-		"1080x1080 1:1\nIG Square",
-		"1080x1350 4:5\nIG Portrait",
-		"1080x566 1.91:1\nIG Landscape",
-		"420x654 1:1.55\nIGTV Cover",
+		"IG Story 1080x1920 9:16",
+		"IG Square 1080x1080 1:1",
+		"IG Portrait 1080x1350 4:5",
+		"IG Landscape 1080x566 1.91:1",
+		"IGTV Cover 420x654 1:1.55 ",
 	};
 
 	i = ofClamp(i, 0, names.size() - 1);
@@ -124,8 +124,6 @@ inline string keyPressedToSetWindowShape(int key) {
 		sWindowDimensions = setWindowShapeSquared(); // Squared 800 x 800
 	else if (key == 'w')
 		sWindowDimensions = setWindowShapeSquared(ofGetWindowWidth()); // Squared w x w
-	//else if (key == 'c')
-	//	sWindowDimensions = setWindowCentered(); // Centered
 	else if (key == '1')
 		sWindowDimensions = setWindowShapeForInstagram(4); // IGTV Cover Photo
 	else if (key == '2')
@@ -136,10 +134,11 @@ inline string keyPressedToSetWindowShape(int key) {
 		sWindowDimensions = setWindowShapeForInstagram(0); // IG Story
 	else if (key == '5')
 		sWindowDimensions = setWindowShapeForInstagram(1); // IG Square
-	//else sWindowDimensions = ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight()) + " px";
+	//else if (key == 'c')
+	//	sWindowDimensions = setWindowCentered(); // Centered
 	
 	if(sWindowDimensions != ""){
-		ofLogNotice("ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape") << "IG presets";
+		ofLogNotice("ofxSurfingHelpersLite::ofxWindowApp::keyPressedToSetWindowShape") << sWindowDimensions;
 	}
 	return sWindowDimensions;
 }
@@ -167,7 +166,7 @@ enum SURFING_LAYOUT {
 //	SURFING_LAYOUT_CENTER,
 //	SURFING_LAYOUT_CENTER_RIGHT,
 //
-//	SURFING_LAYOUT_BOTTOM_LEFT,
+	SURFING_LAYOUT_BOTTOM_LEFT,
 //	SURFING_LAYOUT_BOTTOM_CENTER,
 //	SURFING_LAYOUT_BOTTOM_RIGHT,
 
@@ -351,15 +350,15 @@ inline glm::vec2 getBitmapStringBoxPosToTopLeft(string s, int xpad = SURFING__PA
 //	return p;
 //}
 //
-////--------------------------------------------------------------
-//inline glm::vec2 getBitmapStringBoxPosToBottomLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
-//	auto bb = getBBBitmapStringBox(s, 0, 0);
-//	int x = xpad;
-//	int y = ofGetHeight() - bb.getHeight() - ypad;
-//	glm::vec2 p { x, y };
-//	return p;
-//}
-//
+//--------------------------------------------------------------
+inline glm::vec2 getBitmapStringBoxPosToBottomLeft(string s, int xpad = SURFING__PAD_TO_WINDOW_BORDERS, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
+	auto bb = getBBBitmapStringBox(s, 0, 0);
+	int x = xpad;
+	int y = ofGetHeight() - bb.getHeight() - ypad;
+	glm::vec2 p { x, y };
+	return p;
+}
+
 ////--------------------------------------------------------------
 //inline glm::vec2 getBitmapStringBoxPosToBottomCenter(string s, int ypad = SURFING__PAD_TO_WINDOW_BORDERS) {
 //	auto bb = getBBBitmapStringBox(s, 0, 0);
@@ -403,9 +402,9 @@ inline string getLayoutName(SURFING_LAYOUT layout) {
 //		s = "CENTER RIGHT";
 //		break;
 //
-//	case SURFING_LAYOUT_BOTTOM_LEFT:
-//		s = "BOTTOM LEFT";
-//		break;
+	case SURFING_LAYOUT_BOTTOM_LEFT:
+		s = "BOTTOM LEFT";
+		break;
 //	case SURFING_LAYOUT_BOTTOM_CENTER:
 //		s = "BOTTOM CENTER";
 //		break;
@@ -462,10 +461,11 @@ inline glm::vec2 getBitmapStringBoxPosToLayout(string s, SURFING_LAYOUT layout) 
 //		p = getBitmapStringBoxPosToCenterRight(s);
 //	}
 //
-//	else if (layout == SURFING_LAYOUT_BOTTOM_LEFT) {
-//		// bottom-left
-//		p = getBitmapStringBoxPosToBottomLeft(s);
-//	} else if (layout == SURFING_LAYOUT_BOTTOM_CENTER) {
+	else if (layout == SURFING_LAYOUT_BOTTOM_LEFT) {
+		// bottom-left
+		p = getBitmapStringBoxPosToBottomLeft(s);
+	}
+//	else if (layout == SURFING_LAYOUT_BOTTOM_CENTER) {
 //		// bottom-center
 //		p = getBitmapStringBoxPosToBottomCenter(s);
 //	} else if (layout == SURFING_LAYOUT_BOTTOM_RIGHT) {

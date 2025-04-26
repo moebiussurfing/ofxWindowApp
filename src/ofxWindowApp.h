@@ -14,10 +14,10 @@
 
 //----
 
-#define OFX_WINDOW_APP__DEVELOP_DEBUG // <- (OPTIONAL) Enable some more deep testing displaying info.
-
 //#define OFX_WINDOW_APP__USE_OFX_WATCHER // <- (OPTIONAL) Enable file watcher to reload JSON file when changed:
 // Requires https://github.com/nariakiiwatani/ofxWatcher and to enable the above directive.
+
+//#define OFX_WINDOW_APP__DEVELOP_DEBUG // <- (OPTIONAL) Enable for more deep testing debug info.
 
 //----
 
