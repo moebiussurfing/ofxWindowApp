@@ -23,8 +23,8 @@
 ## KEY COMMANDS
 ```
 SHOW
-d : Debug (& monitors).  
-i : Info (& performance).  
+d : Debug (& Displays).  
+i : Info (& Performance).  
 
 SETTINGS
 f : Fullscreen / Windowed.  
