@@ -744,7 +744,7 @@ void ofxWindowApp::drawInfo() {
 	str += strPad + strPad + "Size:" + screenSizeStr;
 	str += strPad + "Pos:" + screenPosStr;
 	str += strPad + "FPS:" + fpsRealStr;
-	str += "[" + fpsTargetStr + "]";
+	str += " [" + fpsTargetStr + "]";
 
 	str += strPad + strPad + "|" + strPad;
 
