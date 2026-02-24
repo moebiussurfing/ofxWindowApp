@@ -577,3 +577,4 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+Examples/1_example_Simple/1_example_Simple.code-workspace

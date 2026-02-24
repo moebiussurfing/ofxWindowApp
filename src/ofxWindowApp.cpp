@@ -154,6 +154,10 @@ void ofxWindowApp::setupParams() {
 	// Group all
 	params.add(paramsExtra);
 
+	paramsUser.add(bShowDebug);
+	paramsUser.add(bShowInfo);
+	paramsUser.add(bKeys);
+
 	ofAddListener(paramsExtra.parameterChangedE(), this, &ofxWindowApp::ChangedParamsExtra);
 }
 
@@ -196,8 +200,8 @@ void ofxWindowApp::startup() {
 	ofLogVerbose("ofxWindowApp:startup()") << "----------------------startup()--> END";
 	// When strtup() ends, we already have the JSON settings file loaded.
 	// We will un block saving callbacks again, to allow save changes since now.
-	
-	ofLogNotice("ofxWindowApp:startup()")<<"Done.";
+
+	ofLogNotice("ofxWindowApp:startup()") << "Done.";
 }
 
 //----
@@ -743,15 +747,15 @@ void ofxWindowApp::drawInfo() {
 	fpsRealStr = ofToString(fpsReal, 0);
 	fpsTargetStr = ofToString(fpsTarget);
 
-	str += + "ofxWindowApp | "+ofToString(bKeys ? "i:" : "  ")+"INFO";
-	
+	str += +"ofxWindowApp | " + ofToString(bKeys ? "i:" : "  ") + "INFO";
+
 	str += strPad + (bKeys ? "d:" : "") + "DEBUG_" + ofToString(bShowDebug ? "ON " : "OFF");
-	str +=  strPad + "|" ;
-	
+	str += strPad + "|";
+
 	str += strPad + "Size:" + screenSizeStr;
 	str += strPad + "Pos:" + screenPosStr;
 	str += strPad + "|";
-	
+
 	str += strPad + "FPS:" + fpsRealStr;
 	str += " [" + fpsTargetStr + "]";
 
@@ -786,7 +790,7 @@ void ofxWindowApp::drawInfo() {
 	#endif
 #endif
 
-//	str += strPad;
+	//	str += strPad;
 
 	// Debug mod keys
 	//str += strPad + "  ";
@@ -867,9 +871,9 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 		int iDiff = (int)fpsTarget - fpsReal;
 		string diff;
 		diff += "-";
-		if(iDiff<100)diff += " ";
+		if (iDiff < 100) diff += " ";
 		diff += ofToString(iDiff, 0);
-		
+
 		// Threshold alert
 		if (iDiff < 10) diff = " " + diff;
 		diff += " FPS";
@@ -904,14 +908,13 @@ void ofxWindowApp::drawInfoPerformanceWidget() {
 		} else {
 			float _xx = fx - 75;
 			float _yy = previewY;
-			
+
 			ofDrawBitmapStringHighlight(diff, _xx, _yy, cAlert, ofColor(255)); // text fps diff
-			
+
 			// Offset bar widget
 			fy = previewY - fh + 4;
 			fx += 3;
 		}
-
 
 		// Drop down out-performance bar
 		ofFill();

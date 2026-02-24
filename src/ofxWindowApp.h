@@ -349,7 +349,8 @@ private:
 
 	//TODO: To avoid ofxSerializer. Use one only groupParam instead.
 public:
-	ofParameterGroup params { "ofxWindowApp" };
+	ofParameterGroup params { "ofxWindowApp" };//advanced and internal toggles to use on a UI
+	ofParameterGroup paramsUser { "ofxWindowApp" };//simple minimal toggles to use on a UI
 
 private:
 	ofParameterGroup paramsExtra { "Extra" };
